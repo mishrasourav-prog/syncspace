@@ -1,0 +1,57 @@
+@import "tailwindcss";
+@import "./typography.css";
+@import "./animations.css";
+
+@theme inline {
+  --color-background: hsl(var(--background) / <alpha-value>);
+  --color-surface: hsl(var(--surface) / <alpha-value>);
+  --color-border: hsl(var(--border) / <alpha-value>);
+  --color-foreground: hsl(var(--foreground) / <alpha-value>);
+  --color-muted: hsl(var(--muted) / <alpha-value>);
+  --color-primary: hsl(var(--primary) / <alpha-value>);
+  --color-primary-foreground: hsl(var(--primary-foreground) / <alpha-value>);
+  --color-secondary: hsl(var(--secondary) / <alpha-value>);
+  --color-secondary-foreground: hsl(var(--secondary-foreground) / <alpha-value>);
+  --color-success: hsl(var(--success) / <alpha-value>);
+  --color-warning: hsl(var(--warning) / <alpha-value>);
+  --color-danger: hsl(var(--danger) / <alpha-value>);
+  --shadow-soft: 0 2px 8px hsl(0 0% 0% / 0.12);
+  --shadow-elevated: 0 8px 32px hsl(0 0% 0% / 0.24);
+}
+
+:root.dark {
+  /* Neutral gray background system */
+  --background: 240 10% 4%;
+  --surface: 240 8% 8%;
+  --border: 240 6% 16%;
+  --foreground: 240 20% 97%;
+  --muted: 240 5% 55%;
+
+  /* Purple primary / blue secondary accents */
+  --primary: 258 90% 66%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 217 91% 60%;
+  --secondary-foreground: 0 0% 100%;
+
+  /* Status colors */
+  --success: 152 69% 45%;
+  --warning: 38 92% 55%;
+  --danger: 0 84% 63%;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply bg-background text-foreground antialiased;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

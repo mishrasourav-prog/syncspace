@@ -1,5 +1,5 @@
 import slugify from "slugify";
-
+import mongoose from "mongoose";
 import ApiError from "../../utils/ApiError";
 
 import {
@@ -20,6 +20,7 @@ import {
     WorkspaceMember,
     WorkspaceRole,
 } from "../workspace-member/workspace-member.model";
+import { date } from "zod";
 
 
 export class WorkspaceService{
@@ -77,36 +78,75 @@ async createWorkspace(
     data: CreateWorkspace
 ): Promise<IWorkspace> {
 
-    const slug = await this.generateUniqueSlug(data.name);
+    const session = await mongoose.startSession();
 
-    const workspace: IWorkspaceDocument =
-        await Workspace.create({
+    
+    try {
+        session.startTransaction();
+        const slug = await this.generateUniqueSlug(data.name);
 
-            name: data.name,
+    
 
+    // const workspace: IWorkspaceDocument =
+    //     await Workspace.create({
+
+    //         name: data.name,
+
+    //         slug,
+
+    //         description: data.description,
+
+    //         timezone:
+    //             data.timezone ?? "Asia/Kolkata",
+
+    //         owner: ownerId,
+    //     });
+        
+    //create workspace.........................
+        const workspace : IWorkspaceDocument = new Workspace({
+            name:data.name,
             slug,
-
-            description: data.description,
-
-            timezone:
-                data.timezone ?? "Asia/Kolkata",
-
+            description:data.description,
+            timezone:data.timezone??"Asia/Kolkata",
             owner: ownerId,
         });
 
-    await WorkspaceMember.create({
+    await workspace.save({ session });
 
-        workspace: workspace._id,
 
-        user: ownerId,
+    // await WorkspaceMember.create({
 
-        role: WorkspaceRole.OWNER,
+    //     workspace: workspace._id,
 
-        joinedAt: new Date(),
-    });
+    //     user: ownerId,
 
-    return this.mapWorkspace(workspace);
+    //     role: WorkspaceRole.OWNER,
+
+    //     joinedAt: new Date(),
+    // });
+
+    //create owner membership.................
+    const ownerMembership = new WorkspaceMember({
+    workspace: workspace._id,
+    user: ownerId,
+    role: WorkspaceRole.OWNER,
+});
+await ownerMembership.save({ session });
+
+//commit transaction.............................
+await session.commitTransaction();
+return this.mapWorkspace(workspace);
+
+        
+    } catch (error) {
+        await session.abortTransaction();
+        throw error;
+    }
+    finally{
+        await session.endSession();
+    }
 }
+
 
 async getUserWorkspaces(userId:string) : Promise<WorkspaceUserResponse[]>{
     const memberships = await WorkspaceMember

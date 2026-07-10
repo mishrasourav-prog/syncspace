@@ -15,9 +15,11 @@ import {
     InvitationResponse,
     InvitationListResponse,
 } from "../../interfaces/workspaceInvitation.interface";
+import mongoose from "mongoose";
 
 
 class WorkspaceInvitationService {
+    
     async inviteUser(
     workspaceId: string,
     invitedBy: string,
@@ -187,6 +189,10 @@ async acceptInvitation(
     invitationId: string,
     userId: string
 ): Promise<void> {
+    const session = await mongoose.startSession();
+
+    try {
+    session.startTransaction();
 
     const user = await User.findById(userId);
 
@@ -208,14 +214,11 @@ async acceptInvitation(
     }
 
     if (invitation.expiresAt < new Date()) {
-        invitation.status = InvitationStatus.EXPIRED;
-        await invitation.save();
-
-        throw new ApiError(
-            400,
-            "Invitation has expired."
-        );
-    }
+    throw new ApiError(
+        400,
+        "Invitation has expired."
+    );
+}
 
     if (invitation.email !== user.email) {
         throw new ApiError(
@@ -227,7 +230,7 @@ async acceptInvitation(
     const existingMember = await WorkspaceMember.findOne({
         workspace: invitation.workspace,
         user: user._id,
-    });
+    }).session(session);
 
     if (existingMember) {
         throw new ApiError(
@@ -236,18 +239,36 @@ async acceptInvitation(
         );
     }
 
-    await WorkspaceMember.create({
-        workspace: invitation.workspace,
-        user: user._id,
-        role: invitation.role,
-        joinedAt: new Date(),
-    });
+    const member = new WorkspaceMember({
+    workspace: invitation.workspace,
+    user: user._id,
+    role: invitation.role,
+});
+
+await member.save({ session });
 
     invitation.status = InvitationStatus.ACCEPTED;
     invitation.acceptedAt = new Date();
 
-    await invitation.save();
+    await invitation.save({session});
+
+    await session.commitTransaction();
+
+        
+    } catch (error) {
+         await session.abortTransaction();
+        throw error;
+        
+    }
+    finally{
+        await session.endSession();
+
+    }
+
+    
 }
+
+
 async rejectInvitation(
     invitationId: string,
     userId: string

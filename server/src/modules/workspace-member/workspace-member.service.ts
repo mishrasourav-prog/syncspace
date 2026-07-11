@@ -15,7 +15,13 @@ async getWorkspaceMembers(
 
     const workspace = await Workspace.findById(workspaceId);
 
-    if (!workspace || workspace.isArchived) {
+    if (!workspace) {
+        throw new ApiError(
+            404,
+            "Workspace not found."
+        );
+    }
+     if (workspace.isArchived) {
         throw new ApiError(
             404,
             "Workspace not found."

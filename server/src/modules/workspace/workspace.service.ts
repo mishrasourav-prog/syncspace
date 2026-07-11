@@ -7,8 +7,7 @@ import {
     UseGetWorkspaceResponse,
     IWorkspace,
     WorkspaceUserResponse,
-    UpdateWorkspace,
-    GetArchiveWorkspaceResponse
+    UpdateWorkspace
 } from "../../interfaces/workspace.interface";
 
 import {
@@ -20,7 +19,7 @@ import {
     WorkspaceMember,
     WorkspaceRole,
 } from "../workspace-member/workspace-member.model";
-import { date } from "zod";
+
 
 
 export class WorkspaceService{
@@ -155,9 +154,6 @@ async getUserWorkspaces(userId:string) : Promise<WorkspaceUserResponse[]>{
         })
         .populate<{ workspace: IWorkspaceDocument }>({
             path: "workspace",
-            match: {
-                isArchived: false,
-            },
         })
         .sort({
             createdAt: -1,
@@ -178,6 +174,8 @@ async getUserWorkspaces(userId:string) : Promise<WorkspaceUserResponse[]>{
         timezone: workspace.timezone,
         settings: workspace.settings,
         createdAt: workspace.createdAt,
+        updatedAt: workspace.updatedAt,
+        isArchived: workspace.isArchived,
         role: member.role,
       };
     });
@@ -361,47 +359,47 @@ async restoreWorkspace(
 
     await workspace.save();
 }
-async getArchivedWorkspaces(
-    userId: string
-): Promise<GetArchiveWorkspaceResponse> {
+// async getArchivedWorkspaces(
+//     userId: string
+// ): Promise<GetArchiveWorkspaceResponse> {
 
-    const memberships = await WorkspaceMember
-        .find({
-            user: userId,
-        })
-        .populate({
-            path: "workspace",
-            match: {
-                isArchived: true,
-            },
-        });
+//     const memberships = await WorkspaceMember
+//         .find({
+//             user: userId,
+//         })
+//         .populate({
+//             path: "workspace",
+//             match: {
+//                 isArchived: true,
+//             },
+//         });
 
-    const workspaces = memberships
-        .filter(member => member.workspace)
-        .map(member => {
-            const workspace =
-                member.workspace as IWorkspaceDocument;
+//     const workspaces = memberships
+//         .filter(member => member.workspace)
+//         .map(member => {
+//             const workspace =
+//                 member.workspace as IWorkspaceDocument;
 
-            return {
-                _id: workspace._id.toString(),
-                name: workspace.name,
-                slug: workspace.slug,
-                description: workspace.description,
-                avatar: workspace.avatar,
-                owner: workspace.owner.toString(),
-                timezone: workspace.timezone,
-                settings: workspace.settings,
-                isArchived: workspace.isArchived,
-                createdAt: workspace.createdAt,
-                updatedAt: workspace.updatedAt,
-                role: member.role,
-            };
-        });
+//             return {
+//                 _id: workspace._id.toString(),
+//                 name: workspace.name,
+//                 slug: workspace.slug,
+//                 description: workspace.description,
+//                 avatar: workspace.avatar,
+//                 owner: workspace.owner.toString(),
+//                 timezone: workspace.timezone,
+//                 settings: workspace.settings,
+//                 isArchived: workspace.isArchived,
+//                 createdAt: workspace.createdAt,
+//                 updatedAt: workspace.updatedAt,
+//                 role: member.role,
+//             };
+//         });
 
-    return {
-        workspaces,
-    };
-}
+//     return {
+//         workspaces,
+//     };
+// }
 }
 
 export default new WorkspaceService();

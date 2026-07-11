@@ -262,36 +262,36 @@ export const restoreWorkspace = async (
 
 };
 
-export const getArchivedWorkspaces = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-) => {
+// export const getArchivedWorkspaces = async (
+//     req: Request,
+//     res: Response,
+//     next: NextFunction
+// ) => {
 
-    try {
+//     try {
 
-        if (!req.user) {
-            throw new ApiError(
-                401,
-                "Unauthorized."
-            );
-        }
+//         if (!req.user) {
+//             throw new ApiError(
+//                 401,
+//                 "Unauthorized."
+//             );
+//         }
 
-        const payload =
-            await WorkspaceService.getArchivedWorkspaces(
-                req.user._id
-            );
+//         const payload =
+//             await WorkspaceService.getArchivedWorkspaces(
+//                 req.user._id
+//             );
 
-        return res.status(200).json(
-            new ApiResponse(
-                200,
-                "Archived workspaces fetched successfully.",
-                payload
-            )
-        );
+//         return res.status(200).json(
+//             new ApiResponse(
+//                 200,
+//                 "Archived workspaces fetched successfully.",
+//                 payload
+//             )
+//         );
 
-    } catch (error) {
-        next(error);
-    }
+//     } catch (error) {
+//         next(error);
+//     }
 
-};
+// };

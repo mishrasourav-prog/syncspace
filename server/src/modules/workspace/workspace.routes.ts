@@ -4,7 +4,7 @@ import { Router } from "express";
 
 import { authenticateUser } from "../../middlewares/auth.middleware";
 
-import { createWorkspace ,  getUserWorkspaces, getWorkspace , updateWorkspace, archiveWorkspace, restoreWorkspace , getArchivedWorkspaces} from "./workspace.controller";
+import { createWorkspace ,  getUserWorkspaces, getWorkspace , updateWorkspace, archiveWorkspace, restoreWorkspace } from "./workspace.controller";
 
 
 const router = Router();
@@ -13,11 +13,7 @@ const router = Router();
  * Protected Routes
  */
 router.post("/", authenticateUser, createWorkspace);
-router.get(
-    "/archived",
-    authenticateUser,
-    getArchivedWorkspaces
-);
+
 router.get(
     "/",
     authenticateUser,

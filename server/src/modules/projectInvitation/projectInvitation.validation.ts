@@ -1,22 +1,43 @@
 import { z } from "zod";
 
-import { ProjectRole } from "../projectMember/projectMember.model";
+import {
+    objectIdSchema,
+} from "../../validators/common.validation";
 
-export const createProjectInvitationSchema = z.object({
-    email: z
-        .email("Invalid email address.")
-        .trim()
-        .toLowerCase(),
+import { ProjectRole } from "../../interfaces/projectMember.interface";
 
-    role: z.enum(ProjectRole),
-});
+/*
+|--------------------------------------------------------------------------
+| Create Project Invitation
+|--------------------------------------------------------------------------
+*/
 
-export const projectInvitationIdSchema = z.object({
-    invitationId: z
-        .string()
-        .trim()
-        .regex(
-            /^[a-f\d]{24}$/i,
-            "Invalid invitation id."
-        ),
-});
+export const createProjectInvitationSchema =
+    z.object({
+        email: z
+            .string()
+            .trim()
+            .toLowerCase()
+            .email(
+                "Invalid email address."
+            ),
+
+        role: z.enum([
+            ProjectRole.ADMIN,
+            ProjectRole.MEMBER,
+        ]),
+    })
+    .strict();
+
+/*
+|--------------------------------------------------------------------------
+| Invitation Route Parameters
+|--------------------------------------------------------------------------
+*/
+
+export const projectInvitationIdSchema =
+    z.object({
+        invitationId:
+            objectIdSchema,
+    })
+    .strict();

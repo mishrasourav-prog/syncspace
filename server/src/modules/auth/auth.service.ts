@@ -223,10 +223,7 @@ async verifyOtpResetPassword(email: string, otp: string): Promise<ResetResponse>
     if (!otpRecord) {
         throw new ApiError(404, "OTP not found or expired");
     }
-      console.log({
-    otpFromRequest: otp,
-    otpHashFromDb: otpRecord.otpHash,
-});
+  
     if (otpRecord.attempts >= 5) {
     await otpRecord.deleteOne();
 

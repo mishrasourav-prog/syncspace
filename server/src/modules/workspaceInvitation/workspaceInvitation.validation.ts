@@ -1,15 +1,46 @@
 import { z } from "zod";
-import { InvitationRole } from "./workspaceInvitation.model";
 
-export const inviteUserSchema = z.object({
-    email: z
-        .string()
-        .trim()
-        .email("Invalid email address."),
+import {
+    objectIdSchema,
+} from "../../validators/common.validation";
 
-    role: z.nativeEnum(InvitationRole).optional(),
-});
+import {
+    InvitationRole,
+} from "./workspaceInvitation.model";
 
-export const invitationIdSchema = z.object({
-    invitationId: z.string().trim(),
-});
+/*
+|--------------------------------------------------------------------------
+| Route Parameters
+|--------------------------------------------------------------------------
+*/
+
+export const workspaceInvitationWorkspaceParamsSchema =
+    z.object({
+        workspaceId: objectIdSchema,
+    }).strict();
+
+export const workspaceInvitationParamsSchema =
+    z.object({
+        invitationId: objectIdSchema,
+    }).strict();
+
+/*
+|--------------------------------------------------------------------------
+| Invite User Body
+|--------------------------------------------------------------------------
+*/
+
+export const inviteUserSchema =
+    z.object({
+        email: z
+            .string()
+            .trim()
+            .email(
+                "Invalid email address."
+            ),
+
+        role: z
+            .enum(InvitationRole)
+            .optional(),
+    })
+    .strict();

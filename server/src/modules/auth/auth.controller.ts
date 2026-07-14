@@ -25,17 +25,17 @@ export const registerUser = async(req:Request , res:Response , next:NextFunction
 
 export const loginUser = async(req:Request , res:Response , next:NextFunction) =>{
     try{
-      console.log("1");
+  
         const result = loginUserSchema.safeParse(req.body);
-        console.log("2");
+    
 
         if(!result.success){
             throw new ApiError(400,result.error.message);
         }
-        console.log("3");
+    
 
         const { user, accessToken, refreshToken } = await AuthService.loginUser(result.data);
-        console.log("4");
+    
 
         res
         .cookie("accessToken", accessToken, {
@@ -56,7 +56,7 @@ export const loginUser = async(req:Request , res:Response , next:NextFunction) =
             user,
           })
         );
-        console.log("5");
+    
     } catch (error) {
       next(error);
     }
@@ -154,7 +154,7 @@ export const getCurrentUser = async (
     );
 
   } catch (error) {
-    return next(new ApiError(500, "Failed to fetch user"));
+    return next(error);
   }
 };
 
@@ -172,7 +172,7 @@ export const forgotPassword = async(req:Request , res:Response , next:NextFuncti
       )
     );
   } catch (error) {
-    next(error);
+    return next(error);
   }
 }
 

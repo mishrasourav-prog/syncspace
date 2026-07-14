@@ -186,41 +186,65 @@ async getWorkspace(
     workspaceId: string,
     userId: string
 ): Promise<UseGetWorkspaceResponse> {
+    const member =
+        await WorkspaceMember.findOne({
+            workspace: workspaceId,
+            user: userId,
+        }).populate("workspace");
 
-    const member = await WorkspaceMember.findOne({
-        workspace: workspaceId,
-        user: userId,
-    })
-    .populate("workspace");
+    /*
+    Returning 404 here is intentional.
 
-    if (!member) {
+    It prevents non-members from determining whether
+    a workspace exists.
+    */
+    if (!member || !member.workspace) {
         throw new ApiError(
             404,
             "Workspace not found."
         );
     }
 
-    const workspace = member.workspace as IWorkspaceDocument;
-
-    if (workspace.isArchived) {
-        throw new ApiError(
-            404,
-            "Workspace not found."
-        );
-    }
+    const workspace =
+        member.workspace as IWorkspaceDocument;
 
     return {
         workspace: {
-            _id: workspace._id.toString(),
-            name: workspace.name,
-            slug: workspace.slug,
-            description: workspace.description,
-            avatar: workspace.avatar,
-            owner: workspace.owner.toString(),
-            timezone: workspace.timezone,
-            settings: workspace.settings,
-            role: member.role,
-            createdAt: workspace.createdAt,
+            _id:
+                workspace._id.toString(),
+
+            name:
+                workspace.name,
+
+            slug:
+                workspace.slug,
+
+            description:
+                workspace.description,
+
+            avatar:
+                workspace.avatar,
+
+            owner:
+                workspace.owner.toString(),
+
+            timezone:
+                workspace.timezone,
+
+            settings:
+                workspace.settings,
+
+            role:
+                member.role,
+
+            isArchived:
+                workspace.isArchived,
+
+            createdAt:
+                workspace.createdAt,
+
+            updatedAt:
+                workspace.updatedAt,
         },
     };
 }
@@ -257,11 +281,11 @@ async updateWorkspace(
         member.workspace as IWorkspaceDocument;
 
     if (workspace.isArchived) {
-        throw new ApiError(
-            404,
-            "Workspace not found."
-        );
-    }
+    throw new ApiError(
+        409,
+        "Archived workspaces cannot be updated."
+    );
+}
 
     if (data.name !== undefined) {
         workspace.name = data.name;
@@ -292,7 +316,9 @@ async updateWorkspace(
             timezone: workspace.timezone,
             settings: workspace.settings,
             role: member.role,
+            isArchived:workspace.isArchived,
             createdAt: workspace.createdAt,
+            updatedAt:workspace.updatedAt,
         },
     };
 }

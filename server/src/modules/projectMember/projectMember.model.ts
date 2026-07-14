@@ -1,11 +1,7 @@
 import mongoose, { Schema, Types, Document } from "mongoose";
 
 
-
-export enum ProjectRole {
-    ADMIN = "admin",
-    MEMBER = "member",
-}
+import { ProjectRole } from "../../interfaces/projectMember.interface";
 
 export interface IProjectMemberDocument extends Document {
     _id: Types.ObjectId;

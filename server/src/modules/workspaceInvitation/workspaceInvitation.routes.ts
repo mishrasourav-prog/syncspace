@@ -1,36 +1,56 @@
 import { Router } from "express";
 
-import { authenticateUser } from "../../middlewares/auth.middleware";
+import {
+    authenticateUser,
+} from "../../middlewares/auth.middleware";
 
 import {
     inviteUser,
     getMyInvitations,
     acceptInvitation,
-    rejectInvitation
+    rejectInvitation,
 } from "./workspaceInvitation.controller";
 
 const router = Router();
 
+/*
+|--------------------------------------------------------------------------
+| Workspace-scoped Invitation Route
+|--------------------------------------------------------------------------
+*/
+
 router.post(
-    "/:workspaceId/invitations",
+    "/workspaces/:workspaceId/invitations",
     authenticateUser,
     inviteUser
 );
 
+/*
+|--------------------------------------------------------------------------
+| Current User Invitations
+|--------------------------------------------------------------------------
+*/
+
 router.get(
-    "/invitations",
+    "/workspace-invitations",
     authenticateUser,
     getMyInvitations
 );
 
+/*
+|--------------------------------------------------------------------------
+| Individual Invitation Actions
+|--------------------------------------------------------------------------
+*/
+
 router.post(
-    "/invitations/:invitationId/accept",
+    "/workspace-invitations/:invitationId/accept",
     authenticateUser,
     acceptInvitation
 );
 
 router.post(
-    "/invitations/:invitationId/reject",
+    "/workspace-invitations/:invitationId/reject",
     authenticateUser,
     rejectInvitation
 );

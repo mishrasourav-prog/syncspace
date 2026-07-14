@@ -7,25 +7,35 @@ import type {
 import ApiError from "../../utils/ApiError";
 import ApiResponse from "../../utils/ApiResponse";
 
-import ProjectService from "./project.service";
-
 import {
-    createProjectSchema,
     projectIdSchema,
-    updateProjectSchema,
-} from "./project.validation";
+} from "../project/project.validation";
+
+import TaskService from "./task.service";
 
 import {
-    workspaceIdSchema,
-} from "../workspace/workspace.validation";
+    createTaskSchema,
+    taskIdParamSchema,
+    updateTaskSchema,
+} from "./task.validation";
+
+
+import {
+    objectIdSchema,
+} from "../../validators/common.validation";
+
+import {
+    updateTaskStatusSchema,
+} from "./task.validation";
+
 
 /*
 |--------------------------------------------------------------------------
-| Create Project
+| Create Task
 |--------------------------------------------------------------------------
 */
 
-export const createProject = async (
+export const createTask = async (
     req: Request,
     res: Response,
     next: NextFunction
@@ -38,19 +48,19 @@ export const createProject = async (
             );
         }
 
-        const { workspaceId } =
-            workspaceIdSchema.parse(
+        const { projectId } =
+            projectIdSchema.parse(
                 req.params
             );
 
         const data =
-            createProjectSchema.parse(
+            createTaskSchema.parse(
                 req.body
             );
 
-        const project =
-            await ProjectService.createProject(
-                workspaceId,
+        const task =
+            await TaskService.createTask(
+                projectId,
                 req.user._id,
                 data
             );
@@ -58,8 +68,8 @@ export const createProject = async (
         return res.status(201).json(
             new ApiResponse(
                 201,
-                "Project created successfully.",
-                project
+                "Task created successfully.",
+                task
             )
         );
     } catch (error) {
@@ -69,11 +79,11 @@ export const createProject = async (
 
 /*
 |--------------------------------------------------------------------------
-| Get Workspace Projects
+| Get Task
 |--------------------------------------------------------------------------
 */
 
-export const getWorkspaceProjects = async (
+export const getTask = async (
     req: Request,
     res: Response,
     next: NextFunction
@@ -86,22 +96,22 @@ export const getWorkspaceProjects = async (
             );
         }
 
-        const { workspaceId } =
-            workspaceIdSchema.parse(
+        const { taskId } =
+            taskIdParamSchema.parse(
                 req.params
             );
 
-        const projects =
-            await ProjectService.getWorkspaceProjects(
-                workspaceId,
+        const task =
+            await TaskService.getTask(
+                taskId,
                 req.user._id
             );
 
         return res.status(200).json(
             new ApiResponse(
                 200,
-                "Projects fetched successfully.",
-                projects
+                "Task fetched successfully.",
+                task
             )
         );
     } catch (error) {
@@ -111,11 +121,11 @@ export const getWorkspaceProjects = async (
 
 /*
 |--------------------------------------------------------------------------
-| Get Project
+| Get Project Tasks
 |--------------------------------------------------------------------------
 */
 
-export const getProject = async (
+export const getProjectTasks = async (
     req: Request,
     res: Response,
     next: NextFunction
@@ -133,8 +143,8 @@ export const getProject = async (
                 req.params
             );
 
-        const project =
-            await ProjectService.getProject(
+        const tasks =
+            await TaskService.getProjectTasks(
                 projectId,
                 req.user._id
             );
@@ -142,8 +152,8 @@ export const getProject = async (
         return res.status(200).json(
             new ApiResponse(
                 200,
-                "Project fetched successfully.",
-                project
+                "Tasks fetched successfully.",
+                tasks
             )
         );
     } catch (error) {
@@ -153,11 +163,11 @@ export const getProject = async (
 
 /*
 |--------------------------------------------------------------------------
-| Update Project
+| Update Task
 |--------------------------------------------------------------------------
 */
 
-export const updateProject = async (
+export const updateTask = async (
     req: Request,
     res: Response,
     next: NextFunction
@@ -170,19 +180,19 @@ export const updateProject = async (
             );
         }
 
-        const { projectId } =
-            projectIdSchema.parse(
+        const { taskId } =
+            taskIdParamSchema.parse(
                 req.params
             );
 
         const data =
-            updateProjectSchema.parse(
+            updateTaskSchema.parse(
                 req.body
             );
 
-        const project =
-            await ProjectService.updateProject(
-                projectId,
+        const task =
+            await TaskService.updateTask(
+                taskId,
                 req.user._id,
                 data
             );
@@ -190,8 +200,8 @@ export const updateProject = async (
         return res.status(200).json(
             new ApiResponse(
                 200,
-                "Project updated successfully.",
-                project
+                "Task updated successfully.",
+                task
             )
         );
     } catch (error) {
@@ -201,11 +211,11 @@ export const updateProject = async (
 
 /*
 |--------------------------------------------------------------------------
-| Archive Project
+| Archive Task
 |--------------------------------------------------------------------------
 */
 
-export const archiveProject = async (
+export const archiveTask = async (
     req: Request,
     res: Response,
     next: NextFunction
@@ -218,20 +228,20 @@ export const archiveProject = async (
             );
         }
 
-        const { projectId } =
-            projectIdSchema.parse(
+        const { taskId } =
+            taskIdParamSchema.parse(
                 req.params
             );
 
-        await ProjectService.archiveProject(
-            projectId,
+        await TaskService.archiveTask(
+            taskId,
             req.user._id
         );
 
         return res.status(200).json(
             new ApiResponse(
                 200,
-                "Project archived successfully."
+                "Task archived successfully."
             )
         );
     } catch (error) {
@@ -241,11 +251,11 @@ export const archiveProject = async (
 
 /*
 |--------------------------------------------------------------------------
-| Restore Project
+| Restore Task
 |--------------------------------------------------------------------------
 */
 
-export const restoreProject = async (
+export const restoreTask = async (
     req: Request,
     res: Response,
     next: NextFunction
@@ -258,23 +268,59 @@ export const restoreProject = async (
             );
         }
 
-        const { projectId } =
-            projectIdSchema.parse(
+        const { taskId } =
+            taskIdParamSchema.parse(
                 req.params
             );
 
-        await ProjectService.restoreProject(
-            projectId,
+        await TaskService.restoreTask(
+            taskId,
             req.user._id
         );
 
         return res.status(200).json(
             new ApiResponse(
                 200,
-                "Project restored successfully."
+                "Task restored successfully."
             )
         );
     } catch (error) {
         return next(error);
     }
 };
+
+export const updateTaskStatus =
+    async (
+        req: Request,
+        res: Response,
+        next: NextFunction
+    ): Promise<void> => {
+        try {
+            const taskId =
+                objectIdSchema.parse(
+                    req.params.taskId
+                );
+
+            const data =
+                updateTaskStatusSchema.parse(
+                    req.body
+                );
+
+            const task =
+                await TaskService.updateTaskStatus(
+                    taskId,
+                    req.user!._id,
+                    data.status
+                );
+
+            res.status(200).json(
+                new ApiResponse(
+                    200,
+                    "Task status updated successfully.",
+                    task
+                )
+            );
+        } catch (error) {
+            return next(error);
+        }
+    };

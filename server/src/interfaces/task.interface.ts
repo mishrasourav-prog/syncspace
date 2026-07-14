@@ -1,0 +1,95 @@
+
+
+import { TaskPriority , TaskStatus } from "../modules/tasks/task.model";
+export interface ITaskAssigneePreview {
+
+    _id: string;
+
+    name: string;
+
+    username: string;
+
+    avatar?: string;
+
+}
+
+export interface ITaskResponse {
+
+    _id: string;
+
+    project: string;
+
+    title: string;
+
+    description: string;
+
+    status: TaskStatus;
+
+    priority: TaskPriority;
+
+    createdBy: string;
+
+    updatedBy?: string;
+
+    completedBy?: string;
+
+    startDate?: Date;
+
+    dueDate?: Date;
+
+    completedAt?: Date;
+
+    parentTask?: string;
+
+    position: number;
+
+    assignees: ITaskAssigneePreview[];
+
+    isArchived: boolean;
+
+    createdAt: Date;
+
+    updatedAt: Date;
+}
+
+export interface ITasksResponse {
+
+    tasks: ITaskResponse[];
+
+}
+
+export interface ICreateTask {
+
+    title: string;
+
+    description?: string;
+
+    priority?: TaskPriority;
+
+    startDate?: Date;
+
+    dueDate?: Date;
+
+    parentTask?: string;
+
+}
+
+export interface IUpdateTask {
+
+    title?: string;
+
+    description?: string;
+
+    priority?: TaskPriority;
+
+    startDate?: Date | null;
+
+    dueDate?: Date | null;
+
+    parentTask?: string | null;
+
+}
+
+export interface IUpdateTaskStatus {
+    status: TaskStatus;
+}

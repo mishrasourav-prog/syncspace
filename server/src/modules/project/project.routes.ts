@@ -1,6 +1,6 @@
 import { Router } from "express";
 
-import { authenticateUser  } from "../../middlewares/auth.middleware";
+import { authenticateUser } from "../../middlewares/auth.middleware";
 
 import {
     createProject,
@@ -8,43 +8,55 @@ import {
     getProject,
     updateProject,
     archiveProject,
-    restoreProject
+    restoreProject,
 } from "./project.controller";
 
 const router = Router();
 
+/*
+|--------------------------------------------------------------------------
+| Workspace-scoped Project Routes
+|--------------------------------------------------------------------------
+*/
+
 router.post(
-    "/:workspaceId/projects",
+    "/workspaces/:workspaceId/projects",
     authenticateUser,
     createProject
 );
 
 router.get(
-    "/:workspaceId/projects",
+    "/workspaces/:workspaceId/projects",
     authenticateUser,
     getWorkspaceProjects
 );
 
+/*
+|--------------------------------------------------------------------------
+| Individual Project Routes
+|--------------------------------------------------------------------------
+*/
+
 router.get(
-    "/:projectId",
+    "/projects/:projectId",
     authenticateUser,
     getProject
 );
 
 router.patch(
-    "/:projectId",
+    "/projects/:projectId",
     authenticateUser,
     updateProject
 );
 
 router.patch(
-    "/:projectId/archive",
+    "/projects/:projectId/archive",
     authenticateUser,
     archiveProject
 );
 
 router.patch(
-    "/:projectId/restore",
+    "/projects/:projectId/restore",
     authenticateUser,
     restoreProject
 );

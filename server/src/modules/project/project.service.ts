@@ -3,7 +3,8 @@ import mongoose from "mongoose";
 import Project, { IProjectDocument } from "./project.model";
 import { Workspace } from "../workspace/workspace.model";
 import { WorkspaceMember } from "../workspace-member/workspace-member.model";
-import ProjectMember, { ProjectRole } from "../projectMember/projectMember.model";
+import ProjectMember from "../projectMember/projectMember.model";
+import { ProjectRole } from "../../interfaces/projectMember.interface";
 import { WorkspaceRole } from "../workspace-member/workspace-member.model";
 import { IUpdateProject } from "../../interfaces/project.interface";
 import ApiError from "../../utils/ApiError";
@@ -106,7 +107,7 @@ async createProject(
 
         if (workspace.isArchived) {
             throw new ApiError(
-                400,
+                409,
                 "Cannot create a project inside an archived workspace."
             );
         }
@@ -231,12 +232,7 @@ async getWorkspaceProjects(
         );
     }
 
-    if (workspace.isArchived) {
-        throw new ApiError(
-            400,
-            "Workspace is archived."
-        );
-    }
+
 
     /*
     |--------------------------------------------------------------------------
@@ -267,6 +263,7 @@ async getWorkspaceProjects(
         workspace: workspaceId,
     }).sort({
         createdAt: -1,
+        _id:1
     });
 
     /*
@@ -303,12 +300,7 @@ async getProject(
         );
     }
 
-    if (project.isArchived) {
-        throw new ApiError(
-            404,
-            "Project not found."
-        );
-    }
+   
 
     /*
     |--------------------------------------------------------------------------
@@ -455,14 +447,10 @@ async archiveProject(
     projectId: string,
     userId: string
 ): Promise<void> {
-
-    /*
-    |--------------------------------------------------------------------------
-    | Verify Project
-    |--------------------------------------------------------------------------
-    */
-
-    const project = await Project.findById(projectId);
+    const project =
+        await Project.findById(
+            projectId
+        );
 
     if (!project) {
         throw new ApiError(
@@ -471,23 +459,11 @@ async archiveProject(
         );
     }
 
-    if (project.isArchived) {
-        throw new ApiError(
-            400,
-            "Project is already archived."
-        );
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | Verify Permission
-    |--------------------------------------------------------------------------
-    */
-
-    const member = await ProjectMember.findOne({
-        project: projectId,
-        user: userId,
-    });
+    const member =
+        await ProjectMember.findOne({
+            project: projectId,
+            user: userId,
+        });
 
     if (!member) {
         throw new ApiError(
@@ -496,37 +472,57 @@ async archiveProject(
         );
     }
 
-    if (member.role !== ProjectRole.ADMIN) {
+    if (
+        member.role !==
+        ProjectRole.ADMIN
+    ) {
         throw new ApiError(
             403,
             "Only project admins can archive projects."
         );
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | Archive Project
-    |--------------------------------------------------------------------------
-    */
+    const workspace =
+        await Workspace.findById(
+            project.workspace
+        )
+            .select("_id isArchived")
+            .lean();
+
+    if (!workspace) {
+        throw new ApiError(
+            404,
+            "Workspace not found."
+        );
+    }
+
+    if (workspace.isArchived) {
+        throw new ApiError(
+            409,
+            "Projects cannot be archived while the workspace is archived."
+        );
+    }
+
+    if (project.isArchived) {
+        throw new ApiError(
+            409,
+            "Project is already archived."
+        );
+    }
 
     project.isArchived = true;
 
     await project.save();
-
 }
 
 async restoreProject(
     projectId: string,
     userId: string
 ): Promise<void> {
-
-    /*
-    |--------------------------------------------------------------------------
-    | Verify Project
-    |--------------------------------------------------------------------------
-    */
-
-    const project = await Project.findById(projectId);
+    const project =
+        await Project.findById(
+            projectId
+        );
 
     if (!project) {
         throw new ApiError(
@@ -535,23 +531,11 @@ async restoreProject(
         );
     }
 
-    if (!project.isArchived) {
-        throw new ApiError(
-            400,
-            "Project is not archived."
-        );
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | Verify Permission
-    |--------------------------------------------------------------------------
-    */
-
-    const member = await ProjectMember.findOne({
-        project: projectId,
-        user: userId,
-    });
+    const member =
+        await ProjectMember.findOne({
+            project: projectId,
+            user: userId,
+        });
 
     if (!member) {
         throw new ApiError(
@@ -560,25 +544,48 @@ async restoreProject(
         );
     }
 
-    if (member.role !== ProjectRole.ADMIN) {
+    if (
+        member.role !==
+        ProjectRole.ADMIN
+    ) {
         throw new ApiError(
             403,
             "Only project admins can restore projects."
         );
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | Restore Project
-    |--------------------------------------------------------------------------
-    */
+    const workspace =
+        await Workspace.findById(
+            project.workspace
+        )
+            .select("_id isArchived")
+            .lean();
+
+    if (!workspace) {
+        throw new ApiError(
+            404,
+            "Workspace not found."
+        );
+    }
+
+    if (workspace.isArchived) {
+        throw new ApiError(
+            409,
+            "Restore the workspace before restoring this project."
+        );
+    }
+
+    if (!project.isArchived) {
+        throw new ApiError(
+            409,
+            "Project is already active."
+        );
+    }
 
     project.isArchived = false;
 
     await project.save();
-
 }
-
 }
 
 export default new ProjectService();

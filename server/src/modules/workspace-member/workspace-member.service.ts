@@ -6,7 +6,197 @@ import { WorkspaceRole } from "./workspace-member.model";
 
 
 
+import Project from "../project/project.model";
+import ProjectMember from "../projectMember/projectMember.model";
+import { ProjectRole } from "../../interfaces/projectMember.interface";
+
+import Task from "../tasks/task.model";
+import TaskAssignee from "../taskAssignee/taskAssignee.model";
+
+import mongoose, {
+    ClientSession,
+    Types,
+} from "mongoose";
+
 export class WorkspaceMembers{
+
+private async revokeWorkspaceAccess(
+    workspaceId: Types.ObjectId,
+    workspaceMemberId: Types.ObjectId,
+    targetUserId: Types.ObjectId,
+    session: ClientSession
+): Promise<void> {
+    /*
+    |--------------------------------------------------------------------------
+    | Find Projects in Workspace
+    |--------------------------------------------------------------------------
+    */
+
+    const projects = await Project.find({
+        workspace: workspaceId,
+    })
+        .select("_id")
+        .session(session)
+        .lean();
+
+    const projectIds = projects.map(
+        (project) => project._id
+    );
+
+    if (projectIds.length > 0) {
+        /*
+        |--------------------------------------------------------------------------
+        | Find User's Project Memberships
+        |--------------------------------------------------------------------------
+        */
+
+        const projectMemberships =
+            await ProjectMember.find({
+                project: {
+                    $in: projectIds,
+                },
+                user: targetUserId,
+            })
+                .select("_id project role")
+                .session(session)
+                .lean();
+
+        /*
+        |--------------------------------------------------------------------------
+        | Protect Last Project Admin
+        |--------------------------------------------------------------------------
+        |
+        | Removing the workspace member must not leave a project without
+        | an administrator.
+        |
+        */
+
+        const adminProjectIds =
+            projectMemberships
+                .filter(
+                    (membership) =>
+                        membership.role ===
+                        ProjectRole.ADMIN
+                )
+                .map(
+                    (membership) =>
+                        membership.project
+                );
+
+        if (adminProjectIds.length > 0) {
+            const adminCounts =
+                await ProjectMember.aggregate<{
+                    _id: Types.ObjectId;
+                    adminCount: number;
+                }>([
+                    {
+                        $match: {
+                            project: {
+                                $in: adminProjectIds,
+                            },
+                            role: ProjectRole.ADMIN,
+                        },
+                    },
+                    {
+                        $group: {
+                            _id: "$project",
+                            adminCount: {
+                                $sum: 1,
+                            },
+                        },
+                    },
+                ]).session(session);
+
+            const adminCountMap =
+                new Map<string, number>(
+                    adminCounts.map(
+                        (result) => [
+                            result._id.toString(),
+                            result.adminCount,
+                        ]
+                    )
+                );
+
+            const projectsWithoutAnotherAdmin =
+                adminProjectIds.filter(
+                    (projectId) =>
+                        (
+                            adminCountMap.get(
+                                projectId.toString()
+                            ) ?? 0
+                        ) <= 1
+                );
+
+            if (
+                projectsWithoutAnotherAdmin.length >
+                0
+            ) {
+                throw new ApiError(
+                    409,
+                    "This member is the last admin of one or more projects. Assign another project admin before removing them from the workspace."
+                );
+            }
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Remove Active Task Assignments
+        |--------------------------------------------------------------------------
+        */
+
+        const taskIds = await Task.distinct(
+            "_id",
+            {
+                project: {
+                    $in: projectIds,
+                },
+            }
+        ).session(session);
+
+        if (taskIds.length > 0) {
+            await TaskAssignee.deleteMany({
+                task: {
+                    $in: taskIds,
+                },
+                user: targetUserId,
+            }).session(session);
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Remove Project Memberships
+        |--------------------------------------------------------------------------
+        */
+
+        const projectMembershipIds =
+            projectMemberships.map(
+                (membership) =>
+                    membership._id
+            );
+
+        if (
+            projectMembershipIds.length > 0
+        ) {
+            await ProjectMember.deleteMany({
+                _id: {
+                    $in: projectMembershipIds,
+                },
+            }).session(session);
+        }
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Remove Workspace Membership
+    |--------------------------------------------------------------------------
+    */
+
+    await WorkspaceMember.deleteOne({
+        _id: workspaceMemberId,
+        workspace: workspaceId,
+        user: targetUserId,
+    }).session(session);
+}
     
 async getWorkspaceMembers(
     workspaceId: string,
@@ -21,12 +211,7 @@ async getWorkspaceMembers(
             "Workspace not found."
         );
     }
-     if (workspace.isArchived) {
-        throw new ApiError(
-            404,
-            "Workspace not found."
-        );
-    }
+    
 
     const isOwner =
         workspace.owner.toString() === userId;
@@ -53,6 +238,7 @@ async getWorkspaceMembers(
         )
         .sort({
             joinedAt: 1,
+            _id:1,
         });
 
     return {
@@ -86,12 +272,16 @@ async updateMemberRole(
 
     const workspace = await Workspace.findById(workspaceId);
 
-    if (!workspace || workspace.isArchived) {
-        throw new ApiError(
-            404,
-            "Workspace not found."
-        );
-    }
+
+if (!workspace) {
+    throw new ApiError(
+        404,
+        "Workspace not found."
+    );
+}
+
+   
+   
 
     if (workspace.owner.toString() !== userId) {
         throw new ApiError(
@@ -99,6 +289,13 @@ async updateMemberRole(
             "Only the workspace owner can update member roles."
         );
     }
+
+    if (workspace.isArchived) {
+    throw new ApiError(
+        409,
+        "Member roles cannot be changed in an archived workspace."
+    );
+}
 
     const member = await WorkspaceMember.findOne({
         _id: memberId,
@@ -115,12 +312,15 @@ async updateMemberRole(
         );
     }
 
-    if (member.role === WorkspaceRole.OWNER) {
-        throw new ApiError(
-            400,
-            "Owner role cannot be changed."
-        );
-    }
+   if (
+    member.role ===
+    WorkspaceRole.OWNER
+) {
+    throw new ApiError(
+        409,
+        "The workspace owner's role cannot be changed."
+    );
+}
 
     if (member.role === role) {
     throw new ApiError(
@@ -153,85 +353,194 @@ async updateMemberRole(
         updatedAt: member.updatedAt,
     };
 }
+
 async removeMember(
     workspaceId: string,
     memberId: string,
     userId: string
 ): Promise<void> {
+    const session =
+        await mongoose.startSession();
 
-    const workspace = await Workspace.findById(workspaceId);
+    try {
+        await session.withTransaction(
+            async () => {
+                /*
+                |--------------------------------------------------------------------------
+                | Verify Workspace
+                |--------------------------------------------------------------------------
+                */
 
-    if (!workspace || workspace.isArchived) {
-        throw new ApiError(
-            404,
-            "Workspace not found."
+                const workspace =
+                    await Workspace.findById(
+                        workspaceId
+                    ).session(session);
+
+                if (!workspace) {
+                    throw new ApiError(
+                        404,
+                        "Workspace not found."
+                    );
+                }
+
+                if (workspace.isArchived) {
+                    throw new ApiError(
+                        409,
+                        "Members cannot be removed from an archived workspace."
+                    );
+                }
+
+                /*
+                |--------------------------------------------------------------------------
+                | Verify Owner Permission
+                |--------------------------------------------------------------------------
+                */
+
+                if (
+                    workspace.owner.toString() !==
+                    userId
+                ) {
+                    throw new ApiError(
+                        403,
+                        "Only the workspace owner can remove members."
+                    );
+                }
+
+                /*
+                |--------------------------------------------------------------------------
+                | Find Target Membership
+                |--------------------------------------------------------------------------
+                */
+
+                const member =
+                    await WorkspaceMember.findOne({
+                        _id: memberId,
+                        workspace: workspaceId,
+                    }).session(session);
+
+                if (!member) {
+                    throw new ApiError(
+                        404,
+                        "Member not found."
+                    );
+                }
+
+                if (
+                    member.role ===
+                    WorkspaceRole.OWNER
+                ) {
+                    throw new ApiError(
+                        409,
+                        "Workspace owner cannot be removed."
+                    );
+                }
+
+                /*
+                |--------------------------------------------------------------------------
+                | Revoke All Workspace Access
+                |--------------------------------------------------------------------------
+                */
+
+                await this.revokeWorkspaceAccess(
+                    workspace._id,
+                    member._id,
+                    member.user,
+                    session
+                );
+            }
         );
+    } finally {
+        await session.endSession();
     }
-
-    if (workspace.owner.toString() !== userId) {
-        throw new ApiError(
-            403,
-            "Only the workspace owner can remove members."
-        );
-    }
-
-    const member = await WorkspaceMember.findOne({
-        _id: memberId,
-        workspace: workspaceId,
-    });
-
-    if (!member) {
-        throw new ApiError(
-            404,
-            "Member not found."
-        );
-    }
-
-    if (member.role === WorkspaceRole.OWNER) {
-        throw new ApiError(
-            400,
-            "Workspace owner cannot be removed."
-        );
-    }
-
-    await member.deleteOne();
 }
 
 async leaveWorkspace(
     workspaceId: string,
     userId: string
 ): Promise<void> {
+    const session =
+        await mongoose.startSession();
 
-    const workspace = await Workspace.findById(workspaceId);
+    try {
+        await session.withTransaction(
+            async () => {
+                /*
+                |--------------------------------------------------------------------------
+                | Verify Workspace
+                |--------------------------------------------------------------------------
+                */
 
-    if (!workspace || workspace.isArchived) {
-        throw new ApiError(
-            404,
-            "Workspace not found."
+                const workspace =
+                    await Workspace.findById(
+                        workspaceId
+                    ).session(session);
+
+                if (!workspace) {
+                    throw new ApiError(
+                        404,
+                        "Workspace not found."
+                    );
+                }
+
+                if (workspace.isArchived) {
+                    throw new ApiError(
+                        409,
+                        "You cannot leave an archived workspace."
+                    );
+                }
+
+                /*
+                |--------------------------------------------------------------------------
+                | Protect Workspace Owner
+                |--------------------------------------------------------------------------
+                */
+
+                if (
+                    workspace.owner.toString() ===
+                    userId
+                ) {
+                    throw new ApiError(
+                        409,
+                        "The workspace owner cannot leave. Transfer ownership before leaving."
+                    );
+                }
+
+                /*
+                |--------------------------------------------------------------------------
+                | Find Current User Membership
+                |--------------------------------------------------------------------------
+                */
+
+                const membership =
+                    await WorkspaceMember.findOne({
+                        workspace: workspaceId,
+                        user: userId,
+                    }).session(session);
+
+                if (!membership) {
+                    throw new ApiError(
+                        404,
+                        "Workspace membership not found."
+                    );
+                }
+
+                /*
+                |--------------------------------------------------------------------------
+                | Revoke All Workspace Access
+                |--------------------------------------------------------------------------
+                */
+
+                await this.revokeWorkspaceAccess(
+                    workspace._id,
+                    membership._id,
+                    membership.user,
+                    session
+                );
+            }
         );
+    } finally {
+        await session.endSession();
     }
-
-    if (workspace.owner.toString() === userId) {
-        throw new ApiError(
-            400,
-            "Workspace owner cannot leave the workspace."
-        );
-    }
-
-    const membership =
-        await WorkspaceMember.findOne({
-            workspace: workspaceId,
-            user: userId,
-        });
-
-    if (!membership) {
-        throw new ApiError(
-            404,
-            "Membership not found."
-        );
-    }
-
-    await membership.deleteOne();
 }
 }
 

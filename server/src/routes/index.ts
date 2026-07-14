@@ -6,10 +6,18 @@ import workspaceRoutes from "../modules/workspace/workspace.routes";
 
 import workspaceInvitationRoutes from "../modules/workspaceInvitation/workspaceInvitation.routes";
 
+import workspaceMemberRoutes from "../modules/workspace-member/workspace-member.routes"
+
 import projectRoutes from "../modules/project/project.routes"
 import projectInvitationRoutes from "../modules/projectInvitation/projectInvitation.routes";
 
 import projectMemberRoutes from "../modules/projectMember/projectMember.routes";
+
+import taskRoutes from "../modules/tasks/task.routes";
+
+import taskAssigneeRoutes from "../modules/taskAssignee/taskAssignee.routes";
+
+import taskCommentRoutes from "../modules/taskComment/taskComment.routes";
 
 const router = Router();
 
@@ -18,15 +26,18 @@ router.use("/auth", authRoutes);
 router.use("/workspaces", workspaceRoutes);
 
 router.use(
-    "/workspace-invitations",
+    "/",
     workspaceInvitationRoutes
 );
 
 router.use(
     "/workspaces",
-    projectRoutes
+    workspaceMemberRoutes
 );
 
+
+
+router.use("/", projectRoutes);
 router.use(
     projectInvitationRoutes
 );
@@ -35,5 +46,14 @@ router.use(
     "/",
     projectMemberRoutes
 );
+
+router.use(
+    "/",
+    taskRoutes
+)
+
+router.use("/", taskAssigneeRoutes);
+
+router.use("/", taskCommentRoutes);
 
 export default router;

@@ -19,21 +19,71 @@ import mongoose from "mongoose";
 
 
 class WorkspaceInvitationService {
+
+    private async markExpiredIfNeeded(
+    invitationId: string,
+    expiresAt: Date,
+    now: Date
+): Promise<void> {
+    if (
+        expiresAt.getTime() >
+        now.getTime()
+    ) {
+        return;
+    }
+
+    await WorkspaceInvitation.updateOne(
+        {
+            _id: invitationId,
+
+            status:
+                InvitationStatus.PENDING,
+
+            expiresAt: {
+                $lte: now,
+            },
+        },
+        {
+            $set: {
+                status:
+                    InvitationStatus.EXPIRED,
+            },
+        }
+    );
+
+    throw new ApiError(
+        410,
+        "Invitation has expired."
+    );
+}
     
-    async inviteUser(
+async inviteUser(
     workspaceId: string,
     invitedBy: string,
     data: InviteUserRequest
 ): Promise<InvitationResponse> {
+    /*
+    |--------------------------------------------------------------------------
+    | Verify Workspace
+    |--------------------------------------------------------------------------
+    */
 
-    const workspace = await Workspace.findById(workspaceId);
+    const workspace = await Workspace.findById(
+        workspaceId
+    );
 
     if (!workspace) {
-        throw new ApiError(404, "Workspace not found.");
+        throw new ApiError(
+            404,
+            "Workspace not found."
+        );
     }
-    if(workspace.isArchived){
-        throw new ApiError(404, "Workspace not found.");
-    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Verify Inviter Membership
+    |--------------------------------------------------------------------------
+    */
 
     const inviter = await WorkspaceMember.findOne({
         workspace: workspaceId,
@@ -47,24 +97,106 @@ class WorkspaceInvitationService {
         );
     }
 
-    if (
-        inviter.role !== WorkspaceRole.OWNER &&
-        inviter.role !== WorkspaceRole.ADMIN &&
-        !workspace.settings.allowMemberInvites
-    ) {
+    /*
+    |--------------------------------------------------------------------------
+    | Verify Workspace Is Writable
+    |--------------------------------------------------------------------------
+    */
+
+    if (workspace.isArchived) {
         throw new ApiError(
-            403,
-            "You are not allowed to invite members."
+            409,
+            "Users cannot be invited to an archived workspace."
         );
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | Resolve Requested Role
+    |--------------------------------------------------------------------------
+    */
+
+    const requestedRole =
+        data.role ?? InvitationRole.MEMBER;
+
+    /*
+    |--------------------------------------------------------------------------
+    | Verify Invitation Permission
+    |--------------------------------------------------------------------------
+    */
+
+    if (inviter.role === WorkspaceRole.GUEST) {
+        throw new ApiError(
+            403,
+            "Guests are not allowed to invite users."
+        );
+    }
+
+    if (inviter.role === WorkspaceRole.MEMBER) {
+        if (
+            !workspace.settings.allowMemberInvites
+        ) {
+            throw new ApiError(
+                403,
+                "Workspace members are not allowed to invite users."
+            );
+        }
+
+        if (
+            requestedRole ===
+            InvitationRole.ADMIN
+        ) {
+            throw new ApiError(
+                403,
+                "Workspace members cannot invite administrators."
+            );
+        }
+    }
+
+    /*
+    Owners and admins may invite admins and members.
+
+    Members may invite members.
+
+    Any permitted inviter may invite a guest only when
+    guest invitations are enabled.
+    */
+
+    if (
+        requestedRole ===
+            InvitationRole.GUEST &&
+        !workspace.settings.allowGuestInvites
+    ) {
+        throw new ApiError(
+            403,
+            "Guest invitations are disabled for this workspace."
+        );
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Normalize Email
+    |--------------------------------------------------------------------------
+    */
+
+    const normalizedEmail =
+        data.email.trim().toLowerCase();
+
+    /*
+    |--------------------------------------------------------------------------
+    | Check Existing Membership
+    |--------------------------------------------------------------------------
+    */
+
     const user = await User.findOne({
-        email: data.email.toLowerCase(),
-    });
+        email: normalizedEmail,
+    })
+        .select("_id")
+        .lean();
 
     if (user) {
         const existingMember =
-            await WorkspaceMember.findOne({
+            await WorkspaceMember.exists({
                 workspace: workspaceId,
                 user: user._id,
             });
@@ -72,35 +204,48 @@ class WorkspaceInvitationService {
         if (existingMember) {
             throw new ApiError(
                 409,
-                "User is already a member."
+                "User is already a member of this workspace."
             );
         }
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | Check Existing Active Invitation
+    |--------------------------------------------------------------------------
+    */
+
     const existingInvitation =
-        await WorkspaceInvitation.findOne({
+        await WorkspaceInvitation.exists({
             workspace: workspaceId,
-            email: data.email.toLowerCase(),
+            email: normalizedEmail,
             status: InvitationStatus.PENDING,
-            expiresAt: { $gt: new Date() },
+            expiresAt: {
+                $gt: new Date(),
+            },
         });
 
     if (existingInvitation) {
         throw new ApiError(
             409,
-            "An active invitation already exists."
+            "An active invitation already exists for this email."
         );
     }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Create Invitation
+    |--------------------------------------------------------------------------
+    */
 
     const invitation =
         await WorkspaceInvitation.create({
             workspace: workspaceId,
-            email: data.email.toLowerCase(),
+            email: normalizedEmail,
             invitedBy,
-            role:
-                data.role ??
-                InvitationRole.MEMBER,
-            status: InvitationStatus.PENDING,
+            role: requestedRole,
+            status:
+                InvitationStatus.PENDING,
             expiresAt: new Date(
                 Date.now() +
                     7 *
@@ -111,16 +256,24 @@ class WorkspaceInvitationService {
             ),
         });
 
+    /*
+    |--------------------------------------------------------------------------
+    | Return DTO
+    |--------------------------------------------------------------------------
+    */
+
     return {
         _id: invitation._id.toString(),
 
-        workspace: workspace._id.toString(),
+        workspace:
+            workspace._id.toString(),
 
         workspaceName: workspace.name,
 
         email: invitation.email,
 
-        invitedBy: invitation.invitedBy.toString(),
+        invitedBy:
+            invitation.invitedBy.toString(),
 
         role: invitation.role,
 
@@ -128,7 +281,8 @@ class WorkspaceInvitationService {
 
         expiresAt: invitation.expiresAt,
 
-        acceptedAt: invitation.acceptedAt,
+        acceptedAt:
+            invitation.acceptedAt,
 
         createdAt: invitation.createdAt,
 
@@ -196,9 +350,13 @@ async acceptInvitation(
 
     const user = await User.findById(userId);
 
+    
+
     if (!user) {
         throw new ApiError(404, "User not found.");
     }
+
+    const now = new Date();
 
     const invitation = await WorkspaceInvitation.findById(invitationId);
 
@@ -213,12 +371,13 @@ async acceptInvitation(
         );
     }
 
-    if (invitation.expiresAt < new Date()) {
-    throw new ApiError(
-        400,
-        "Invitation has expired."
-    );
-}
+    await this.markExpiredIfNeeded(
+    invitation._id.toString(),
+    invitation.expiresAt,
+    now
+);
+
+
 
     if (invitation.email !== user.email) {
         throw new ApiError(
@@ -248,7 +407,7 @@ async acceptInvitation(
 await member.save({ session });
 
     invitation.status = InvitationStatus.ACCEPTED;
-    invitation.acceptedAt = new Date();
+    invitation.acceptedAt = now;
 
     await invitation.save({session});
 
@@ -280,6 +439,8 @@ async rejectInvitation(
         throw new ApiError(404, "User not found.");
     }
 
+    const now = new Date();
+
     const invitation = await WorkspaceInvitation.findById(invitationId);
 
     if (!invitation) {
@@ -299,6 +460,12 @@ async rejectInvitation(
             "You cannot reject this invitation."
         );
     }
+
+    await this.markExpiredIfNeeded(
+    invitation._id.toString(),
+    invitation.expiresAt,
+    now
+);
 
     invitation.status = InvitationStatus.REJECTED;
 

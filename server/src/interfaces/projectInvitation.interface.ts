@@ -1,4 +1,4 @@
-import { ProjectRole } from "../modules/projectMember/projectMember.model";
+import { ProjectRole } from "./projectMember.interface";
 
 export interface ICreateProjectInvitation {
     email: string;

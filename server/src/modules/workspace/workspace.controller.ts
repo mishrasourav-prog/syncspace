@@ -1,29 +1,48 @@
-import { Request , Response , NextFunction } from "express";
+import {
+    Request,
+    Response,
+    NextFunction,
+} from "express";
+
 import ApiError from "../../utils/ApiError";
 import ApiResponse from "../../utils/ApiResponse";
-import { createWorkspaceSchema , workspaceIdSchema , updateWorkspaceSchema } from "./workspace.validation";
+
 import WorkspaceService from "./workspace.service";
+
+import {
+    createWorkspaceSchema,
+    updateWorkspaceSchema,
+    workspaceIdSchema,
+} from "./workspace.validation";
+
+/*
+|--------------------------------------------------------------------------
+| Create Workspace
+|--------------------------------------------------------------------------
+*/
+
 export const createWorkspace = async (
     req: Request,
     res: Response,
     next: NextFunction
 ) => {
     try {
-
         if (!req.user) {
-            throw new ApiError(401, "Unauthorized");
+            throw new ApiError(
+                401,
+                "Unauthorized."
+            );
         }
 
-        const result = createWorkspaceSchema.safeParse(req.body);
-
-        if (!result.success) {
-            throw new ApiError(400, result.error.message);
-        }
+        const data =
+            createWorkspaceSchema.parse(
+                req.body
+            );
 
         const workspace =
             await WorkspaceService.createWorkspace(
-                req.user._id,         
-                result.data
+                req.user._id,
+                data
             );
 
         return res.status(201).json(
@@ -33,12 +52,16 @@ export const createWorkspace = async (
                 workspace
             )
         );
-
     } catch (error) {
-        next(error);
+        return next(error);
     }
 };
 
+/*
+|--------------------------------------------------------------------------
+| Get User Workspaces
+|--------------------------------------------------------------------------
+*/
 
 export const getUserWorkspaces = async (
     req: Request,
@@ -46,11 +69,10 @@ export const getUserWorkspaces = async (
     next: NextFunction
 ) => {
     try {
-
         if (!req.user) {
             throw new ApiError(
                 401,
-                "Unauthorized"
+                "Unauthorized."
             );
         }
 
@@ -68,40 +90,38 @@ export const getUserWorkspaces = async (
                 }
             )
         );
-
     } catch (error) {
-        next(error);
+        return next(error);
     }
 };
+
+/*
+|--------------------------------------------------------------------------
+| Get Workspace
+|--------------------------------------------------------------------------
+*/
 
 export const getWorkspace = async (
     req: Request,
     res: Response,
     next: NextFunction
 ) => {
-
     try {
-
         if (!req.user) {
             throw new ApiError(
                 401,
-                "Unauthorized"
+                "Unauthorized."
             );
         }
 
-        const result =
-            workspaceIdSchema.safeParse(req.params);
-
-        if (!result.success) {
-            throw new ApiError(
-                400,
-                result.error.message
+        const { workspaceId } =
+            workspaceIdSchema.parse(
+                req.params
             );
-        }
 
-        const payload =
+        const workspace =
             await WorkspaceService.getWorkspace(
-                result.data.workspaceId,
+                workspaceId,
                 req.user._id
             );
 
@@ -109,24 +129,26 @@ export const getWorkspace = async (
             new ApiResponse(
                 200,
                 "Workspace fetched successfully.",
-                payload
+                workspace
             )
         );
-
     } catch (error) {
-        next(error);
+        return next(error);
     }
-
 };
+
+/*
+|--------------------------------------------------------------------------
+| Update Workspace
+|--------------------------------------------------------------------------
+*/
 
 export const updateWorkspace = async (
     req: Request,
     res: Response,
     next: NextFunction
 ) => {
-
     try {
-
         if (!req.user) {
             throw new ApiError(
                 401,
@@ -134,55 +156,47 @@ export const updateWorkspace = async (
             );
         }
 
-        const params =
-            workspaceIdSchema.safeParse(req.params);
-
-        if (!params.success) {
-            throw new ApiError(
-                400,
-                params.error.message
+        const { workspaceId } =
+            workspaceIdSchema.parse(
+                req.params
             );
-        }
 
-        const body =
-            updateWorkspaceSchema.safeParse(req.body);
-
-        if (!body.success) {
-            throw new ApiError(
-                400,
-                body.error.message
+        const data =
+            updateWorkspaceSchema.parse(
+                req.body
             );
-        }
 
-        const payload =
+        const workspace =
             await WorkspaceService.updateWorkspace(
-                params.data.workspaceId,
+                workspaceId,
                 req.user._id,
-                body.data
+                data
             );
 
         return res.status(200).json(
             new ApiResponse(
                 200,
                 "Workspace updated successfully.",
-                payload
+                workspace
             )
         );
-
     } catch (error) {
-        next(error);
+        return next(error);
     }
-
 };
+
+/*
+|--------------------------------------------------------------------------
+| Archive Workspace
+|--------------------------------------------------------------------------
+*/
 
 export const archiveWorkspace = async (
     req: Request,
     res: Response,
     next: NextFunction
 ) => {
-
     try {
-
         if (!req.user) {
             throw new ApiError(
                 401,
@@ -190,18 +204,13 @@ export const archiveWorkspace = async (
             );
         }
 
-        const result =
-            workspaceIdSchema.safeParse(req.params);
-
-        if (!result.success) {
-            throw new ApiError(
-                400,
-                result.error.message
+        const { workspaceId } =
+            workspaceIdSchema.parse(
+                req.params
             );
-        }
 
         await WorkspaceService.archiveWorkspace(
-            result.data.workspaceId,
+            workspaceId,
             req.user._id
         );
 
@@ -211,22 +220,23 @@ export const archiveWorkspace = async (
                 "Workspace archived successfully."
             )
         );
-
     } catch (error) {
-        next(error);
+        return next(error);
     }
-
 };
 
+/*
+|--------------------------------------------------------------------------
+| Restore Workspace
+|--------------------------------------------------------------------------
+*/
 
 export const restoreWorkspace = async (
     req: Request,
     res: Response,
     next: NextFunction
 ) => {
-
     try {
-
         if (!req.user) {
             throw new ApiError(
                 401,
@@ -234,18 +244,13 @@ export const restoreWorkspace = async (
             );
         }
 
-        const result =
-            workspaceIdSchema.safeParse(req.params);
-
-        if (!result.success) {
-            throw new ApiError(
-                400,
-                result.error.message
+        const { workspaceId } =
+            workspaceIdSchema.parse(
+                req.params
             );
-        }
 
         await WorkspaceService.restoreWorkspace(
-            result.data.workspaceId,
+            workspaceId,
             req.user._id
         );
 
@@ -255,43 +260,7 @@ export const restoreWorkspace = async (
                 "Workspace restored successfully."
             )
         );
-
     } catch (error) {
-        next(error);
+        return next(error);
     }
-
 };
-
-// export const getArchivedWorkspaces = async (
-//     req: Request,
-//     res: Response,
-//     next: NextFunction
-// ) => {
-
-//     try {
-
-//         if (!req.user) {
-//             throw new ApiError(
-//                 401,
-//                 "Unauthorized."
-//             );
-//         }
-
-//         const payload =
-//             await WorkspaceService.getArchivedWorkspaces(
-//                 req.user._id
-//             );
-
-//         return res.status(200).json(
-//             new ApiResponse(
-//                 200,
-//                 "Archived workspaces fetched successfully.",
-//                 payload
-//             )
-//         );
-
-//     } catch (error) {
-//         next(error);
-//     }
-
-// };

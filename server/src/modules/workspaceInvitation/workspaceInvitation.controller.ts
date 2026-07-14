@@ -1,14 +1,26 @@
-import { Request, Response, NextFunction } from "express";
+import type {
+    Request,
+    Response,
+    NextFunction,
+} from "express";
 
 import ApiError from "../../utils/ApiError";
 import ApiResponse from "../../utils/ApiResponse";
 
-import WorkspaceInvitationService from "./workspaceInvitation.service";
+import WorkspaceInvitationService
+    from "./workspaceInvitation.service";
 
 import {
     inviteUserSchema,
+    workspaceInvitationParamsSchema,
+    workspaceInvitationWorkspaceParamsSchema,
 } from "./workspaceInvitation.validation";
 
+/*
+|--------------------------------------------------------------------------
+| Invite User
+|--------------------------------------------------------------------------
+*/
 
 export const inviteUser = async (
     req: Request,
@@ -16,7 +28,6 @@ export const inviteUser = async (
     next: NextFunction
 ) => {
     try {
-
         if (!req.user) {
             throw new ApiError(
                 401,
@@ -24,21 +35,21 @@ export const inviteUser = async (
             );
         }
 
-        const result =
-            inviteUserSchema.safeParse(req.body);
-
-        if (!result.success) {
-            throw new ApiError(
-                400,
-                result.error.message
+        const { workspaceId } =
+            workspaceInvitationWorkspaceParamsSchema.parse(
+                req.params
             );
-        }
+
+        const data =
+            inviteUserSchema.parse(
+                req.body
+            );
 
         const invitation =
             await WorkspaceInvitationService.inviteUser(
-                req.params.workspaceId as string,
+                workspaceId,
                 req.user._id,
-                result.data
+                data
             );
 
         return res.status(201).json(
@@ -48,11 +59,16 @@ export const inviteUser = async (
                 invitation
             )
         );
-
     } catch (error) {
-        next(error);
+        return next(error);
     }
 };
+
+/*
+|--------------------------------------------------------------------------
+| Get Current User Invitations
+|--------------------------------------------------------------------------
+*/
 
 export const getMyInvitations = async (
     req: Request,
@@ -60,7 +76,6 @@ export const getMyInvitations = async (
     next: NextFunction
 ) => {
     try {
-
         if (!req.user) {
             throw new ApiError(
                 401,
@@ -80,25 +95,37 @@ export const getMyInvitations = async (
                 invitations
             )
         );
-
     } catch (error) {
-        next(error);
+        return next(error);
     }
 };
 
+/*
+|--------------------------------------------------------------------------
+| Accept Invitation
+|--------------------------------------------------------------------------
+*/
+
 export const acceptInvitation = async (
-    req: Request<{ invitationId: string }>,
+    req: Request,
     res: Response,
     next: NextFunction
 ) => {
     try {
-
         if (!req.user) {
-            throw new ApiError(401, "Unauthorized.");
+            throw new ApiError(
+                401,
+                "Unauthorized."
+            );
         }
 
+        const { invitationId } =
+            workspaceInvitationParamsSchema.parse(
+                req.params
+            );
+
         await WorkspaceInvitationService.acceptInvitation(
-            req.params.invitationId,
+            invitationId,
             req.user._id
         );
 
@@ -108,25 +135,37 @@ export const acceptInvitation = async (
                 "Invitation accepted successfully."
             )
         );
-
     } catch (error) {
-        next(error);
+        return next(error);
     }
 };
 
+/*
+|--------------------------------------------------------------------------
+| Reject Invitation
+|--------------------------------------------------------------------------
+*/
+
 export const rejectInvitation = async (
-    req: Request<{ invitationId: string }>,
+    req: Request,
     res: Response,
     next: NextFunction
 ) => {
     try {
-
         if (!req.user) {
-            throw new ApiError(401, "Unauthorized.");
+            throw new ApiError(
+                401,
+                "Unauthorized."
+            );
         }
 
+        const { invitationId } =
+            workspaceInvitationParamsSchema.parse(
+                req.params
+            );
+
         await WorkspaceInvitationService.rejectInvitation(
-            req.params.invitationId,
+            invitationId,
             req.user._id
         );
 
@@ -136,8 +175,7 @@ export const rejectInvitation = async (
                 "Invitation rejected successfully."
             )
         );
-
     } catch (error) {
-        next(error);
+        return next(error);
     }
 };

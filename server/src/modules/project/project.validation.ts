@@ -1,47 +1,122 @@
 import { z } from "zod";
 
-export const createProjectSchema = z.object({
-    name: z
-        .string()
-        .trim()
-        .min(2, "Project name must be at least 2 characters.")
-        .max(100, "Project name cannot exceed 100 characters."),
+import {
+    objectIdSchema,
+} from "../../validators/common.validation";
 
-    description: z
-        .string()
-        .trim()
-        .max(500, "Description cannot exceed 500 characters.")
-        .optional()
-        .or(z.literal("")),
+/*
+|--------------------------------------------------------------------------
+| Create Project
+|--------------------------------------------------------------------------
+*/
 
-    icon: z
-        .string()
-        .trim()
-        .max(10, "Icon cannot exceed 10 characters.")
-        .optional(),
-});
+export const createProjectSchema = z
+    .object({
+        name: z
+            .string()
+            .trim()
+            .min(
+                2,
+                "Project name must be at least 2 characters."
+            )
+            .max(
+                100,
+                "Project name cannot exceed 100 characters."
+            ),
 
-export const updateProjectSchema = z.object({
-    name: z
-        .string()
-        .trim()
-        .min(2, "Project name must be at least 2 characters.")
-        .max(100, "Project name cannot exceed 100 characters.")
-        .optional(),
+        /*
+        Empty string is allowed so a project can be
+        created without a description.
+        */
+        description: z
+            .string()
+            .trim()
+            .max(
+                500,
+                "Description cannot exceed 500 characters."
+            )
+            .optional(),
 
-    description: z
-        .string()
-        .trim()
-        .max(500, "Description cannot exceed 500 characters.")
-        .optional(),
+        icon: z
+            .string()
+            .trim()
+            .min(
+                1,
+                "Project icon cannot be empty."
+            )
+            .max(
+                10,
+                "Project icon cannot exceed 10 characters."
+            )
+            .optional(),
+    })
+    .strict();
 
-    icon: z
-        .string()
-        .trim()
-        .max(10, "Icon cannot exceed 10 characters.")
-        .optional(),
-});
+/*
+|--------------------------------------------------------------------------
+| Update Project
+|--------------------------------------------------------------------------
+*/
 
-export const projectIdSchema = z.object({
-    projectId: z.string().length(24, "Invalid project id"),
-});
+export const updateProjectSchema = z
+    .object({
+        name: z
+            .string()
+            .trim()
+            .min(
+                2,
+                "Project name must be at least 2 characters."
+            )
+            .max(
+                100,
+                "Project name cannot exceed 100 characters."
+            )
+            .optional(),
+
+        /*
+        Empty string is intentionally allowed here.
+        It lets the client clear the description.
+        */
+        description: z
+            .string()
+            .trim()
+            .max(
+                500,
+                "Description cannot exceed 500 characters."
+            )
+            .optional(),
+
+        icon: z
+            .string()
+            .trim()
+            .min(
+                1,
+                "Project icon cannot be empty."
+            )
+            .max(
+                10,
+                "Project icon cannot exceed 10 characters."
+            )
+            .optional(),
+    })
+    .strict()
+    .refine(
+        (data) =>
+            Object.keys(data).length > 0,
+        {
+            message:
+                "At least one project field must be provided.",
+        }
+    );
+
+/*
+|--------------------------------------------------------------------------
+| Project Route Parameters
+|--------------------------------------------------------------------------
+*/
+
+export const projectIdSchema = z
+    .object({
+        projectId: objectIdSchema,
+    })
+    .strict();

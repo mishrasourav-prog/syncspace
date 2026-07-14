@@ -60,22 +60,34 @@ export interface WorkspaceUserResponse {
 
 export interface GetWorkspaceResponse {
     _id: string;
+
     name: string;
+
     slug: string;
+
     description?: string;
+
     avatar?: string;
+
     owner: string;
+
     timezone: string;
+
     role: WorkspaceRole;
+
     settings: {
         allowGuestInvites: boolean;
         allowMemberInvites: boolean;
         allowPublicProjects: boolean;
         defaultRole: "guest" | "member";
     };
-    createdAt: Date;
-}
 
+    isArchived: boolean;
+
+    createdAt: Date;
+
+    updatedAt: Date;
+}
 export interface UseGetWorkspaceResponse {
     workspace: GetWorkspaceResponse;
 }

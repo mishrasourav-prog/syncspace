@@ -1,6 +1,6 @@
 import mongoose, { Document, Schema, Types } from "mongoose";
 
-import { ProjectRole } from "../projectMember/projectMember.model";
+import { ProjectRole } from "../../interfaces/projectMember.interface";
 
 export enum ProjectInvitationStatus {
     PENDING = "PENDING",

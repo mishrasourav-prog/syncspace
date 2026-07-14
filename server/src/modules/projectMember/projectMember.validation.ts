@@ -1,20 +1,38 @@
 import { z } from "zod";
-import { ProjectRole } from "./projectMember.model";
 
-export const updateProjectMemberRoleSchema = z.object({
-    role: z.enum([
-        ProjectRole.ADMIN,
-        ProjectRole.MEMBER,
-    ]),
-});
+import {
+    objectIdSchema,
+} from "../../validators/common.validation";
 
-export const projectMemberIdSchema = z.object({
-    projectId: z.string().regex(
-        /^[0-9a-fA-F]{24}$/,
-        "Invalid project id."
-    ),
-    memberId: z.string().regex(
-        /^[0-9a-fA-F]{24}$/,
-        "Invalid member id."
-    ),
-});
+import { ProjectRole } from "../../interfaces/projectMember.interface";
+
+/*
+|--------------------------------------------------------------------------
+| Route Parameters
+|--------------------------------------------------------------------------
+*/
+
+export const projectMemberProjectParamsSchema =
+    z.object({
+        projectId: objectIdSchema,
+    }).strict();
+
+export const projectMemberParamsSchema =
+    z.object({
+        projectId: objectIdSchema,
+        memberId: objectIdSchema,
+    }).strict();
+
+/*
+|--------------------------------------------------------------------------
+| Update Project Member Role
+|--------------------------------------------------------------------------
+*/
+
+export const updateProjectMemberRoleSchema =
+    z.object({
+        role: z.enum([
+            ProjectRole.ADMIN,
+            ProjectRole.MEMBER,
+        ]),
+    }).strict();

@@ -1,12 +1,17 @@
 import mongoose from "mongoose";
 
-export const connectDb = async() : Promise<void> =>{
-    try{
-        const conn = await mongoose.connect(process.env.URI || '');
-        console.log(conn);
-    }
-    catch(error){
-        process.exit(1);
+export const connectDb =
+    async (): Promise<void> => {
+        const mongoUri =
+            process.env.MONGODB_URI;
 
-    }
-}
+        if (!mongoUri) {
+            throw new Error(
+                "MONGODB_URI is not configured."
+            );
+        }
+
+        await mongoose.connect(
+            mongoUri
+        );
+    };

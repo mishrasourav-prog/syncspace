@@ -4,8 +4,8 @@ import { authenticateUser } from "../../middlewares/auth.middleware";
 
 import {
     getProjectMembers,
-    updateMemberRole,
-    removeMember,
+    updateProjectMemberRole,
+    removeProjectMember,
     leaveProject,
 } from "./projectMember.controller";
 
@@ -26,13 +26,13 @@ router.get(
 router.patch(
     "/projects/:projectId/members/:memberId/role",
     authenticateUser,
-    updateMemberRole
+    updateProjectMemberRole
 );
 
 router.delete(
     "/projects/:projectId/members/:memberId",
     authenticateUser,
-    removeMember
+    removeProjectMember
 );
 
 router.post(

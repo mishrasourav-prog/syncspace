@@ -1,19 +1,36 @@
-import { Request , Response , NextFunction } from "express";
+import type {
+    Request,
+    Response,
+    NextFunction,
+} from "express";
+
 import ApiError from "../../utils/ApiError";
 import ApiResponse from "../../utils/ApiResponse";
-import { projectIdSchema } from "../project/project.validation";
-import { createProjectInvitationSchema } from "./projectInvitation.validation";
-import ProjectInvitationService from "./projectInvitation.service";
-import { projectInvitationIdSchema } from "./projectInvitation.validation";
+
+import {
+    projectIdSchema,
+} from "../project/project.validation";
+
+import ProjectInvitationService
+    from "./projectInvitation.service";
+
+import {
+    createProjectInvitationSchema,
+    projectInvitationIdSchema,
+} from "./projectInvitation.validation";
+
+/*
+|--------------------------------------------------------------------------
+| Invite Project Member
+|--------------------------------------------------------------------------
+*/
 
 export const inviteProjectMember = async (
     req: Request,
     res: Response,
     next: NextFunction
 ) => {
-
     try {
-
         if (!req.user) {
             throw new ApiError(
                 401,
@@ -21,33 +38,21 @@ export const inviteProjectMember = async (
             );
         }
 
-        const params =
-            projectIdSchema.safeParse(req.params);
-
-        if (!params.success) {
-            throw new ApiError(
-                400,
-                params.error.message
+        const { projectId } =
+            projectIdSchema.parse(
+                req.params
             );
-        }
 
-        const body =
-            createProjectInvitationSchema.safeParse(
+        const data =
+            createProjectInvitationSchema.parse(
                 req.body
             );
 
-        if (!body.success) {
-            throw new ApiError(
-                400,
-                body.error.message
-            );
-        }
-
         const invitation =
             await ProjectInvitationService.inviteMember(
-                params.data.projectId,
+                projectId,
                 req.user._id,
-                body.data
+                data
             );
 
         return res.status(201).json(
@@ -57,23 +62,23 @@ export const inviteProjectMember = async (
                 invitation
             )
         );
-
     } catch (error) {
-
-        next(error);
-
+        return next(error);
     }
-
 };
+
+/*
+|--------------------------------------------------------------------------
+| Accept Project Invitation
+|--------------------------------------------------------------------------
+*/
 
 export const acceptProjectInvitation = async (
     req: Request,
     res: Response,
     next: NextFunction
 ) => {
-
     try {
-
         if (!req.user) {
             throw new ApiError(
                 401,
@@ -81,20 +86,13 @@ export const acceptProjectInvitation = async (
             );
         }
 
-        const params =
-            projectInvitationIdSchema.safeParse(
+        const { invitationId } =
+            projectInvitationIdSchema.parse(
                 req.params
             );
 
-        if (!params.success) {
-            throw new ApiError(
-                400,
-                params.error.message
-            );
-        }
-
         await ProjectInvitationService.acceptInvitation(
-            params.data.invitationId,
+            invitationId,
             req.user._id
         );
 
@@ -104,21 +102,23 @@ export const acceptProjectInvitation = async (
                 "Project invitation accepted successfully."
             )
         );
-
     } catch (error) {
-        next(error);
+        return next(error);
     }
-
 };
+
+/*
+|--------------------------------------------------------------------------
+| Reject Project Invitation
+|--------------------------------------------------------------------------
+*/
 
 export const rejectProjectInvitation = async (
     req: Request,
     res: Response,
     next: NextFunction
 ) => {
-
     try {
-
         if (!req.user) {
             throw new ApiError(
                 401,
@@ -126,20 +126,13 @@ export const rejectProjectInvitation = async (
             );
         }
 
-        const params =
-            projectInvitationIdSchema.safeParse(
+        const { invitationId } =
+            projectInvitationIdSchema.parse(
                 req.params
             );
 
-        if (!params.success) {
-            throw new ApiError(
-                400,
-                params.error.message
-            );
-        }
-
         await ProjectInvitationService.rejectInvitation(
-            params.data.invitationId,
+            invitationId,
             req.user._id
         );
 
@@ -149,21 +142,23 @@ export const rejectProjectInvitation = async (
                 "Project invitation rejected successfully."
             )
         );
-
     } catch (error) {
-        next(error);
+        return next(error);
     }
-
 };
+
+/*
+|--------------------------------------------------------------------------
+| Cancel Project Invitation
+|--------------------------------------------------------------------------
+*/
 
 export const cancelProjectInvitation = async (
     req: Request,
     res: Response,
     next: NextFunction
 ) => {
-
     try {
-
         if (!req.user) {
             throw new ApiError(
                 401,
@@ -171,20 +166,13 @@ export const cancelProjectInvitation = async (
             );
         }
 
-        const params =
-            projectInvitationIdSchema.safeParse(
+        const { invitationId } =
+            projectInvitationIdSchema.parse(
                 req.params
             );
 
-        if (!params.success) {
-            throw new ApiError(
-                400,
-                params.error.message
-            );
-        }
-
         await ProjectInvitationService.cancelInvitation(
-            params.data.invitationId,
+            invitationId,
             req.user._id
         );
 
@@ -194,55 +182,50 @@ export const cancelProjectInvitation = async (
                 "Project invitation cancelled successfully."
             )
         );
-
     } catch (error) {
-        next(error);
+        return next(error);
     }
-
 };
 
+/*
+|--------------------------------------------------------------------------
+| Get Pending Project Invitations
+|--------------------------------------------------------------------------
+*/
 
-export const getPendingProjectInvitations = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-) => {
+export const getPendingProjectInvitations =
+    async (
+        req: Request,
+        res: Response,
+        next: NextFunction
+    ) => {
+        try {
+            if (!req.user) {
+                throw new ApiError(
+                    401,
+                    "Unauthorized."
+                );
+            }
 
-    try {
+            const { projectId } =
+                projectIdSchema.parse(
+                    req.params
+                );
 
-        if (!req.user) {
-            throw new ApiError(
-                401,
-                "Unauthorized."
+            const payload =
+                await ProjectInvitationService.getPendingInvitations(
+                    projectId,
+                    req.user._id
+                );
+
+            return res.status(200).json(
+                new ApiResponse(
+                    200,
+                    "Project invitations fetched successfully.",
+                    payload
+                )
             );
+        } catch (error) {
+            return next(error);
         }
-
-        const params =
-            projectIdSchema.safeParse(req.params);
-
-        if (!params.success) {
-            throw new ApiError(
-                400,
-                params.error.message
-            );
-        }
-
-        const payload =
-            await ProjectInvitationService.getPendingInvitations(
-                params.data.projectId,
-                req.user._id
-            );
-
-        return res.status(200).json(
-            new ApiResponse(
-                200,
-                "Project invitations fetched successfully.",
-                payload
-            )
-        );
-
-    } catch (error) {
-        next(error);
-    }
-
-};
+    };

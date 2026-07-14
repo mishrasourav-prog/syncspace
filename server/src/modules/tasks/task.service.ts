@@ -29,6 +29,11 @@ import {
     IUpdateTask,
 } from "../../interfaces/task.interface";
 
+import {
+    DomainEventName,
+    eventBus,
+} from "../../events";
+
 interface ITaskHierarchyNode {
     _id: Types.ObjectId;
 
@@ -521,6 +526,29 @@ export class TaskService {
                 position,
             });
 
+            await eventBus.publish(
+    DomainEventName.TASK_CREATED,
+    {
+        workspaceId:
+            workspace._id.toString(),
+
+        projectId:
+            project._id.toString(),
+
+        taskId:
+            task._id.toString(),
+
+        actorId:
+            userId,
+
+        title:
+            task.title,
+
+        status:
+            task.status,
+    }
+);
+
         /*
         A newly created task has no assignees,
         so no assignment query is required.
@@ -966,6 +994,8 @@ export class TaskService {
 
         await task.save();
 
+        
+
         const assignees =
             await this.getTaskAssigneePreview(
                 task._id.toString()
@@ -1123,6 +1153,8 @@ export class TaskService {
         | Update Lifecycle Metadata
         |--------------------------------------------------------------------------
         */
+       const previousStatus =
+    task.status;
 
         task.status =
             status;
@@ -1155,6 +1187,31 @@ export class TaskService {
         }
 
         await task.save();
+
+        await eventBus.publish(
+    DomainEventName.TASK_STATUS_CHANGED,
+    {
+        workspaceId:
+            workspace._id.toString(),
+
+        projectId:
+            project._id.toString(),
+
+        taskId:
+            task._id.toString(),
+
+        actorId:
+            userId,
+
+        title:
+            task.title,
+
+        previousStatus,
+
+        currentStatus:
+            task.status,
+    }
+);
 
         const assignees =
             await this.getTaskAssigneePreview(

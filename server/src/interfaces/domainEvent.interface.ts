@@ -11,6 +11,12 @@ export enum DomainEventName {
 
     TASK_ASSIGNED =
         "task.assigned",
+
+    ACTIVITY_CREATED =
+        "activity.created",
+
+    NOTIFICATION_CREATED =
+        "notification.created",
 }
 
 export interface TaskCreatedEventPayload {
@@ -43,6 +49,20 @@ export interface TaskStatusChangedEventPayload {
     currentStatus: TaskStatus;
 }
 
+export interface ActivityCreatedEventPayload {
+    activityId: string;
+
+    workspaceId: string;
+
+    projectId: string;
+}
+
+export interface NotificationCreatedEventPayload {
+    notificationId: string;
+
+    recipientId: string;
+}
+
 export interface DomainEventPayloadMap {
     [DomainEventName.TASK_CREATED]:
         TaskCreatedEventPayload;
@@ -52,6 +72,13 @@ export interface DomainEventPayloadMap {
 
     [DomainEventName.TASK_ASSIGNED]:
         TaskAssignedEventPayload;
+
+    
+    [DomainEventName.ACTIVITY_CREATED]:
+        ActivityCreatedEventPayload;
+
+    [DomainEventName.NOTIFICATION_CREATED]:
+        NotificationCreatedEventPayload;
 }
 
 export interface DomainEvent<
@@ -93,3 +120,4 @@ export interface TaskAssignedEventPayload {
 
     title: string;
 }
+

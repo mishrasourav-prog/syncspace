@@ -171,8 +171,8 @@ export class ActivityService {
 
     async createActivity(
         data: ICreateActivityInternal
-    ): Promise<void> {
-        await Activity.create({
+    ): Promise<string> {
+        const activity = await Activity.create({
             workspace:
                 new Types.ObjectId(
                     data.workspaceId
@@ -202,6 +202,7 @@ export class ActivityService {
             metadata:
                 data.metadata ?? {},
         });
+        return activity._id.toString();
     }
 
     /*

@@ -197,8 +197,8 @@ export class NotificationService {
     async createNotification(
         data:
             ICreateNotificationInternal
-    ): Promise<void> {
-        await Notification.create({
+    ): Promise<string> {
+        const notification = await Notification.create({
             recipient:
                 new Types.ObjectId(
                     data.recipientId
@@ -247,6 +247,7 @@ export class NotificationService {
             metadata:
                 data.metadata ?? {},
         });
+        return notification._id.toString();
     }
 
     async getNotifications(

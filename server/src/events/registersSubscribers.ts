@@ -6,6 +6,10 @@ import {
     registerNotificationSubscribers,
 } from "../modules/notifications/notification.subscriber";
 
+import {
+    registerSocketSubscribers,
+} from "../sockets/socket.subscriber";
+
 let subscribersRegistered =
     false;
 
@@ -21,4 +25,6 @@ export const registerDomainEventSubscribers =
         registerActivitySubscribers();
 
         registerNotificationSubscribers();
+
+        registerSocketSubscribers();
     };

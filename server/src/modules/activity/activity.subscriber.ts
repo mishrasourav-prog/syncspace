@@ -27,71 +27,99 @@ export const registerActivitySubscribers =
             true;
 
         eventBus.subscribe(
-            DomainEventName.TASK_CREATED,
-            async (event) => {
-                await activityService.createActivity({
-                    workspaceId:
-                        event.payload.workspaceId,
+    DomainEventName.TASK_CREATED,
+    async (event) => {
+        const activityId =
+            await activityService.createActivity({
+                workspaceId:
+                    event.payload.workspaceId,
 
-                    projectId:
-                        event.payload.projectId,
+                projectId:
+                    event.payload.projectId,
 
-                    actorId:
-                        event.payload.actorId,
+                actorId:
+                    event.payload.actorId,
 
-                    action:
-                        ActivityAction.TASK_CREATED,
+                action:
+                    ActivityAction.TASK_CREATED,
 
-                    entityType:
-                        ActivityEntityType.TASK,
+                entityType:
+                    ActivityEntityType.TASK,
 
-                    entityId:
-                        event.payload.taskId,
+                entityId:
+                    event.payload.taskId,
 
-                    metadata: {
-                        title:
-                            event.payload.title,
+                metadata: {
+                    title:
+                        event.payload.title,
 
-                        status:
-                            event.payload.status,
-                    },
-                });
+                    status:
+                        event.payload.status,
+                },
+            });
+
+        await eventBus.publish(
+            DomainEventName.ACTIVITY_CREATED,
+            {
+                activityId,
+
+                workspaceId:
+                    event.payload.workspaceId,
+
+                projectId:
+                    event.payload.projectId,
             }
         );
+    }
+);
 
-        eventBus.subscribe(
-            DomainEventName.TASK_STATUS_CHANGED,
-            async (event) => {
-                await activityService.createActivity({
-                    workspaceId:
-                        event.payload.workspaceId,
+       eventBus.subscribe(
+    DomainEventName.TASK_STATUS_CHANGED,
+    async (event) => {
+        const activityId =
+            await activityService.createActivity({
+                workspaceId:
+                    event.payload.workspaceId,
 
-                    projectId:
-                        event.payload.projectId,
+                projectId:
+                    event.payload.projectId,
 
-                    actorId:
-                        event.payload.actorId,
+                actorId:
+                    event.payload.actorId,
 
-                    action:
-                        ActivityAction.TASK_STATUS_CHANGED,
+                action:
+                    ActivityAction.TASK_STATUS_CHANGED,
 
-                    entityType:
-                        ActivityEntityType.TASK,
+                entityType:
+                    ActivityEntityType.TASK,
 
-                    entityId:
-                        event.payload.taskId,
+                entityId:
+                    event.payload.taskId,
 
-                    metadata: {
-                        title:
-                            event.payload.title,
+                metadata: {
+                    title:
+                        event.payload.title,
 
-                        previousStatus:
-                            event.payload.previousStatus,
+                    previousStatus:
+                        event.payload.previousStatus,
 
-                        currentStatus:
-                            event.payload.currentStatus,
-                    },
-                });
+                    currentStatus:
+                        event.payload.currentStatus,
+                },
+            });
+
+        await eventBus.publish(
+            DomainEventName.ACTIVITY_CREATED,
+            {
+                activityId,
+
+                workspaceId:
+                    event.payload.workspaceId,
+
+                projectId:
+                    event.payload.projectId,
             }
         );
+    }
+);
     };

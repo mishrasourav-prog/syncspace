@@ -9,10 +9,12 @@ export {
 } from "../interfaces/domainEvent.interface";
 
 export type {
+    ActivityCreatedEventPayload,
     AnyDomainEvent,
     DomainEvent,
     DomainEventHandler,
     DomainEventPayloadMap,
+    NotificationCreatedEventPayload,
     TaskAssignedEventPayload,
     TaskCreatedEventPayload,
     TaskStatusChangedEventPayload,

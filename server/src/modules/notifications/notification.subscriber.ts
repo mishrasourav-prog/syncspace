@@ -44,40 +44,50 @@ export const registerNotificationSubscribers =
                     return;
                 }
 
-                await notificationService
-                    .createNotification({
-                        recipientId:
-                            event.payload.recipientId,
+                const notificationId =
+    await notificationService.createNotification({
+        recipientId:
+            event.payload.recipientId,
 
-                        actorId:
-                            event.payload.actorId,
+        actorId:
+            event.payload.actorId,
 
-                        type:
-                            NotificationType.TASK_ASSIGNED,
+        type:
+            NotificationType.TASK_ASSIGNED,
 
-                        title:
-                            "Task assigned",
+        title:
+            "Task assigned",
 
-                        message:
-                            `You were assigned to "${event.payload.title}".`,
+        message:
+            `You were assigned to "${event.payload.title}".`,
 
-                        workspaceId:
-                            event.payload.workspaceId,
+        workspaceId:
+            event.payload.workspaceId,
 
-                        projectId:
-                            event.payload.projectId,
+        projectId:
+            event.payload.projectId,
 
-                        entityType:
-                            NotificationEntityType.TASK,
+        entityType:
+            NotificationEntityType.TASK,
 
-                        entityId:
-                            event.payload.taskId,
+        entityId:
+            event.payload.taskId,
 
-                        metadata: {
-                            taskTitle:
-                                event.payload.title,
-                        },
-                    });
+        metadata: {
+            taskTitle:
+                event.payload.title,
+        },
+    });
+
+await eventBus.publish(
+    DomainEventName.NOTIFICATION_CREATED,
+    {
+        notificationId,
+
+        recipientId:
+            event.payload.recipientId,
+    }
+);
             }
         );
 
@@ -106,50 +116,60 @@ export const registerNotificationSubscribers =
                         .lean();
 
                 for (
-                    const assignment of
-                    assignments
-                ) {
-                    await notificationService
-                        .createNotification({
-                            recipientId:
-                                assignment.user.toString(),
+    const assignment of assignments
+) {
+    const recipientId =
+        assignment.user.toString();
 
-                            actorId:
-                                event.payload.actorId,
+    const notificationId =
+        await notificationService.createNotification({
+            recipientId,
 
-                            type:
-                                NotificationType.TASK_STATUS_CHANGED,
+            actorId:
+                event.payload.actorId,
 
-                            title:
-                                "Task status changed",
+            type:
+                NotificationType.TASK_STATUS_CHANGED,
 
-                            message:
-                                `"${event.payload.title}" moved from ${event.payload.previousStatus} to ${event.payload.currentStatus}.`,
+            title:
+                "Task status changed",
 
-                            workspaceId:
-                                event.payload.workspaceId,
+            message:
+                `"${event.payload.title}" moved from ${event.payload.previousStatus} to ${event.payload.currentStatus}.`,
 
-                            projectId:
-                                event.payload.projectId,
+            workspaceId:
+                event.payload.workspaceId,
 
-                            entityType:
-                                NotificationEntityType.TASK,
+            projectId:
+                event.payload.projectId,
 
-                            entityId:
-                                event.payload.taskId,
+            entityType:
+                NotificationEntityType.TASK,
 
-                            metadata: {
-                                taskTitle:
-                                    event.payload.title,
+            entityId:
+                event.payload.taskId,
 
-                                previousStatus:
-                                    event.payload.previousStatus,
+            metadata: {
+                taskTitle:
+                    event.payload.title,
 
-                                currentStatus:
-                                    event.payload.currentStatus,
-                            },
-                        });
-                }
+                previousStatus:
+                    event.payload.previousStatus,
+
+                currentStatus:
+                    event.payload.currentStatus,
+            },
+        });
+
+    await eventBus.publish(
+        DomainEventName.NOTIFICATION_CREATED,
+        {
+            notificationId,
+
+            recipientId,
+        }
+    );
+}
             }
         );
     };

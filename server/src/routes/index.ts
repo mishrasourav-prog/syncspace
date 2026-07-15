@@ -19,6 +19,8 @@ import taskAssigneeRoutes from "../modules/taskAssignee/taskAssignee.routes";
 
 import taskCommentRoutes from "../modules/taskComment/taskComment.routes";
 
+import activityRouter from "../modules/activity/activity.routes";
+
 const router = Router();
 
 router.use("/auth", authRoutes);
@@ -55,5 +57,12 @@ router.use(
 router.use("/", taskAssigneeRoutes);
 
 router.use("/", taskCommentRoutes);
+
+router.use(
+    "/",
+    activityRouter
+);
+
+
 
 export default router;

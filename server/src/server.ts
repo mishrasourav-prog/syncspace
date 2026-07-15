@@ -7,10 +7,15 @@ import mongoose from "mongoose";
 import mailService from "./modules/mail/mail.service";
 import { connectDb } from "./config/db";
 import app from "./app";
+import {
+    registerDomainEventSubscribers,
+} from "./events/registersSubscribers";
 
 const PORT = Number(process.env.PORT) || 5000;
 
 const server = http.createServer(app);
+
+registerDomainEventSubscribers();
 
 const startServer = async () => {
   try {

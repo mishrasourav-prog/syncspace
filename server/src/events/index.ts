@@ -13,6 +13,7 @@ export type {
     DomainEvent,
     DomainEventHandler,
     DomainEventPayloadMap,
+    TaskAssignedEventPayload,
     TaskCreatedEventPayload,
     TaskStatusChangedEventPayload,
 } from "../interfaces/domainEvent.interface";

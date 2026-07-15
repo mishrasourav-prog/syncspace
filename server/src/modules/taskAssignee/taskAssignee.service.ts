@@ -1,302 +1,3 @@
-// import { IAssignTask , ITaskAssigneeResponse , ITaskAssigneesResponse } from "../../interfaces/taskAssignee.interface";
-// import ApiError from "../../utils/ApiError";
-// import Task from "../tasks/task.model";
-// import ProjectMember from "../projectMember/projectMember.model";
-// import TaskAssignee from "./taskAssignee.model";
-
-
-// export class TaskAssigneeService{
-
-   
-//     async assignMember(
-//     taskId: string,
-//     userId: string,
-//     assigneeId: string
-// ): Promise<ITaskAssigneeResponse> {
-
-//     /*
-//     |--------------------------------------------------------------------------
-//     | Verify Task
-//     |--------------------------------------------------------------------------
-//     */
-
-//     const task = await Task.findById(taskId);
-
-//     if (!task || task.isArchived) {
-//         throw new ApiError(
-//             404,
-//             "Task not found."
-//         );
-//     }
-
-//     /*
-//     |--------------------------------------------------------------------------
-//     | Verify Requester
-//     |--------------------------------------------------------------------------
-//     */
-
-//     const requester =
-//         await ProjectMember.findOne({
-//             project: task.project,
-//             user: userId,
-//         });
-
-//     if (!requester) {
-//         throw new ApiError(
-//             403,
-//             "You are not a member of this project."
-//         );
-//     }
-
-//     /*
-//     |--------------------------------------------------------------------------
-//     | Verify Assignee
-//     |--------------------------------------------------------------------------
-//     */
-
-//     const assigneeMember =
-//         await ProjectMember.findOne({
-//             project: task.project,
-//             user: assigneeId,
-//         });
-
-//     if (!assigneeMember) {
-//         throw new ApiError(
-//             400,
-//             "User is not a member of this project."
-//         );
-//     }
-
-//     /*
-//     |--------------------------------------------------------------------------
-//     | Already Assigned?
-//     |--------------------------------------------------------------------------
-//     */
-
-//     const existing =
-//         await TaskAssignee.findOne({
-//             task: taskId,
-//             user: assigneeId,
-//         });
-
-//     if (existing) {
-//         throw new ApiError(
-//             409,
-//             "User is already assigned."
-//         );
-//     }
-
-//     /*
-//     |--------------------------------------------------------------------------
-//     | Create Assignment
-//     |--------------------------------------------------------------------------
-//     */
-
-//     const assignment =
-//         await TaskAssignee.create({
-//             task: taskId,
-//             user: assigneeId,
-//             assignedBy: userId,
-//         });
-
-//     await assignment.populate(
-//         "user",
-//         "name username email avatar"
-//     );
-
-//     /*
-//     |--------------------------------------------------------------------------
-//     | Event (Later)
-//     |--------------------------------------------------------------------------
-//     */
-
-//     // eventDispatcher.publish(
-//     //     new TaskAssignedEvent(...)
-//     // );
-
-//     return {
-//         _id: assignment._id.toString(),
-//         task: assignment.task.toString(),
-//         user: {
-//             _id: (assignment.user as any)._id.toString(),
-//             name: (assignment.user as any).name,
-//             username: (assignment.user as any).username,
-//             email: (assignment.user as any).email,
-//             avatar: (assignment.user as any).avatar,
-//         },
-//         assignedBy: assignment.assignedBy.toString(),
-//         assignedAt: assignment.assignedAt,
-//     };
-// }
-
-// async getTaskAssignees(
-//     taskId: string,
-//     userId: string
-// ): Promise<ITaskAssigneesResponse> {
-
-//     /*
-//     |--------------------------------------------------------------------------
-//     | Verify Task
-//     |--------------------------------------------------------------------------
-//     */
-
-//     const task = await Task.findById(taskId);
-
-//     if (!task || task.isArchived) {
-//         throw new ApiError(
-//             404,
-//             "Task not found."
-//         );
-//     }
-
-//     /*
-//     |--------------------------------------------------------------------------
-//     | Verify Membership
-//     |--------------------------------------------------------------------------
-//     */
-
-//     const membership =
-//         await ProjectMember.findOne({
-//             project: task.project,
-//             user: userId,
-//         });
-
-//     if (!membership) {
-//         throw new ApiError(
-//             403,
-//             "You are not a member of this project."
-//         );
-//     }
-
-//     /*
-//     |--------------------------------------------------------------------------
-//     | Fetch Assignees
-//     |--------------------------------------------------------------------------
-//     */
-
-//     const assignees = await TaskAssignee.find({
-//         task: taskId,
-//     })
-//     .populate(
-//         "user",
-//         "name username email avatar"
-//     )
-//     .sort({
-//         assignedAt: 1,
-//     });
-
-//     /*
-//     |--------------------------------------------------------------------------
-//     | Return
-//     |--------------------------------------------------------------------------
-//     */
-
-//     return {
-//         assignees: assignees.map((assignee) => ({
-//             _id: assignee._id.toString(),
-
-//             task: assignee.task.toString(),
-
-//             user: {
-//                 _id: (assignee.user as any)._id.toString(),
-//                 name: (assignee.user as any).name,
-//                 username: (assignee.user as any).username,
-//                 email: (assignee.user as any).email,
-//                 avatar: (assignee.user as any).avatar,
-//             },
-
-//             assignedBy:
-//                 assignee.assignedBy.toString(),
-
-//             assignedAt:
-//                 assignee.assignedAt,
-//         })),
-//     };
-// }
-
-// async removeAssignee(
-//     taskId: string,
-//     assigneeId: string,
-//     userId: string
-// ): Promise<void> {
-
-//     /*
-//     |--------------------------------------------------------------------------
-//     | Verify Task
-//     |--------------------------------------------------------------------------
-//     */
-
-//     const task = await Task.findById(taskId);
-
-//     if (!task || task.isArchived) {
-//         throw new ApiError(
-//             404,
-//             "Task not found."
-//         );
-//     }
-
-//     /*
-//     |--------------------------------------------------------------------------
-//     | Verify Membership
-//     |--------------------------------------------------------------------------
-//     */
-
-//     const membership =
-//         await ProjectMember.findOne({
-//             project: task.project,
-//             user: userId,
-//         });
-
-//     if (!membership) {
-//         throw new ApiError(
-//             403,
-//             "You are not a member of this project."
-//         );
-//     }
-
-//     /*
-//     |--------------------------------------------------------------------------
-//     | Find Assignment
-//     |--------------------------------------------------------------------------
-//     */
-
-//     const assignment =
-//         await TaskAssignee.findOne({
-//             task: taskId,
-//             user: assigneeId,
-//         });
-
-//     if (!assignment) {
-//         throw new ApiError(
-//             404,
-//             "User is not assigned to this task."
-//         );
-//     }
-
-//     /*
-//     |--------------------------------------------------------------------------
-//     | Delete Assignment
-//     |--------------------------------------------------------------------------
-//     */
-
-//     await assignment.deleteOne();
-
-//     /*
-//     |--------------------------------------------------------------------------
-//     | Event (Later)
-//     |--------------------------------------------------------------------------
-//     */
-
-//     // eventDispatcher.publish(
-//     //     new TaskUnassignedEvent(...)
-//     // );
-// }
-
-// }
-
-// export default new TaskAssigneeService;
-
-
 import { Types } from "mongoose";
 
 import ApiError from "../../utils/ApiError";
@@ -326,6 +27,11 @@ import {
     ITaskAssigneeResponse,
     ITaskAssigneesResponse,
 } from "../../interfaces/taskAssignee.interface";
+
+import {
+    DomainEventName,
+    eventBus,
+} from "../../events";
 
 /*
 |--------------------------------------------------------------------------
@@ -665,6 +371,29 @@ export class TaskAssigneeService {
                 "The assigned user is no longer available."
             );
         }
+
+        await eventBus.publish(
+    DomainEventName.TASK_ASSIGNED,
+    {
+        workspaceId:
+            context.workspace._id.toString(),
+
+        projectId:
+            context.project._id.toString(),
+
+        taskId:
+            context.task._id.toString(),
+
+        actorId:
+            userId,
+
+        recipientId:
+            assigneeId,
+
+        title:
+            context.task.title,
+    }
+);
 
         /*
         Future domain-event boundary:

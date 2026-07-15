@@ -21,6 +21,8 @@ import taskCommentRoutes from "../modules/taskComment/taskComment.routes";
 
 import activityRouter from "../modules/activity/activity.routes";
 
+import notificationRouter from "../modules/notifications/notification.routes";
+
 const router = Router();
 
 router.use("/auth", authRoutes);
@@ -63,6 +65,11 @@ router.use(
     activityRouter
 );
 
+
+router.use(
+    "/",
+    notificationRouter
+);
 
 
 export default router;

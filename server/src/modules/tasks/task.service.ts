@@ -29,6 +29,8 @@ import {
     IUpdateTask,
 } from "../../interfaces/task.interface";
 
+import { TaskType } from "./task.model";
+
 import {
     DomainEventName,
     eventBus,
@@ -308,6 +310,11 @@ export class TaskService {
             completedBy:
                 task.completedBy?.toString(),
 
+            type:
+            task.type ??
+            TaskType.TASK,
+
+
             startDate:
                 task.startDate,
 
@@ -500,6 +507,10 @@ export class TaskService {
                 priority:
                     data.priority,
 
+                type:
+                    data.type ??
+                    TaskType.TASK,
+
                 createdBy:
                     new Types.ObjectId(
                         userId
@@ -546,6 +557,9 @@ export class TaskService {
 
         status:
             task.status,
+
+        taskType:
+            task.type,
     }
 );
 
@@ -951,6 +965,10 @@ export class TaskService {
                 data.priority;
         }
 
+        if(data.type!==undefined){
+            task.type = data.type;
+        }
+
         if (
     data.startDate !==
     undefined
@@ -1210,6 +1228,9 @@ export class TaskService {
 
         currentStatus:
             task.status,
+        
+        taskType:
+            task.type,
     }
 );
 

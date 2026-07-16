@@ -12,6 +12,10 @@ import {
 
 import notificationService from "./notification.service";
 
+import {
+    TaskType,
+} from "../tasks/task.model";
+
 let isRegistered =
     false;
 
@@ -43,40 +47,85 @@ export const registerNotificationSubscribers =
                 ) {
                     return;
                 }
+                const itemLabel =
+    event.payload.taskType ===
+    TaskType.ISSUE
+        ? "Issue"
+        : "Task";
 
-                const notificationId =
-    await notificationService.createNotification({
-        recipientId:
-            event.payload.recipientId,
+    //             const notificationId =
+    // await notificationService.createNotification({
+    //     recipientId:
+    //         event.payload.recipientId,
 
-        actorId:
-            event.payload.actorId,
+    //     actorId:
+    //         event.payload.actorId,
 
-        type:
-            NotificationType.TASK_ASSIGNED,
+    //     type:
+    //         NotificationType.TASK_ASSIGNED,
 
-        title:
-            "Task assigned",
+    //     title:
+    //         "Task assigned",
 
-        message:
-            `You were assigned to "${event.payload.title}".`,
+    //     message:
+    //         `You were assigned to "${event.payload.title}".`,
 
-        workspaceId:
-            event.payload.workspaceId,
+    //     workspaceId:
+    //         event.payload.workspaceId,
 
-        projectId:
-            event.payload.projectId,
+    //     projectId:
+    //         event.payload.projectId,
 
-        entityType:
-            NotificationEntityType.TASK,
+    //     entityType:
+    //         NotificationEntityType.TASK,
 
-        entityId:
-            event.payload.taskId,
+    //     entityId:
+    //         event.payload.taskId,
 
-        metadata: {
-            taskTitle:
-                event.payload.title,
-        },
+    //     metadata: {
+    //         taskTitle:
+    //             event.payload.title,
+    //     },
+    //      taskType:
+    //                 event.payload.taskType,
+
+    const notificationId =
+    await notificationService
+        .createNotification({
+            recipientId:
+                event.payload.recipientId,
+
+            actorId:
+                event.payload.actorId,
+
+            type:
+                NotificationType.TASK_ASSIGNED,
+
+            title:
+                `${itemLabel} assigned`,
+
+            message:
+                `You were assigned to ${itemLabel.toLowerCase()} "${event.payload.title}".`,
+
+            workspaceId:
+                event.payload.workspaceId,
+
+            projectId:
+                event.payload.projectId,
+
+            entityType:
+                NotificationEntityType.TASK,
+
+            entityId:
+                event.payload.taskId,
+
+            metadata: {
+                taskTitle:
+                    event.payload.title,
+
+                taskType:
+                    event.payload.taskType,
+            },
     });
 
 await eventBus.publish(
@@ -169,6 +218,93 @@ await eventBus.publish(
             recipientId,
         }
     );
+            /*
+        |--------------------------------------------------------------------------
+        | Discussion Reply Created
+        |--------------------------------------------------------------------------
+        |
+        | When someone replies to a discussion, notify the original
+        | discussion author.
+        |
+        */
+
+        eventBus.subscribe(
+            DomainEventName.DISCUSSION_REPLY_CREATED,
+            async (event) => {
+                /*
+                Do not notify the discussion author when they
+                reply to their own discussion.
+                */
+
+                if (
+                    event.payload.actorId ===
+                    event.payload.discussionAuthorId
+                ) {
+                    return;
+                }
+
+                const notificationId =
+                    await notificationService
+                        .createNotification({
+                            recipientId:
+                                event.payload
+                                    .discussionAuthorId,
+
+                            actorId:
+                                event.payload.actorId,
+
+                            type:
+                                NotificationType
+                                    .DISCUSSION_REPLY,
+
+                            title:
+                                "New discussion reply",
+
+                            message:
+                                `Someone replied to "${event.payload.title}".`,
+
+                            workspaceId:
+                                event.payload.workspaceId,
+
+                            projectId:
+                                event.payload.projectId,
+
+                            entityType:
+                                NotificationEntityType
+                                    .DISCUSSION,
+
+                            entityId:
+                                event.payload
+                                    .discussionId,
+
+                            metadata: {
+                                discussionTitle:
+                                    event.payload.title,
+
+                                replyId:
+                                    event.payload.replyId,
+                            },
+                        });
+
+                /*
+                The notification is now safely stored in MongoDB.
+
+                Publish another event so the Socket.IO subscriber
+                can tell the recipient's connected devices.
+                */
+
+                await eventBus.publish(
+                    DomainEventName.NOTIFICATION_CREATED,
+                    {
+                        notificationId,
+
+                        recipientId:
+                            event.payload
+                                .discussionAuthorId,
+                    }
+                );
+            }
+        );
 }
             }
         );

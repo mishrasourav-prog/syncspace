@@ -23,6 +23,10 @@ import activityRouter from "../modules/activity/activity.routes";
 
 import notificationRouter from "../modules/notifications/notification.routes";
 
+import documentRouter from "../modules/documents/document.routes";
+
+import discussionRouter from "../modules/discussions/discussions.routes";
+
 const router = Router();
 
 router.use("/auth", authRoutes);
@@ -69,6 +73,14 @@ router.use(
 router.use(
     "/",
     notificationRouter
+);
+
+router.use(
+    documentRouter
+);
+
+router.use(
+    discussionRouter
 );
 
 

@@ -1,6 +1,6 @@
 
 
-import { TaskPriority , TaskStatus } from "../modules/tasks/task.model";
+import { TaskPriority , TaskStatus , TaskType } from "../modules/tasks/task.model";
 export interface ITaskAssigneePreview {
 
     _id: string;
@@ -39,6 +39,8 @@ export interface ITaskResponse {
 
     completedAt?: Date;
 
+    type?:TaskType;
+
     parentTask?: string;
 
     position: number;
@@ -72,6 +74,8 @@ export interface ICreateTask {
 
     parentTask?: string;
 
+    type?:TaskType
+
 }
 
 export interface IUpdateTask {
@@ -87,6 +91,8 @@ export interface IUpdateTask {
     dueDate?: Date | null;
 
     parentTask?: string | null;
+
+    type?:TaskType;
 
 }
 

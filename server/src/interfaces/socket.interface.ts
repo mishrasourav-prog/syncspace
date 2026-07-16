@@ -1,5 +1,6 @@
 import type {
     TaskStatus,
+    TaskType
 } from "../modules/tasks/task.model";
 
 /*
@@ -18,6 +19,66 @@ export interface ISocketActionResponse {
     success: boolean;
 
     message: string;
+}
+
+export interface DocumentSocketPayload {
+    workspaceId: string;
+
+    projectId: string;
+
+    documentId: string;
+
+    actorId: string;
+
+    title: string;
+
+    revision: number;
+}
+
+export type DiscussionChange =
+    | "created"
+    | "updated"
+    | "deleted"
+    | "pinned"
+    | "unpinned"
+    | "locked"
+    | "unlocked";
+
+export type DiscussionReplyChange =
+    | "created"
+    | "updated"
+    | "deleted";
+
+export interface DiscussionSocketPayload {
+    workspaceId: string;
+
+    projectId: string;
+
+    discussionId: string;
+
+    actorId: string;
+
+    title: string;
+
+    change:
+        DiscussionChange;
+}
+
+export interface DiscussionReplySocketPayload {
+    workspaceId: string;
+
+    projectId: string;
+
+    discussionId: string;
+
+    replyId: string;
+
+    actorId: string;
+
+    title: string;
+
+    change:
+        DiscussionReplyChange;
 }
 
 /*
@@ -49,6 +110,8 @@ export interface ServerToClientEvents {
         title: string;
 
         status: TaskStatus;
+
+        taskType: TaskType;
     }) => void;
 
     "task:status-changed": (payload: {
@@ -65,6 +128,8 @@ export interface ServerToClientEvents {
         previousStatus: TaskStatus;
 
         currentStatus: TaskStatus;
+
+        taskType: TaskType;
     }) => void;
 
     "task:assigned": (payload: {
@@ -79,6 +144,8 @@ export interface ServerToClientEvents {
         assigneeId: string;
 
         title: string;
+
+        taskType: TaskType;
     }) => void;
 
     "notification:new": (payload: {
@@ -92,6 +159,36 @@ export interface ServerToClientEvents {
 
         projectId: string;
     }) => void;
+
+    "document:created": (
+        payload:
+            DocumentSocketPayload
+    ) => void;
+
+    "document:updated": (
+        payload:
+            DocumentSocketPayload
+    ) => void;
+
+    "document:archived": (
+        payload:
+            DocumentSocketPayload
+    ) => void;
+
+    "document:restored": (
+        payload:
+            DocumentSocketPayload
+    ) => void;
+
+    "discussion:changed": (
+        payload:
+            DiscussionSocketPayload
+    ) => void;
+
+    "discussion:reply-changed": (
+        payload:
+            DiscussionReplySocketPayload
+    ) => void;
 }
 
 /*

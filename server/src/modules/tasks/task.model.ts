@@ -18,6 +18,11 @@ export enum TaskPriority {
     URGENT = "URGENT",
 }
 
+export enum TaskType {
+    TASK = "task",
+    ISSUE = "issue",
+}
+
 export interface ITaskDocument extends Document {
     _id: Types.ObjectId;
 
@@ -42,6 +47,8 @@ export interface ITaskDocument extends Document {
     dueDate?: Date;
 
     completedAt?: Date;
+
+    type:TaskType;
 
     parentTask?: Types.ObjectId;
 
@@ -116,6 +123,16 @@ const TaskSchema = new Schema<ITaskDocument>(
             type: Date,
         },
 
+        type: {
+    type: String,
+    enum: Object.values(
+        TaskType
+    ),
+    default:
+        TaskType.TASK,
+    required: true,
+},
+
         parentTask: {
             type: Schema.Types.ObjectId,
             ref: "Task",
@@ -163,6 +180,14 @@ TaskSchema.index({
 
 TaskSchema.index({
     createdBy: 1,
+});
+
+TaskSchema.index({
+    project: 1,
+    type: 1,
+    status: 1,
+    isArchived: 1,
+    createdAt: -1,
 });
 
 const Task = mongoose.model<ITaskDocument>(

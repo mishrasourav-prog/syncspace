@@ -14,11 +14,20 @@ export enum NotificationType {
 
     TASK_STATUS_CHANGED =
         "task_status_changed",
+
+    
+    DISCUSSION_REPLY =
+        "discussion.reply",
 }
 
 export enum NotificationEntityType {
     TASK =
         "task",
+
+    DISCUSSION =
+        "discussion",
+
+    
 }
 
 export interface INotificationDocument

@@ -9,11 +9,18 @@ import {
     TaskStatus,
 } from "./task.model";
 
+import { TaskType } from "./task.model";
+
 /*
 |--------------------------------------------------------------------------
 | Create Task
 |--------------------------------------------------------------------------
 */
+export const taskTypeSchema =
+    z.enum([
+        TaskType.TASK,
+        TaskType.ISSUE,
+    ]);
 
 export const createTaskSchema = z
     .object({
@@ -37,6 +44,10 @@ export const createTaskSchema = z
                 "Description cannot exceed 10000 characters."
             )
             .optional(),
+
+        type:
+            taskTypeSchema
+                .optional(),
 
         priority: z
             .enum(TaskPriority)
@@ -116,6 +127,10 @@ export const updateTaskSchema = z
         priority: z
             .enum(TaskPriority)
             .optional(),
+
+        type:
+            taskTypeSchema
+                .optional(),
 
         startDate: z
             .coerce

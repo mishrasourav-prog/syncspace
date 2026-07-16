@@ -10,17 +10,67 @@ import type {
 
 export enum ActivityAction {
     TASK_CREATED =
-        "task_created",
+        "task.created",
 
     TASK_STATUS_CHANGED =
-        "task_status_changed",
+        "task.status_changed",
+
+    DOCUMENT_CREATED =
+        "document.created",
+
+    DOCUMENT_UPDATED =
+        "document.updated",
+
+    DOCUMENT_ARCHIVED =
+        "document.archived",
+
+    DOCUMENT_RESTORED =
+        "document.restored",
+
+        DISCUSSION_CREATED =
+        "discussion.created",
+
+    DISCUSSION_UPDATED =
+        "discussion.updated",
+
+    DISCUSSION_DELETED =
+        "discussion.deleted",
+
+    DISCUSSION_PINNED =
+        "discussion.pinned",
+
+    DISCUSSION_UNPINNED =
+        "discussion.unpinned",
+
+    DISCUSSION_LOCKED =
+        "discussion.locked",
+
+    DISCUSSION_UNLOCKED =
+        "discussion.unlocked",
+
+    DISCUSSION_REPLY_CREATED =
+        "discussion.reply_created",
+
+    DISCUSSION_REPLY_UPDATED =
+        "discussion.reply_updated",
+
+    DISCUSSION_REPLY_DELETED =
+        "discussion.reply_deleted",
 }
 
 export enum ActivityEntityType {
     TASK =
         "task",
-}
 
+    DOCUMENT =
+        "document",
+
+     DISCUSSION =
+        "discussion",
+
+    DISCUSSION_REPLY =
+        "discussion_reply",
+}
 export interface IActivityDocument
     extends Document {
     _id:

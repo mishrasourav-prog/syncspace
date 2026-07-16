@@ -392,6 +392,9 @@ export class TaskAssigneeService {
 
         title:
             context.task.title,
+
+        taskType:
+            context.task.type,
     }
 );
 

@@ -189,6 +189,28 @@ export interface ServerToClientEvents {
         payload:
             DiscussionReplySocketPayload
     ) => void;
+
+        "tasks:reordered": (payload: {
+    workspaceId: string;
+
+    projectId: string;
+
+    actorId: string;
+
+    affectedStatuses:
+        TaskStatus[];
+}) => void;
+
+    "access:project-revoked": (
+        payload:
+            ProjectAccessRevokedSocketPayload
+    ) => void;
+
+    "access:workspace-revoked": (
+        payload:
+            WorkspaceAccessRevokedSocketPayload
+    ) => void;
+
 }
 
 /*
@@ -229,6 +251,19 @@ export interface ClientToServerEvents {
             response: ISocketActionResponse
         ) => void
     ) => void;
+
+        "tasks:reordered": (payload: {
+    workspaceId: string;
+
+    projectId: string;
+
+    actorId: string;
+
+    affectedStatuses:
+        TaskStatus[];
+}) => void;
+
+
 }
 
 /*
@@ -261,4 +296,24 @@ export interface SocketData {
     email: string;
 
     username: string;
+}
+
+export interface ProjectAccessRevokedSocketPayload {
+    workspaceId: string;
+
+    projectId: string;
+
+    reason:
+        "removed" |
+        "left";
+}
+
+export interface WorkspaceAccessRevokedSocketPayload {
+    workspaceId: string;
+
+    projectIds: string[];
+
+    reason:
+        "removed" |
+        "left";
 }

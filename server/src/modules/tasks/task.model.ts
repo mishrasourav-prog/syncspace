@@ -141,6 +141,8 @@ const TaskSchema = new Schema<ITaskDocument>(
         position: {
             type: Number,
             default: 1000,
+            required:true,
+            min:0
         },
 
         isArchived: {
@@ -188,6 +190,15 @@ TaskSchema.index({
     status: 1,
     isArchived: 1,
     createdAt: -1,
+});
+
+TaskSchema.index({
+    project: 1,
+    status: 1,
+    parentTask: 1,
+    isArchived: 1,
+    position: 1,
+    _id: 1,
 });
 
 const Task = mongoose.model<ITaskDocument>(

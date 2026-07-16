@@ -99,3 +99,22 @@ export interface IUpdateTask {
 export interface IUpdateTaskStatus {
     status: TaskStatus;
 }
+
+export interface ITaskReorderColumnInput {
+    status: TaskStatus;
+
+    /*
+    Task IDs must be supplied in the exact order
+    in which they should appear in this column.
+    */
+    taskIds: string[];
+}
+
+export interface IReorderProjectTasksInput {
+    columns:
+        ITaskReorderColumnInput[];
+}
+
+export interface IReorderProjectTasksResponse {
+    updatedTaskCount: number;
+}

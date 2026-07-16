@@ -18,6 +18,11 @@ import mongoose, {
     Types,
 } from "mongoose";
 
+import {
+    DomainEventName,
+    eventBus,
+} from "../../events";
+
 export class WorkspaceMembers{
 
 private async revokeWorkspaceAccess(
@@ -362,6 +367,26 @@ async removeMember(
     const session =
         await mongoose.startSession();
 
+    /*
+    These values are collected inside the transaction.
+
+    They are used to publish the domain event only after
+    the transaction successfully commits.
+    */
+    let affectedUserId:
+        string |
+        null =
+            null;
+
+    let committedWorkspaceId:
+        string |
+        null =
+            null;
+
+    let committedProjectIds:
+        string[] =
+            [];
+
     try {
         await session.withTransaction(
             async () => {
@@ -374,7 +399,13 @@ async removeMember(
                 const workspace =
                     await Workspace.findById(
                         workspaceId
-                    ).session(session);
+                    )
+                        .select(
+                            "_id owner isArchived"
+                        )
+                        .session(
+                            session
+                        );
 
                 if (!workspace) {
                     throw new ApiError(
@@ -383,7 +414,9 @@ async removeMember(
                     );
                 }
 
-                if (workspace.isArchived) {
+                if (
+                    workspace.isArchived
+                ) {
                     throw new ApiError(
                         409,
                         "Members cannot be removed from an archived workspace."
@@ -413,10 +446,22 @@ async removeMember(
                 */
 
                 const member =
-                    await WorkspaceMember.findOne({
-                        _id: memberId,
-                        workspace: workspaceId,
-                    }).session(session);
+                    await WorkspaceMember
+                        .findOne({
+                            _id:
+                                new Types.ObjectId(
+                                    memberId
+                                ),
+
+                            workspace:
+                                workspace._id,
+                        })
+                        .select(
+                            "_id user role"
+                        )
+                        .session(
+                            session
+                        );
 
                 if (!member) {
                     throw new ApiError(
@@ -424,6 +469,13 @@ async removeMember(
                         "Member not found."
                     );
                 }
+
+                /*
+                The workspace owner cannot be removed.
+
+                Ownership must first be transferred through
+                a dedicated ownership-transfer workflow.
+                */
 
                 if (
                     member.role ===
@@ -436,9 +488,58 @@ async removeMember(
                 }
 
                 /*
+                Prevent the owner from accidentally using the
+                remove-member endpoint on their own membership.
+                */
+
+                if (
+                    member.user.toString() ===
+                    userId
+                ) {
+                    throw new ApiError(
+                        409,
+                        "The workspace owner cannot remove themselves."
+                    );
+                }
+
+                /*
+                |--------------------------------------------------------------------------
+                | Find Workspace Projects
+                |--------------------------------------------------------------------------
+                |
+                | The affected user's sockets must later be removed
+                | from every project room belonging to this workspace.
+                |
+                */
+
+                const projects =
+                    await Project.find({
+                        workspace:
+                            workspace._id,
+                    })
+                        .select(
+                            "_id"
+                        )
+                        .session(
+                            session
+                        )
+                        .lean<{
+                            _id:
+                                Types.ObjectId;
+                        }[]>()
+                        .exec();
+
+                /*
                 |--------------------------------------------------------------------------
                 | Revoke All Workspace Access
                 |--------------------------------------------------------------------------
+                |
+                | This helper should transactionally remove:
+                |
+                | - Workspace membership
+                | - Project memberships in this workspace
+                | - Task assignments in those projects
+                |
                 */
 
                 await this.revokeWorkspaceAccess(
@@ -447,8 +548,60 @@ async removeMember(
                     member.user,
                     session
                 );
+
+                /*
+                Store the event context only after all transaction
+                operations have completed successfully.
+                */
+
+                affectedUserId =
+                    member.user.toString();
+
+                committedWorkspaceId =
+                    workspace._id.toString();
+
+                committedProjectIds =
+                    projects.map(
+                        (project) =>
+                            project._id.toString()
+                    );
             }
         );
+
+        /*
+        |--------------------------------------------------------------------------
+        | Publish After Transaction Commit
+        |--------------------------------------------------------------------------
+        |
+        | Socket room removal cannot be rolled back. Therefore,
+        | this event must not be published inside withTransaction().
+        |
+        */
+
+        if (
+            affectedUserId &&
+            committedWorkspaceId
+        ) {
+            await eventBus.publish(
+                DomainEventName
+                    .WORKSPACE_MEMBERSHIP_ENDED,
+                {
+                    workspaceId:
+                        committedWorkspaceId,
+
+                    projectIds:
+                        committedProjectIds,
+
+                    affectedUserId,
+
+                    actorId:
+                        userId,
+
+                    reason:
+                        "removed",
+                }
+            );
+        }
     } finally {
         await session.endSession();
     }
@@ -460,6 +613,15 @@ async leaveWorkspace(
 ): Promise<void> {
     const session =
         await mongoose.startSession();
+
+    let committedWorkspaceId:
+        string |
+        null =
+            null;
+
+    let committedProjectIds:
+        string[] =
+            [];
 
     try {
         await session.withTransaction(
@@ -473,7 +635,13 @@ async leaveWorkspace(
                 const workspace =
                     await Workspace.findById(
                         workspaceId
-                    ).session(session);
+                    )
+                        .select(
+                            "_id owner isArchived"
+                        )
+                        .session(
+                            session
+                        );
 
                 if (!workspace) {
                     throw new ApiError(
@@ -482,7 +650,9 @@ async leaveWorkspace(
                     );
                 }
 
-                if (workspace.isArchived) {
+                if (
+                    workspace.isArchived
+                ) {
                     throw new ApiError(
                         409,
                         "You cannot leave an archived workspace."
@@ -512,10 +682,22 @@ async leaveWorkspace(
                 */
 
                 const membership =
-                    await WorkspaceMember.findOne({
-                        workspace: workspaceId,
-                        user: userId,
-                    }).session(session);
+                    await WorkspaceMember
+                        .findOne({
+                            workspace:
+                                workspace._id,
+
+                            user:
+                                new Types.ObjectId(
+                                    userId
+                                ),
+                        })
+                        .select(
+                            "_id user role"
+                        )
+                        .session(
+                            session
+                        );
 
                 if (!membership) {
                     throw new ApiError(
@@ -523,6 +705,44 @@ async leaveWorkspace(
                         "Workspace membership not found."
                     );
                 }
+
+                /*
+                Extra protection in case the workspace.owner field
+                and membership role ever become inconsistent.
+                */
+
+                if (
+                    membership.role ===
+                    WorkspaceRole.OWNER
+                ) {
+                    throw new ApiError(
+                        409,
+                        "The workspace owner cannot leave. Transfer ownership before leaving."
+                    );
+                }
+
+                /*
+                |--------------------------------------------------------------------------
+                | Find Workspace Projects
+                |--------------------------------------------------------------------------
+                */
+
+                const projects =
+                    await Project.find({
+                        workspace:
+                            workspace._id,
+                    })
+                        .select(
+                            "_id"
+                        )
+                        .session(
+                            session
+                        )
+                        .lean<{
+                            _id:
+                                Types.ObjectId;
+                        }[]>()
+                        .exec();
 
                 /*
                 |--------------------------------------------------------------------------
@@ -536,8 +756,46 @@ async leaveWorkspace(
                     membership.user,
                     session
                 );
+
+                committedWorkspaceId =
+                    workspace._id.toString();
+
+                committedProjectIds =
+                    projects.map(
+                        (project) =>
+                            project._id.toString()
+                    );
             }
         );
+
+        /*
+        Publish only after the transaction successfully commits.
+        */
+
+        if (
+            committedWorkspaceId
+        ) {
+            await eventBus.publish(
+                DomainEventName
+                    .WORKSPACE_MEMBERSHIP_ENDED,
+                {
+                    workspaceId:
+                        committedWorkspaceId,
+
+                    projectIds:
+                        committedProjectIds,
+
+                    affectedUserId:
+                        userId,
+
+                    actorId:
+                        userId,
+
+                    reason:
+                        "left",
+                }
+            );
+        }
     } finally {
         await session.endSession();
     }

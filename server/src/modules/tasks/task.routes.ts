@@ -3,7 +3,7 @@ import { Router } from "express";
 const router = Router();
 
 import { authenticateUser } from "../../middlewares/auth.middleware";
-import { createTask , getProjectTasks , getTask , archiveTask , restoreTask , updateTask , updateTaskStatus} from "./task.controller";
+import { createTask , getProjectTasks , getTask , archiveTask , restoreTask , updateTask , updateTaskStatus , reorderProjectTasks} from "./task.controller";
 
 
 
@@ -24,6 +24,11 @@ router.get(
     "/projects/:projectId/tasks",
     authenticateUser,
     getProjectTasks
+);
+router.patch(
+    "/projects/:projectId/tasks/reorder",
+    authenticateUser,
+    reorderProjectTasks
 );
 
 router.patch(
@@ -49,5 +54,7 @@ router.patch(
     authenticateUser,
     updateTaskStatus
 );
+
+
 
 export default router;

@@ -11,6 +11,18 @@ import {
 
 import { TaskType } from "./task.model";
 
+import { IReorderProjectTasksInput } from "../../interfaces/task.interface";
+
+
+
+export const taskStatusSchema:
+    z.ZodType<TaskStatus> =
+        z.enum(
+            TaskStatus
+        );
+
+
+
 /*
 |--------------------------------------------------------------------------
 | Create Task
@@ -205,3 +217,108 @@ export const updateTaskStatusSchema =
             TaskStatus
         ),
     });
+
+export const reorderProjectTasksBodySchema:
+    z.ZodType<IReorderProjectTasksInput> =
+        z.object({
+            columns:
+                z.array(
+                    z.object({
+                        status:
+                            taskStatusSchema,
+
+                        taskIds:
+                            z.array(
+                                objectIdSchema
+                            )
+                                .max(
+                                    500,
+                                    "A maximum of 500 tasks can be reordered at once."
+                                ),
+                    })
+                )
+                    .min(
+                        1,
+                        "At least one column is required."
+                    )
+                    .max(
+                        Object.values(
+                            TaskStatus
+                        ).length
+                    ),
+        })
+            .superRefine(
+                (
+                    data,
+                    context
+                ) => {
+                    const statuses =
+                        new Set<TaskStatus>();
+
+                    const taskIds =
+                        new Set<string>();
+
+                    data.columns.forEach(
+                        (
+                            column,
+                            columnIndex
+                        ) => {
+                            if (
+                                statuses.has(
+                                    column.status
+                                )
+                            ) {
+                                context.addIssue({
+                                    code:
+                                        "custom",
+
+                                    path: [
+                                        "columns",
+                                        columnIndex,
+                                        "status",
+                                    ],
+
+                                    message:
+                                        "The same status column cannot be provided more than once.",
+                                });
+                            }
+
+                            statuses.add(
+                                column.status
+                            );
+
+                            column.taskIds.forEach(
+                                (
+                                    taskId,
+                                    taskIndex
+                                ) => {
+                                    if (
+                                        taskIds.has(
+                                            taskId
+                                        )
+                                    ) {
+                                        context.addIssue({
+                                            code:
+                                                "custom",
+
+                                            path: [
+                                                "columns",
+                                                columnIndex,
+                                                "taskIds",
+                                                taskIndex,
+                                            ],
+
+                                            message:
+                                                "A task cannot appear more than once.",
+                                        });
+                                    }
+
+                                    taskIds.add(
+                                        taskId
+                                    );
+                                }
+                            );
+                        }
+                    );
+                }
+            );

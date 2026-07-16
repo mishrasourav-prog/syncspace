@@ -520,5 +520,162 @@ eventBus.subscribe(
             }
         );
 
+        /*
+|--------------------------------------------------------------------------
+| Tasks Reordered
+|--------------------------------------------------------------------------
+*/
+
+eventBus.subscribe(
+    DomainEventName.TASKS_REORDERED,
+    async (event) => {
+        const io =
+            getSocketServer();
+
+        io.to(
+            getProjectRoom(
+                event.payload.projectId
+            )
+        ).emit(
+            "tasks:reordered",
+            event.payload
+        );
+    }
+);
+
+        /*
+        |--------------------------------------------------------------------------
+        | Project Membership Ended
+        |--------------------------------------------------------------------------
+        |
+        | Remove every active connection belonging to the affected
+        | user from the project room.
+        |
+        */
+
+        eventBus.subscribe(
+            DomainEventName.PROJECT_MEMBERSHIP_ENDED,
+            async (event) => {
+                const io =
+                    getSocketServer();
+
+                const userRoom =
+                    getUserRoom(
+                        event.payload
+                            .affectedUserId
+                    );
+
+                const projectRoom =
+                    getProjectRoom(
+                        event.payload.projectId
+                    );
+
+                /*
+                Select all sockets belonging to this user and
+                force those sockets to leave the project room.
+                */
+
+                io.in(
+                    userRoom
+                ).socketsLeave(
+                    projectRoom
+                );
+
+                /*
+                The sockets remain connected and remain inside
+                their private user room.
+
+                Notify them that project access has ended.
+                */
+
+                io.to(
+                    userRoom
+                ).emit(
+                    "access:project-revoked",
+                    {
+                        workspaceId:
+                            event.payload.workspaceId,
+
+                        projectId:
+                            event.payload.projectId,
+
+                        reason:
+                            event.payload.reason,
+                    }
+                );
+            }
+        );
+
+        /*
+        |--------------------------------------------------------------------------
+        | Workspace Membership Ended
+        |--------------------------------------------------------------------------
+        |
+        | Workspace removal also terminates access to every project
+        | inside that workspace.
+        |
+        */
+
+        eventBus.subscribe(
+            DomainEventName.WORKSPACE_MEMBERSHIP_ENDED,
+            async (event) => {
+                const io =
+                    getSocketServer();
+
+                const userRoom =
+                    getUserRoom(
+                        event.payload
+                            .affectedUserId
+                    );
+
+                /*
+                First remove every active socket belonging to this
+                user from the workspace room.
+                */
+
+                io.in(
+                    userRoom
+                ).socketsLeave(
+                    getWorkspaceRoom(
+                        event.payload.workspaceId
+                    )
+                );
+
+                /*
+                Then remove those sockets from every project room
+                associated with the workspace.
+                */
+
+                for (
+                    const projectId of
+                    event.payload.projectIds
+                ) {
+                    io.in(
+                        userRoom
+                    ).socketsLeave(
+                        getProjectRoom(
+                            projectId
+                        )
+                    );
+                }
+
+                io.to(
+                    userRoom
+                ).emit(
+                    "access:workspace-revoked",
+                    {
+                        workspaceId:
+                            event.payload.workspaceId,
+
+                        projectIds:
+                            event.payload.projectIds,
+
+                        reason:
+                            event.payload.reason,
+                    }
+                );
+            }
+        );
+
     
     };

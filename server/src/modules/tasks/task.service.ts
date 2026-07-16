@@ -36,6 +36,63 @@ import {
     eventBus,
 } from "../../events";
 
+import mongoose from "mongoose";
+
+import type {
+    IReorderProjectTasksInput,
+    IReorderProjectTasksResponse,
+} from "../../interfaces/task.interface";
+
+interface ITaskProjectContext {
+    project: {
+        _id: Types.ObjectId;
+
+        workspace: Types.ObjectId;
+
+        isArchived: boolean;
+    };
+
+    membership: {
+        _id: Types.ObjectId;
+
+        role: ProjectRole;
+    };
+}
+
+interface ITaskForBoardReorder {
+    _id: Types.ObjectId;
+
+    title: string;
+
+    type: TaskType;
+
+    status: TaskStatus;
+
+    position: number;
+
+    completedAt?:
+        Date |
+        null;
+
+    completedBy?:
+        Types.ObjectId |
+        null;
+}
+
+interface IChangedTaskStatus {
+    taskId: string;
+
+    title: string;
+
+    taskType: TaskType;
+
+    previousStatus:
+        TaskStatus;
+
+    currentStatus:
+        TaskStatus;
+}
+
 interface ITaskHierarchyNode {
     _id: Types.ObjectId;
 
@@ -63,6 +120,106 @@ interface IPopulatedAssigneeUser {
 }
 
 export class TaskService {
+
+        private async getProjectContext(
+        projectId: string,
+        userId: string,
+        mutation: boolean
+    ): Promise<ITaskProjectContext> {
+        /*
+        |--------------------------------------------------------------------------
+        | Find Project
+        |--------------------------------------------------------------------------
+        */
+
+        const project =
+            await Project.findById(
+                projectId
+            )
+                .select(
+                    "_id workspace isArchived"
+                )
+                .lean<{
+                    _id: Types.ObjectId;
+
+                    workspace: Types.ObjectId;
+
+                    isArchived: boolean;
+                }>()
+                .exec();
+
+        if (!project) {
+            throw new ApiError(
+                404,
+                "Project not found."
+            );
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Verify Project Membership
+        |--------------------------------------------------------------------------
+        |
+        | Knowing a project ID does not give the user access.
+        | The user must have an active ProjectMember record.
+        |
+        */
+
+        const membership =
+            await ProjectMember
+                .findOne({
+                    project:
+                        project._id,
+
+                    user:
+                        new Types.ObjectId(
+                            userId
+                        ),
+                })
+                .select(
+                    "_id role"
+                )
+                .lean<{
+                    _id: Types.ObjectId;
+
+                    role: ProjectRole;
+                }>()
+                .exec();
+
+        /*
+        Return 404 rather than 403 so an unauthorized user
+        cannot confirm that a private project exists.
+        */
+
+        if (!membership) {
+            throw new ApiError(
+                404,
+                "Project not found."
+            );
+        }
+
+        /*
+        Read operations may access archived projects.
+
+        Mutations such as task reordering are blocked because
+        archived projects are read-only.
+        */
+
+        if (
+            mutation &&
+            project.isArchived
+        ) {
+            throw new ApiError(
+                409,
+                "Archived projects are read-only."
+            );
+        }
+
+        return {
+            project,
+            membership,
+        };
+    }
     /*
     |--------------------------------------------------------------------------
     | Validate Parent Task
@@ -1489,6 +1646,373 @@ export class TaskService {
 
         await task.save();
     }
+
+    async reorderProjectTasks(
+    projectId: string,
+    userId: string,
+    data:
+        IReorderProjectTasksInput
+): Promise<IReorderProjectTasksResponse> {
+    /*
+    Use your existing project/member authorization helper here.
+
+    mutation=true means archived projects cannot be changed.
+    */
+    const context =
+        await this.getProjectContext(
+            projectId,
+            userId,
+            true
+        );
+
+    const session =
+        await mongoose.startSession();
+
+    const changedStatuses:
+        IChangedTaskStatus[] = [];
+
+    let updatedTaskCount = 0;
+
+    try {
+        await session.withTransaction(
+            async () => {
+                /*
+                These are the columns whose complete ordering
+                the frontend supplied.
+                */
+
+                const affectedStatuses =
+                    data.columns.map(
+                        (column) =>
+                            column.status
+                    );
+
+                /*
+                Flatten every supplied task ID into one array.
+                */
+
+                const suppliedTaskIds =
+                    data.columns.flatMap(
+                        (column) =>
+                            column.taskIds
+                    );
+
+                /*
+                Fetch all current active root tasks from the
+                affected status columns.
+
+                parentTask: null means subtasks are not reordered
+                through the main Kanban board endpoint.
+                */
+
+                const currentTasks =
+                    await Task.find({
+                        project:
+                            context.project._id,
+
+                        status: {
+                            $in:
+                                affectedStatuses,
+                        },
+
+                        parentTask:
+                            null,
+
+                        isArchived:
+                            false,
+                    })
+                        .select(
+                            "_id title type status position completedAt completedBy"
+                        )
+                        .session(
+                            session
+                        )
+                        .lean<
+                            ITaskForBoardReorder[]
+                        >()
+                        .exec();
+
+                /*
+                The union of supplied tasks must exactly match
+                the union of active tasks currently contained
+                in the affected columns.
+
+                This prevents the frontend from accidentally
+                dropping a task from a column.
+                */
+
+                if (
+                    currentTasks.length !==
+                    suppliedTaskIds.length
+                ) {
+                    throw new ApiError(
+                        409,
+                        "The task board changed. Refresh it before reordering again."
+                    );
+                }
+
+                const currentTaskMap =
+                    new Map(
+                        currentTasks.map(
+                            (task) => [
+                                task._id.toString(),
+                                task,
+                            ]
+                        )
+                    );
+
+                for (
+                    const taskId of
+                    suppliedTaskIds
+                ) {
+                    if (
+                        !currentTaskMap.has(
+                            taskId
+                        )
+                    ) {
+                        throw new ApiError(
+                            409,
+                            "The task board changed. Refresh it before reordering again."
+                        );
+                    }
+                }
+
+                const now =
+                    new Date();
+
+                const actorObjectId =
+                    new Types.ObjectId(
+                        userId
+                    );
+
+                const operations:
+                    Parameters<
+                        typeof Task.bulkWrite
+                    >[0] = [];
+
+                for (
+                    const column of
+                    data.columns
+                ) {
+                    column.taskIds.forEach(
+                        (
+                            taskId,
+                            index
+                        ) => {
+                            const task =
+                                currentTaskMap.get(
+                                    taskId
+                                );
+
+                            if (!task) {
+                                throw new ApiError(
+                                    409,
+                                    "The task board changed. Refresh it before reordering again."
+                                );
+                            }
+
+                            /*
+                            Use spaced integer positions:
+
+                            1000
+                            2000
+                            3000
+
+                            The spacing makes debugging and future
+                            midpoint-based insertion easier.
+                            */
+
+                            const position =
+                                (
+                                    index +
+                                    1
+                                ) *
+                                1000;
+
+                            const statusChanged =
+                                task.status !==
+                                column.status;
+
+                            const setFields:
+                                Record<
+                                    string,
+                                    unknown
+                                > = {
+                                    position,
+
+                                    status:
+                                        column.status,
+
+                                    updatedBy:
+                                        actorObjectId,
+                                };
+
+                            /*
+                            Keep task completion metadata synchronized
+                            with the destination status.
+                            */
+
+                            if (
+                                statusChanged &&
+                                column.status ===
+                                    TaskStatus.DONE
+                            ) {
+                                setFields.completedAt =
+                                    now;
+
+                                setFields.completedBy =
+                                    actorObjectId;
+                            }
+
+                            if (
+                                statusChanged &&
+                                task.status ===
+                                    TaskStatus.DONE &&
+                                column.status !==
+                                    TaskStatus.DONE
+                            ) {
+                                setFields.completedAt =
+                                    null;
+
+                                setFields.completedBy =
+                                    null;
+                            }
+
+                            operations.push({
+                                updateOne: {
+                                    filter: {
+                                        _id:
+                                            task._id,
+
+                                        project:
+                                            context.project
+                                                ._id,
+
+                                        isArchived:
+                                            false,
+                                    },
+
+                                    update: {
+                                        $set:
+                                            setFields,
+                                    },
+                                },
+                            });
+
+                            if (
+                                statusChanged
+                            ) {
+                                changedStatuses.push({
+                                    taskId:
+                                        task._id
+                                            .toString(),
+
+                                    title:
+                                        task.title,
+
+                                    taskType:
+                                        task.type,
+
+                                    previousStatus:
+                                        task.status,
+
+                                    currentStatus:
+                                        column.status,
+                                });
+                            }
+                        }
+                    );
+                }
+
+                if (
+                    operations.length >
+                    0
+                ) {
+                    const result =
+                        await Task.bulkWrite(
+                            operations,
+                            {
+                                session,
+                            }
+                        );
+
+                    updatedTaskCount =
+                        result.modifiedCount;
+                }
+            }
+        );
+    } finally {
+        await session.endSession();
+    }
+
+    /*
+    Domain events are published only after the transaction
+    has successfully committed.
+    */
+
+    for (
+        const changedTask of
+        changedStatuses
+    ) {
+        await eventBus.publish(
+            DomainEventName
+                .TASK_STATUS_CHANGED,
+            {
+                workspaceId:
+                    context.project.workspace
+                        .toString(),
+
+                projectId:
+                    context.project._id
+                        .toString(),
+
+                taskId:
+                    changedTask.taskId,
+
+                actorId:
+                    userId,
+
+                title:
+                    changedTask.title,
+
+                taskType:
+                    changedTask.taskType,
+
+                previousStatus:
+                    changedTask.previousStatus,
+
+                currentStatus:
+                    changedTask.currentStatus,
+            }
+        );
+    }
+
+    await eventBus.publish(
+        DomainEventName.TASKS_REORDERED,
+        {
+            workspaceId:
+                context.project.workspace
+                    .toString(),
+
+            projectId:
+                context.project._id
+                    .toString(),
+
+            actorId:
+                userId,
+
+            affectedStatuses:
+                data.columns.map(
+                    (column) =>
+                        column.status
+                ),
+        }
+    );
+
+    return {
+        updatedTaskCount,
+    };
+}
 }
 
 export default new TaskService();

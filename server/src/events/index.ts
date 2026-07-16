@@ -28,3 +28,13 @@ export type {
     DiscussionChangedEventPayload,
     DiscussionReplyChangedEventPayload,
 } from "../interfaces/domainEvent.interface";
+
+export type {
+    TasksReorderedEventPayload,
+} from "../interfaces/domainEvent.interface";
+
+export type {
+    MembershipEndReason,
+    ProjectMembershipEndedEventPayload,
+    WorkspaceMembershipEndedEventPayload,
+} from "../interfaces/domainEvent.interface";

@@ -49,6 +49,60 @@ DISCUSSION_REPLY_UPDATED =
 
 DISCUSSION_REPLY_DELETED =
     "discussion.reply_deleted",
+
+TASKS_REORDERED =
+    "tasks.reordered",
+
+
+PROJECT_MEMBERSHIP_ENDED =
+        "project.membership_ended",
+
+WORKSPACE_MEMBERSHIP_ENDED =
+        "workspace.membership_ended",
+}
+
+export type MembershipEndReason =
+    | "removed"
+    | "left";
+
+export interface ProjectMembershipEndedEventPayload {
+    workspaceId: string;
+
+    projectId: string;
+
+    /*
+    User who no longer has project access.
+    */
+    affectedUserId: string;
+
+    /*
+    User who performed the operation.
+
+    For voluntary leave:
+    actorId === affectedUserId
+    */
+    actorId: string;
+
+    reason:
+        MembershipEndReason;
+}
+
+
+export interface WorkspaceMembershipEndedEventPayload {
+    workspaceId: string;
+
+    /*
+    All projects whose rooms the user
+    must leave.
+    */
+    projectIds: string[];
+
+    affectedUserId: string;
+
+    actorId: string;
+
+    reason:
+        MembershipEndReason;
 }
 
 export interface DiscussionChangedEventPayload {
@@ -127,6 +181,17 @@ export interface NotificationCreatedEventPayload {
     recipientId: string;
 }
 
+export interface TasksReorderedEventPayload {
+    workspaceId: string;
+
+    projectId: string;
+
+    actorId: string;
+
+    affectedStatuses:
+        TaskStatus[];
+}
+
 export interface DomainEventPayloadMap {
     [DomainEventName.TASK_CREATED]:
         TaskCreatedEventPayload;
@@ -185,6 +250,18 @@ export interface DomainEventPayloadMap {
 
 [DomainEventName.DISCUSSION_REPLY_DELETED]:
     DiscussionReplyChangedEventPayload;
+
+[DomainEventName.TASKS_REORDERED]:
+    TasksReorderedEventPayload;
+
+
+[DomainEventName.PROJECT_MEMBERSHIP_ENDED]:
+        ProjectMembershipEndedEventPayload;
+
+[DomainEventName.WORKSPACE_MEMBERSHIP_ENDED]:
+        WorkspaceMembershipEndedEventPayload;
+
+
 
     
 }

@@ -7,14 +7,20 @@ import mongoose from "mongoose";
 
 import type {
     ClientSession,
-    Types,
 } from "mongoose";
+
+import { Types } from "mongoose";
 
 
 
 import Task from "../tasks/task.model";
 
 import TaskAssignee from "../taskAssignee/taskAssignee.model";
+
+import {
+    DomainEventName,
+    eventBus,
+} from "../../events";
 
 export class ProjectMemberService{
 
@@ -272,6 +278,25 @@ async removeMember(
     const session =
         await mongoose.startSession();
 
+    /*
+    These values are captured inside the transaction
+    and used only after the transaction commits.
+    */
+    let affectedUserId:
+        string |
+        null =
+            null;
+
+    let committedProjectId:
+        string |
+        null =
+            null;
+
+    let committedWorkspaceId:
+        string |
+        null =
+            null;
+
     try {
         await session.withTransaction(
             async () => {
@@ -284,7 +309,13 @@ async removeMember(
                 const project =
                     await Project.findById(
                         projectId
-                    ).session(session);
+                    )
+                        .select(
+                            "_id workspace isArchived"
+                        )
+                        .session(
+                            session
+                        );
 
                 if (!project) {
                     throw new ApiError(
@@ -301,9 +332,20 @@ async removeMember(
 
                 const requester =
                     await ProjectMember.findOne({
-                        project: projectId,
-                        user: userId,
-                    }).session(session);
+                        project:
+                            project._id,
+
+                        user:
+                            new Types.ObjectId(
+                                userId
+                            ),
+                    })
+                        .select(
+                            "_id role"
+                        )
+                        .session(
+                            session
+                        );
 
                 if (!requester) {
                     throw new ApiError(
@@ -335,8 +377,16 @@ async removeMember(
                         .select(
                             "_id isArchived"
                         )
-                        .session(session)
-                        .lean();
+                        .session(
+                            session
+                        )
+                        .lean<{
+                            _id:
+                                Types.ObjectId;
+
+                            isArchived:
+                                boolean;
+                        }>();
 
                 if (!workspace) {
                     throw new ApiError(
@@ -345,14 +395,18 @@ async removeMember(
                     );
                 }
 
-                if (workspace.isArchived) {
+                if (
+                    workspace.isArchived
+                ) {
                     throw new ApiError(
                         409,
                         "Members cannot be removed while the workspace is archived."
                     );
                 }
 
-                if (project.isArchived) {
+                if (
+                    project.isArchived
+                ) {
                     throw new ApiError(
                         409,
                         "Members cannot be removed from an archived project."
@@ -367,9 +421,20 @@ async removeMember(
 
                 const member =
                     await ProjectMember.findOne({
-                        _id: memberId,
-                        project: projectId,
-                    }).session(session);
+                        _id:
+                            new Types.ObjectId(
+                                memberId
+                            ),
+
+                        project:
+                            project._id,
+                    })
+                        .select(
+                            "_id user role"
+                        )
+                        .session(
+                            session
+                        );
 
                 if (!member) {
                     throw new ApiError(
@@ -382,6 +447,7 @@ async removeMember(
                 The requester must use the dedicated
                 leave-project endpoint for themselves.
                 */
+
                 if (
                     member.user.toString() ===
                     userId
@@ -403,17 +469,22 @@ async removeMember(
                     ProjectRole.ADMIN
                 ) {
                     const adminCount =
-                        await ProjectMember.countDocuments(
-                            {
+                        await ProjectMember
+                            .countDocuments({
                                 project:
-                                    projectId,
+                                    project._id,
 
                                 role:
                                     ProjectRole.ADMIN,
-                            }
-                        ).session(session);
+                            })
+                            .session(
+                                session
+                            );
 
-                    if (adminCount <= 1) {
+                    if (
+                        adminCount <=
+                        1
+                    ) {
                         throw new ApiError(
                             409,
                             "Project must have at least one admin."
@@ -433,6 +504,61 @@ async removeMember(
                     member.user,
                     session
                 );
+
+                /*
+                Capture values only after the database operations
+                inside the transaction have completed successfully.
+                */
+
+                affectedUserId =
+                    member.user.toString();
+
+                committedProjectId =
+                    project._id.toString();
+
+                committedWorkspaceId =
+                    workspace._id.toString();
+            }
+        );
+
+        /*
+        |--------------------------------------------------------------------------
+        | Publish Event After Transaction Commit
+        |--------------------------------------------------------------------------
+        |
+        | Socket room removal cannot be rolled back, so the event
+        | must never be published inside the MongoDB transaction.
+        |
+        */
+
+        if (
+            !affectedUserId ||
+            !committedProjectId ||
+            !committedWorkspaceId
+        ) {
+            throw new ApiError(
+                500,
+                "Project member removal completed without the required event context."
+            );
+        }
+
+        await eventBus.publish(
+            DomainEventName
+                .PROJECT_MEMBERSHIP_ENDED,
+            {
+                workspaceId:
+                    committedWorkspaceId,
+
+                projectId:
+                    committedProjectId,
+
+                affectedUserId,
+
+                actorId:
+                    userId,
+
+                reason:
+                    "removed",
             }
         );
     } finally {
@@ -447,6 +573,16 @@ async leaveProject(
     const session =
         await mongoose.startSession();
 
+    let committedProjectId:
+        string |
+        null =
+            null;
+
+    let committedWorkspaceId:
+        string |
+        null =
+            null;
+
     try {
         await session.withTransaction(
             async () => {
@@ -459,7 +595,13 @@ async leaveProject(
                 const project =
                     await Project.findById(
                         projectId
-                    ).session(session);
+                    )
+                        .select(
+                            "_id workspace isArchived"
+                        )
+                        .session(
+                            session
+                        );
 
                 if (!project) {
                     throw new ApiError(
@@ -476,9 +618,20 @@ async leaveProject(
 
                 const membership =
                     await ProjectMember.findOne({
-                        project: projectId,
-                        user: userId,
-                    }).session(session);
+                        project:
+                            project._id,
+
+                        user:
+                            new Types.ObjectId(
+                                userId
+                            ),
+                    })
+                        .select(
+                            "_id user role"
+                        )
+                        .session(
+                            session
+                        );
 
                 if (!membership) {
                     throw new ApiError(
@@ -500,8 +653,16 @@ async leaveProject(
                         .select(
                             "_id isArchived"
                         )
-                        .session(session)
-                        .lean();
+                        .session(
+                            session
+                        )
+                        .lean<{
+                            _id:
+                                Types.ObjectId;
+
+                            isArchived:
+                                boolean;
+                        }>();
 
                 if (!workspace) {
                     throw new ApiError(
@@ -510,14 +671,18 @@ async leaveProject(
                     );
                 }
 
-                if (workspace.isArchived) {
+                if (
+                    workspace.isArchived
+                ) {
                     throw new ApiError(
                         409,
                         "You cannot leave a project while its workspace is archived."
                     );
                 }
 
-                if (project.isArchived) {
+                if (
+                    project.isArchived
+                ) {
                     throw new ApiError(
                         409,
                         "You cannot leave an archived project."
@@ -535,17 +700,22 @@ async leaveProject(
                     ProjectRole.ADMIN
                 ) {
                     const adminCount =
-                        await ProjectMember.countDocuments(
-                            {
+                        await ProjectMember
+                            .countDocuments({
                                 project:
-                                    projectId,
+                                    project._id,
 
                                 role:
                                     ProjectRole.ADMIN,
-                            }
-                        ).session(session);
+                            })
+                            .session(
+                                session
+                            );
 
-                    if (adminCount <= 1) {
+                    if (
+                        adminCount <=
+                        1
+                    ) {
                         throw new ApiError(
                             409,
                             "You are the last project admin. Assign another admin before leaving."
@@ -565,13 +735,53 @@ async leaveProject(
                     membership.user,
                     session
                 );
+
+                committedProjectId =
+                    project._id.toString();
+
+                committedWorkspaceId =
+                    workspace._id.toString();
+            }
+        );
+
+        /*
+        Publish only after the membership transaction commits.
+        */
+
+        if (
+            !committedProjectId ||
+            !committedWorkspaceId
+        ) {
+            throw new ApiError(
+                500,
+                "Project leave operation completed without the required event context."
+            );
+        }
+
+        await eventBus.publish(
+            DomainEventName
+                .PROJECT_MEMBERSHIP_ENDED,
+            {
+                workspaceId:
+                    committedWorkspaceId,
+
+                projectId:
+                    committedProjectId,
+
+                affectedUserId:
+                    userId,
+
+                actorId:
+                    userId,
+
+                reason:
+                    "left",
             }
         );
     } finally {
         await session.endSession();
     }
 }
-
 }
 
 export default new ProjectMemberService();

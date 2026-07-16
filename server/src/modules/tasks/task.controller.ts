@@ -28,6 +28,11 @@ import {
     updateTaskStatusSchema,
 } from "./task.validation";
 
+import {
+    reorderProjectTasksBodySchema,
+} from "./task.validation";
+import { projectIdParamSchema } from "../documents/document.validation";
+
 
 /*
 |--------------------------------------------------------------------------
@@ -324,3 +329,45 @@ export const updateTaskStatus =
             return next(error);
         }
     };
+
+    export const  reorderProjectTasks = 
+    async(
+    req: Request,
+    res: Response,
+    next: NextFunction
+): Promise<Response | void> => {
+    try {
+        const {
+            projectId,
+        } =
+            projectIdParamSchema.parse(
+                req.params
+            );
+
+        const data =
+            reorderProjectTasksBodySchema
+                .parse(
+                    req.body
+                );
+
+        const result =
+            await TaskService
+                .reorderProjectTasks(
+                    projectId,
+                    req.user!._id,
+                    data
+                );
+
+        return res.status(
+            200
+        ).json(
+            new ApiResponse(
+                200,
+                "Tasks reordered successfully.",
+                result
+            )
+        );
+    } catch (error) {
+        return next(error);
+    }
+}

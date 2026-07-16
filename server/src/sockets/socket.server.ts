@@ -491,3 +491,56 @@ export const getSocketServer =
 
         return socketServer;
     };
+
+    /*
+|--------------------------------------------------------------------------
+| Check Socket.IO Initialization
+|--------------------------------------------------------------------------
+*/
+
+export const isSocketServerInitialized =
+    (): boolean => {
+        return socketServer !==
+            null;
+    };
+
+/*
+|--------------------------------------------------------------------------
+| Close Socket.IO Server
+|--------------------------------------------------------------------------
+*/
+
+export const closeSocketServer =
+    async (): Promise<void> => {
+        if (!socketServer) {
+            return;
+        }
+
+        /*
+        Save the current instance before clearing
+        the singleton reference.
+        */
+
+        const currentSocketServer =
+            socketServer;
+
+        socketServer =
+            null;
+
+        /*
+        Socket.IO's close() is callback-based.
+
+        Wrapping it in a Promise allows server.ts
+        to await the shutdown operation.
+        */
+
+        await new Promise<void>(
+            (resolve) => {
+                currentSocketServer.close(
+                    () => {
+                        resolve();
+                    }
+                );
+            }
+        );
+    };

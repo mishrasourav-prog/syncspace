@@ -106,10 +106,6 @@ TaskCommentSchema.index({
     _id:1
 });
 
-TaskCommentSchema.index({
-    author: 1,
-});
-
 const TaskComment =
 mongoose.model<ITaskCommentDocument>(
     "TaskComment",

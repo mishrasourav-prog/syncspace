@@ -8,6 +8,7 @@ import morgan from "morgan";
 import routes from "./routes";
 import { notFoundHandler } from "./middlewares/notFound.middleware";
 import { errorHandler } from "./middlewares/error.middleware";
+import systemRouter from "./modules/system/system.routes";
 
 const app = express();
 
@@ -52,13 +53,10 @@ if (process.env.NODE_ENV === "development") {
 /**
  * Health Check
  */
-app.get("/health", (_, res) => {
-  res.status(200).json({
-    success: true,
-    message: "Server is healthy",
-  });
-});
 
+app.use(
+    systemRouter
+);
 /**
  * API Routes
  */

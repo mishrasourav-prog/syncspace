@@ -43,8 +43,6 @@ router.use(
     workspaceMemberRoutes
 );
 
-
-
 router.use("/", projectRoutes);
 router.use(
     projectInvitationRoutes

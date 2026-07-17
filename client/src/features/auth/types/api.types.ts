@@ -1,6 +1,20 @@
-export interface ApiResponse<T> {
-    success: boolean;
-    statusCode: number;
-    message: string;
-    data: T;
-  }
+export type ApiResponse<T = void> = {
+    success:
+        boolean;
+
+    statusCode:
+        number;
+
+    message:
+        string;
+} & (
+    [T] extends [void]
+        ? {
+            data?:
+                never;
+        }
+        : {
+            data:
+                T;
+        }
+);

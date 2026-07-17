@@ -165,9 +165,10 @@ export function ForgotPasswordPage({ onNavigateToLogin }: ForgotPasswordPageProp
         <Lock className="w-5 h-5 text-primary" />
       </div>
       <h1 className="text-h1 text-foreground mb-1">Reset your password</h1>
-      <p className="text-body mb-6">
-        Enter your email and we&apos;ll send you a reset link.
-      </p>
+      <p className="text-sm text-muted-foreground">
+    Enter your email address and we&apos;ll send you a
+    six-digit verification code.
+</p>
 
       {forgotPasswordMutation.isError && (
         <div className="mb-4 rounded-md border border-danger/30 bg-danger/10 px-3 py-2 text-xs text-danger">
@@ -188,12 +189,19 @@ export function ForgotPasswordPage({ onNavigateToLogin }: ForgotPasswordPageProp
         </FormField>
 
         <Button
-          type="submit"
-          className="w-full"
-          disabled={forgotPasswordMutation.isPending}
-        >
-          {forgotPasswordMutation.isPending ? "Sending..." : "Send reset link"}
-        </Button>
+    type="submit"
+    disabled={
+        forgotPasswordMutation
+            .isPending
+    }
+>
+    {
+        forgotPasswordMutation
+            .isPending
+            ? "Sending code..."
+            : "Send verification code"
+    }
+</Button>
       </form>
     </AuthLayout>
   );

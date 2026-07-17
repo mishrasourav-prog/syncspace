@@ -259,10 +259,14 @@ export function ResetPasswordPage() {
             <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
               <Lock className="w-5 h-5 text-primary" />
             </div>
-            <h1 className="text-h1 text-foreground mb-1">Reset your password</h1>
-            <p className="text-body mb-6">
-              Create a new secure password for your account.
-            </p>
+            <h1 className="text-2xl font-semibold">
+    Create a new password
+</h1>
+
+<p className="text-sm text-muted-foreground">
+    Choose a strong password that you haven&apos;t
+    used before.
+</p>
 
             {resetPasswordMutation.isError && (
               <div className="mb-4 rounded-md border border-danger/30 bg-danger/10 px-3 py-2 text-xs text-danger">
@@ -322,14 +326,19 @@ export function ResetPasswordPage() {
               </FormField>
 
               <Button
-                type="submit"
-                className="w-full"
-                disabled={resetPasswordMutation.isPending}
-              >
-                {resetPasswordMutation.isPending
-                  ? "Updating Password..."
-                  : "Reset Password"}
-              </Button>
+    type="submit"
+    disabled={
+        resetPasswordMutation
+            .isPending
+    }
+>
+    {
+        resetPasswordMutation
+            .isPending
+            ? "Updating password..."
+            : "Update password"
+    }
+</Button>
             </form>
           </motion.div>
         ) : (
@@ -345,7 +354,7 @@ export function ResetPasswordPage() {
             </div>
             <h1 className="text-h2 text-foreground mb-1">Password updated</h1>
             <p className="text-body">
-              Your password has been changed successfully.
+              Your password has been updated successfully. You can now log in..
             </p>
           </motion.div>
         )}

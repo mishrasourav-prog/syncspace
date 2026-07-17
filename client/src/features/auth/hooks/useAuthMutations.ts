@@ -31,8 +31,8 @@ export function useLoginMutation() {
 
   return useMutation<AuthSession, ApiErrorShape, LoginPayload>({
     mutationFn: loginRequest,
-    onSuccess: (session) =>
-    setUser(session.user)
+    onSuccess: (session) =>{
+    setUser(session.user)}
   });
 }
 

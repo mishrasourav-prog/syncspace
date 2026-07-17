@@ -1,36 +1,68 @@
-import { create } from "zustand";
-import { persist } from "zustand/middleware";
-import type { AuthUser } from "@/features/auth/types/auth.types";
+import {
+    create,
+} from "zustand";
+
+import type {
+    AuthUser,
+} from "@/features/auth/types/auth.types";
 
 interface AuthState {
-  user: AuthUser | null;
-  setUser: (user: AuthUser) => void;
-  clearSession: () => void;
+    user:
+        AuthUser |
+        null;
+
+    /*
+    False while the application is checking /auth/me.
+
+    Route guards must not redirect until this becomes true.
+    */
+    isAuthInitialized:
+        boolean;
+
+    setUser: (
+        user:
+            AuthUser |
+            null
+    ) => void;
+
+    markAuthInitialized:
+        () => void;
+
+    clearSession:
+        () => void;
 }
 
-export const useAuthStore = create<AuthState>()(
-  persist(
-  (set) => ({
-    user: null,
-    accessToken: null,
+export const useAuthStore =
+    create<AuthState>(
+        (set) => ({
+            user:
+                null,
 
+            isAuthInitialized:
+                false,
 
-    setUser: (user) => {
-      set((state) => ({
-        ...state,
-        user,
-      }));
-    },
+            setUser: (
+                user
+            ) => {
+                set({
+                    user,
+                });
+            },
 
-    clearSession: () => {
-      localStorage.removeItem("syncspace_access_token");
-      set({
-        user: null,
-      });
-    },
-  }),
-  {
-    name: "syncspace-auth",
-  }
-)
-);
+            markAuthInitialized:
+                () => {
+                    set({
+                        isAuthInitialized:
+                            true,
+                    });
+                },
+
+            clearSession:
+                () => {
+                    set({
+                        user:
+                            null,
+                    });
+                },
+        })
+    );

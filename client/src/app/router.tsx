@@ -1,24 +1,25 @@
 import type { ReactNode } from "react";
 import { Navigate, Route, Routes, useLocation, useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
 import { ForgotPasswordPage } from "@/features/auth/pages/ForgotPasswordPage";
 import { LoginPage } from "@/features/auth/pages/LoginPage";
 import { OtpVerificationPage } from "@/features/auth/pages/OtpVerificationPage";
 import { LandingPage as LandingPageComponent } from "@/features/landing/pages/LandingPage";
 import { SignupPage } from "@/features/auth/pages/SignupPage";
-import { useAuthStore } from "./store";
 import { ResetPasswordPage } from "@/features/auth/pages/ResetPasswordPage";
-import { useLogoutMutation } from "@/features/auth/hooks/useAuthMutations";
+import { AppShell } from "@/layouts/AppShell";
+import { WorkspaceDashboardPage } from "@/features/workspaces/pages/WorkspaceDashboardPage";
+import { WorkspaceRoutePage } from "@/features/workspaces/pages/WorkspaceRoutePage";
+import { useAuthStore } from "./store";
 
 function useIsAuthenticated() {
-    return useAuthStore(state => Boolean(state.user));
+  return useAuthStore((state) => Boolean(state.user));
 }
 
 function PublicOnlyRoute({ children }: { children: ReactNode }) {
   const isAuthenticated = useIsAuthenticated();
 
   if (isAuthenticated) {
-    return <Navigate to="/home" replace />;
+    return <Navigate to="/dashboard" replace />;
   }
 
   return children;
@@ -36,7 +37,7 @@ function LoginRoute() {
 
   return (
     <LoginPage
-      onSuccess={() => navigate("/home")}
+      onSuccess={() => navigate("/dashboard")}
       onNavigateToSignup={() => navigate("/signup")}
       onNavigateToForgotPassword={() => navigate("/forgot-password")}
     />
@@ -69,48 +70,18 @@ function OtpVerificationRoute() {
     return <Navigate to="/forgot-password" replace />;
   }
 
-  return <OtpVerificationPage
-  email={email}
-  onSuccess={(data) =>
-    navigate("/reset-password", {
-      state: {
-        email: data.email,
-        resetToken: data.resetToken,
-      },
-    })
-  }
-/>;
-}
-
-
-function HomePage() {
-  const navigate = useNavigate();
-  const user = useAuthStore((state) => state.user);
-  const clearSession = useAuthStore((state) => state.clearSession);
-  const logoutMutation = useLogoutMutation();
-
-  const handleLogout = () => {
-  logoutMutation.mutate(undefined, {
-    onSuccess: () => {
-      clearSession();
-      navigate("/");
-    },
-  });
-};
-
   return (
-    <div className="min-h-screen bg-background flex flex-col items-center justify-center px-4">
-      <h1 className="text-h1 text-foreground">Welcome{user ? `, ${user.name}` : ""}</h1>
-      <p className="text-body mt-2">You&apos;re signed in to SyncSpace.</p>
-      <Button
-  variant="secondary"
-  className="mt-6"
-  onClick={handleLogout}
-  disabled={logoutMutation.isPending}
->
-  {logoutMutation.isPending ? "Logging out..." : "Log out"}
-</Button>
-    </div>
+    <OtpVerificationPage
+      email={email}
+      onSuccess={(data) =>
+        navigate("/reset-password", {
+          state: {
+            email: data.email,
+            resetToken: data.resetToken,
+          },
+        })
+      }
+    />
   );
 }
 
@@ -121,7 +92,7 @@ function LandingRoute() {
     <LandingPageComponent
       onLogin={() => navigate("/login")}
       onSignup={() => navigate("/signup")}
-      onGetStarted={()=>navigate("/signup")}
+      onGetStarted={() => navigate("/signup")}
     />
   );
 }
@@ -153,7 +124,7 @@ export function AppRouter() {
           </PublicOnlyRoute>
         }
       />
-      
+
       <Route
         path="/otp-verification"
         element={
@@ -164,13 +135,13 @@ export function AppRouter() {
       />
 
       <Route
-  path="/reset-password"
-  element={
-    <PublicOnlyRoute>
-      <ResetPasswordPage />
-    </PublicOnlyRoute>
-  }
-/>
+        path="/reset-password"
+        element={
+          <PublicOnlyRoute>
+            <ResetPasswordPage />
+          </PublicOnlyRoute>
+        }
+      />
 
       <Route
         path="/"
@@ -180,14 +151,22 @@ export function AppRouter() {
           </PublicOnlyRoute>
         }
       />
+
+      {/* Authenticated application shell — sidebar/topbar stay mounted across nested routes. */}
       <Route
-  path="/home"
-  element={
-    <ProtectedRoute>
-      <HomePage />
-    </ProtectedRoute>
-  }
-/>
+        element={
+          <ProtectedRoute>
+            <AppShell />
+          </ProtectedRoute>
+        }
+      >
+        <Route path="/dashboard" element={<WorkspaceDashboardPage />} />
+        <Route path="/workspaces/:workspaceId" element={<WorkspaceRoutePage />} />
+      </Route>
+
+      {/* Preserve old bookmarks/links pointing at the previous /home route. */}
+      <Route path="/home" element={<Navigate to="/dashboard" replace />} />
+
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

@@ -1,94 +1,151 @@
-// import { useState } from "react";
-// import { Outlet } from "react-router-dom";
-// import { AppSidebar } from "@/components/navigation/AppSidebar";
-// import { AppTopbar } from "@/components/navigation/AppTopbar";
-// import { MobileNavigationDrawer } from "@/components/navigation/MobileNavigationDrawer";
-// import { CreateWorkspaceDialog } from "@/features/workspaces/components/CreateWorkspaceDialog";
-// import { useSocketLifecycle } from "@/realtime/useSocketLifecycle";
+import {
+    useCallback,
+    useState,
+} from "react";
 
-// export interface AppShellOutletContext {
-//   onCreateWorkspace: () => void;
-// }
+import {
+    Outlet,
+} from "react-router-dom";
 
-// export function AppShell() {
-//   const [mobileNavOpen, setMobileNavOpen] = useState(false);
-//   const [createDialogOpen, setCreateDialogOpen] = useState(false);
+import {
+    AppSidebar,
+} from "@/components/navigation/AppSidebar";
 
-//   useSocketLifecycle();
+import {
+    AppTopbar,
+} from "@/components/navigation/AppTopbar";
 
-//   const outletContext: AppShellOutletContext = {
-//     onCreateWorkspace: () => setCreateDialogOpen(true),
-//   };
+import {
+    MobileNavigationDrawer,
+} from "@/components/navigation/MobileNavigationDrawer";
 
-//   return (
-//     <div className="flex h-screen w-full overflow-hidden bg-background">
-//       <AppSidebar onCreateWorkspace={outletContext.onCreateWorkspace} />
+import {
+    CreateWorkspaceDialog,
+} from "@/features/workspaces/components/CreateWorkspaceDialog";
 
-//       <MobileNavigationDrawer
-//         open={mobileNavOpen}
-//         onClose={() => setMobileNavOpen(false)}
-//         onCreateWorkspace={outletContext.onCreateWorkspace}
-//       />
-
-//       <div className="flex min-w-0 flex-1 flex-col">
-//         <AppTopbar onOpenMobileNav={() => setMobileNavOpen(true)} onCreateWorkspace={outletContext.onCreateWorkspace} />
-
-//         <main className="flex-1 overflow-y-auto">
-//           <div className="mx-auto w-full max-w-[1600px] px-4 py-6 sm:px-6 lg:px-8">
-//             <Outlet context={outletContext} />
-//           </div>
-//         </main>
-//       </div>
-
-//       <CreateWorkspaceDialog open={createDialogOpen} onClose={() => setCreateDialogOpen(false)} />
-//     </div>
-//   );
-// }
-
-
-import { useState } from "react";
-import { Outlet } from "react-router-dom";
-import { AppSidebar } from "@/components/navigation/AppSidebar";
-import { AppTopbar } from "@/components/navigation/AppTopbar";
-import { MobileNavigationDrawer } from "@/components/navigation/MobileNavigationDrawer";
-import { CreateWorkspaceDialog } from "@/features/workspaces/components/CreateWorkspaceDialog";
-import { useSocketLifecycle } from "@/realtime/useSocketLifecycle";
+import {
+    useSocketLifecycle,
+} from "@/realtime/useSocketLifecycle";
 
 export interface AppShellOutletContext {
-  onCreateWorkspace: () => void;
+    onCreateWorkspace:
+        () => void;
 }
 
 export function AppShell() {
-  const [mobileNavOpen, setMobileNavOpen] = useState(false);
-  const [createDialogOpen, setCreateDialogOpen] = useState(false);
+    const [
+        mobileNavOpen,
+        setMobileNavOpen,
+    ] =
+        useState(
+            false
+        );
 
-  useSocketLifecycle();
+    const [
+        createDialogOpen,
+        setCreateDialogOpen,
+    ] =
+        useState(
+            false
+        );
 
-  const outletContext: AppShellOutletContext = {
-    onCreateWorkspace: () => setCreateDialogOpen(true),
-  };
+    useSocketLifecycle();
 
-  return (
-    <div className="flex h-screen w-full overflow-hidden bg-background">
-      <AppSidebar onCreateWorkspace={outletContext.onCreateWorkspace} />
+    const openMobileNavigation =
+        useCallback(
+            () => {
+                setMobileNavOpen(
+                    true
+                );
+            },
+            []
+        );
 
-      <MobileNavigationDrawer
-        open={mobileNavOpen}
-        onClose={() => setMobileNavOpen(false)}
-        onCreateWorkspace={outletContext.onCreateWorkspace}
-      />
+    const closeMobileNavigation =
+        useCallback(
+            () => {
+                setMobileNavOpen(
+                    false
+                );
+            },
+            []
+        );
 
-      <div className="flex min-w-0 flex-1 flex-col">
-        <AppTopbar onOpenMobileNav={() => setMobileNavOpen(true)} onCreateWorkspace={outletContext.onCreateWorkspace} />
+    const openCreateWorkspace =
+        useCallback(
+            () => {
+                setCreateDialogOpen(
+                    true
+                );
+            },
+            []
+        );
 
-        <main className="flex-1 overflow-y-auto">
-          <div className="mx-auto w-full max-w-[1600px] px-4 py-6 sm:px-6 lg:px-8">
-            <Outlet context={outletContext} />
-          </div>
-        </main>
-      </div>
+    const closeCreateWorkspace =
+        useCallback(
+            () => {
+                setCreateDialogOpen(
+                    false
+                );
+            },
+            []
+        );
 
-      <CreateWorkspaceDialog open={createDialogOpen} onClose={() => setCreateDialogOpen(false)} />
-    </div>
-  );
+    const outletContext:
+        AppShellOutletContext = {
+            onCreateWorkspace:
+                openCreateWorkspace,
+        };
+
+    return (
+        <div className="flex h-screen w-full overflow-hidden bg-background">
+            <AppSidebar
+                onCreateWorkspace={
+                    openCreateWorkspace
+                }
+            />
+
+            <MobileNavigationDrawer
+                open={
+                    mobileNavOpen
+                }
+                onClose={
+                    closeMobileNavigation
+                }
+                onCreateWorkspace={
+                    openCreateWorkspace
+                }
+            />
+
+            <div className="flex min-w-0 flex-1 flex-col">
+                <AppTopbar
+                    onOpenMobileNav={
+                        openMobileNavigation
+                    }
+                    onCreateWorkspace={
+                        openCreateWorkspace
+                    }
+                />
+
+                <main className="flex-1 overflow-y-auto">
+                    <div className="mx-auto w-full max-w-[1600px] px-4 py-6 sm:px-6 lg:px-8">
+                        <Outlet
+                            context={
+                                outletContext
+                            }
+                        />
+                    </div>
+                </main>
+            </div>
+
+            <CreateWorkspaceDialog
+                open={
+                    createDialogOpen
+                }
+                onClose={
+                    closeCreateWorkspace
+                }
+            />
+        </div>
+    );
 }

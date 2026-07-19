@@ -3,11 +3,13 @@ import type {
     Socket,
 } from "socket.io";
 
+import {
+    parseCookie,
+} from "cookie";
+
 import authService from "../modules/auth/auth.service";
 
-import {
-    User,
-} from "../modules/auth/auth.model";
+import {User} from "../modules/auth/auth.model";
 
 import type {
     ClientToServerEvents,
@@ -24,68 +26,90 @@ type AuthenticatedSocket =
         SocketData
     >;
 
-interface ISocketAuthPayload {
-    accessToken?: unknown;
+interface SocketAuthError
+    extends ExtendedError {
+    data?: {
+        code:
+            string;
+    };
 }
+
+const createSocketAuthError = (
+    message:
+        string,
+    code:
+        string
+): SocketAuthError => {
+    const error =
+        new Error(
+            message
+        ) as SocketAuthError;
+
+    error.data = {
+        code,
+    };
+
+    return error;
+};
 
 export const authenticateSocket =
     async (
-        socket: AuthenticatedSocket,
+        socket:
+            AuthenticatedSocket,
         next: (
-            error?: ExtendedError
+            error?:
+                ExtendedError
         ) => void
     ): Promise<void> => {
         try {
             /*
             |--------------------------------------------------------------------------
-            | Read Token From Connection Handshake
+            | Read HTTP Cookie Header
             |--------------------------------------------------------------------------
             |
-            | The frontend will connect using:
-            |
-            | io(API_URL, {
-            |     auth: {
-            |         accessToken
-            |     }
-            | });
+            | HTTP-only cookies cannot be read by frontend JavaScript.
+            | The browser sends them automatically during the Socket.IO handshake.
             |
             */
 
-            const auth =
+            const rawCookieHeader =
                 socket.handshake
-                    .auth as
-                    ISocketAuthPayload;
-
-            const accessToken =
-                auth.accessToken;
+                    .headers
+                    .cookie;
 
             if (
-                typeof accessToken !==
-                    "string" ||
+                !rawCookieHeader
+            ) {
+                return next(
+                    createSocketAuthError(
+                        "Authentication required.",
+                        "SOCKET_AUTH_REQUIRED"
+                    )
+                );
+            }
+
+            const cookies =
+                parseCookie(
+                    rawCookieHeader
+                );
+
+            const accessToken =
+                cookies.accessToken;
+
+            if (
                 !accessToken
             ) {
-                const error =
-                    new Error(
-                        "Authentication required."
-                    ) as ExtendedError & {
-                        data?: {
-                            code: string;
-                        };
-                    };
-
-                error.data = {
-                    code:
-                        "SOCKET_AUTH_REQUIRED",
-                };
-
                 return next(
-                    error
+                    createSocketAuthError(
+                        "Authentication required.",
+                        "SOCKET_AUTH_REQUIRED"
+                    )
                 );
             }
 
             /*
             |--------------------------------------------------------------------------
-            | Verify JWT
+            | Verify Access Token
             |--------------------------------------------------------------------------
             */
 
@@ -97,12 +121,8 @@ export const authenticateSocket =
 
             /*
             |--------------------------------------------------------------------------
-            | Verify User Still Exists
+            | Confirm User Still Exists
             |--------------------------------------------------------------------------
-            |
-            | A structurally valid JWT should not be enough if the
-            | user was deleted or disabled after the token was issued.
-            |
             */
 
             const user =
@@ -114,34 +134,25 @@ export const authenticateSocket =
                     )
                     .lean();
 
-            if (!user) {
-                const error =
-                    new Error(
-                        "User account is unavailable."
-                    ) as ExtendedError & {
-                        data?: {
-                            code: string;
-                        };
-                    };
-
-                error.data = {
-                    code:
-                        "SOCKET_USER_NOT_FOUND",
-                };
-
+            if (
+                !user
+            ) {
                 return next(
-                    error
+                    createSocketAuthError(
+                        "User account is unavailable.",
+                        "SOCKET_USER_NOT_FOUND"
+                    )
                 );
             }
 
             /*
-            |--------------------------------------------------------------------------
-            | Store Trusted User Data
-            |--------------------------------------------------------------------------
+            Store trusted server-side identity for all
+            later Socket.IO event handlers.
             */
 
             socket.data.userId =
-                user._id.toString();
+                user._id
+                    .toString();
 
             socket.data.email =
                 user.email;
@@ -149,32 +160,13 @@ export const authenticateSocket =
             socket.data.username =
                 user.username;
 
-            /*
-            next() without an error accepts the connection.
-            */
-
             return next();
         } catch {
-            const error =
-                new Error(
-                    "Invalid or expired access token."
-                ) as ExtendedError & {
-                    data?: {
-                        code: string;
-                    };
-                };
-
-            error.data = {
-                code:
-                    "SOCKET_AUTH_INVALID",
-            };
-
-            /*
-            next(error) rejects the Socket.IO connection.
-            */
-
             return next(
-                error
+                createSocketAuthError(
+                    "Invalid or expired access token.",
+                    "SOCKET_AUTH_INVALID"
+                )
             );
         }
     };

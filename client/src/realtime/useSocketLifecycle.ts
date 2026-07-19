@@ -55,7 +55,8 @@ export function useSocketLifecycle() {
       queryClient.invalidateQueries({ queryKey: workspaceInvitationQueryKeys.list() });
       queryClient.removeQueries({ queryKey: workspaceQueryKeys.detail(payload.workspaceId) });
 
-      if (location.pathname === `/workspaces/${payload.workspaceId}`) {
+      if (location.pathname.startsWith(
+        `/workspaces/${payload.workspaceId}`) ){
         navigate("/dashboard", { replace: true });
       }
 

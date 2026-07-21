@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { FolderKanban, Plus } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -31,6 +32,7 @@ interface WorkspaceProjectsPanelProps {
 }
 
 export function WorkspaceProjectsPanel({ workspace, search }: WorkspaceProjectsPanelProps) {
+  const navigate = useNavigate();
   const projectsQuery = useWorkspaceProjectsQuery(workspace._id);
   const [showAll, setShowAll] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
@@ -112,9 +114,11 @@ export function WorkspaceProjectsPanel({ workspace, search }: WorkspaceProjectsP
       {!projectsQuery.isLoading && !projectsQuery.isError && filteredProjects.length > 0 && (
         <div className="space-y-2">
           {visibleProjects.map((project) => (
-            <div
+            <button
               key={project._id}
-              className="flex items-center gap-3 rounded-lg border border-border/60 px-3 py-2.5 transition-colors hover:border-muted/40"
+              type="button"
+              onClick={() => navigate(`/workspaces/${workspace._id}/projects/${project._id}`)}
+              className="flex w-full items-center gap-3 rounded-lg border border-border/60 px-3 py-2.5 text-left transition-colors hover:border-muted/40 hover:bg-background/40"
             >
               <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/15 text-sm text-primary">
                 {project.icon || <FolderKanban className="h-4 w-4" />}
@@ -129,7 +133,7 @@ export function WorkspaceProjectsPanel({ workspace, search }: WorkspaceProjectsP
                 </Badge>
                 <span className="text-[11px] text-muted">{formatRelativeTime(project.updatedAt)}</span>
               </div>
-            </div>
+            </button>
           ))}
 
           {hasMore && (

@@ -7,3 +7,9 @@ export async function getWorkspaceActivitiesRequest(workspaceId: string): Promis
     .get<ApiResponse<{ activities: Activity[] }>>(`/workspaces/${workspaceId}/activities`)
     .then((res) => res.data.data.activities);
 }
+
+export async function getProjectActivitiesRequest(projectId: string): Promise<Activity[]> {
+  return axiosClient
+    .get<ApiResponse<{ activities: Activity[] }>>(`/projects/${projectId}/activities`)
+    .then((res) => res.data.data.activities);
+}

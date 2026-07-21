@@ -24,3 +24,9 @@ export interface CreateProjectPayload {
   description?: string;
   icon?: string;
 }
+
+export interface UpdateProjectPayload {
+  name?: string;
+  description?: string;
+  icon?: string;
+}

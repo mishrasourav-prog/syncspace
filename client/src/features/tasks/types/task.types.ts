@@ -39,3 +39,30 @@ export interface CreateTaskPayload {
   startDate?: string;
   dueDate?: string;
 }
+
+/**
+ * Every field is optional — quick edit sends only what changed. Dates that
+ * were cleared in the form are simply omitted, never sent as null, since
+ * the server's update-task validator does not accept null.
+ */
+export interface UpdateTaskPayload {
+  title?: string;
+  description?: string;
+  type?: TaskType;
+  priority?: TaskPriority;
+  startDate?: string;
+  dueDate?: string;
+}
+
+export interface ReorderTasksColumn {
+  status: TaskStatus;
+  taskIds: string[];
+}
+
+export interface ReorderTasksPayload {
+  columns: ReorderTasksColumn[];
+}
+
+export interface ReorderTasksResult {
+  updatedTaskCount: number;
+}

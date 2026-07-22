@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { AlertCircle, CheckSquare, Plus } from "lucide-react";
 import { Avatar } from "@/components/ui/avatar";
@@ -47,6 +48,9 @@ interface RecentWorkItemsProps {
     projectId:
         string;
 
+    workspaceId:
+        string;
+
     tasks:
         Task[];
 
@@ -77,6 +81,7 @@ interface RecentWorkItemsProps {
 
 export function RecentWorkItems({   
     projectId,
+    workspaceId,
     tasks,
     search,
     canUpdateStatus,
@@ -203,12 +208,20 @@ if (
             aria-labelledby="recent-work-items-heading"
             className="scroll-mt-24 rounded-xl border border-border bg-surface/60 p-4 shadow-soft"
         >
-            <h2
-                id="recent-work-items-heading"
-                className="mb-4 text-h3 text-foreground"
-            >
-                Recent Tasks &amp; Issues
-            </h2>
+            <div className="mb-4 flex items-center justify-between gap-2">
+                <h2
+                    id="recent-work-items-heading"
+                    className="text-h3 text-foreground"
+                >
+                    Recent Tasks &amp; Issues
+                </h2>
+                <Link
+                    to={`/workspaces/${workspaceId}/projects/${projectId}/tasks`}
+                    className="text-xs font-medium text-primary transition-colors hover:text-primary/80"
+                >
+                    Open board
+                </Link>
+            </div>
 
             <DashboardSectionError
                 compact
@@ -235,12 +248,20 @@ if (
           Recent Tasks &amp; Issues
           <span className="ml-2 text-caption">{sortedItems.length}</span>
         </h2>
-        {canCreateTask && (
-          <Button size="sm" onClick={onCreateTask}>
-            <Plus className="h-3.5 w-3.5" />
-            New Task
-          </Button>
-        )}
+        <div className="flex items-center gap-2">
+          <Link
+            to={`/workspaces/${workspaceId}/projects/${projectId}/tasks`}
+            className="text-xs font-medium text-primary transition-colors hover:text-primary/80"
+          >
+            Open board
+          </Link>
+          {canCreateTask && (
+            <Button size="sm" onClick={onCreateTask}>
+              <Plus className="h-3.5 w-3.5" />
+              New Task
+            </Button>
+          )}
+        </div>
       </div>
 
       {sortedItems.length === 0 && (

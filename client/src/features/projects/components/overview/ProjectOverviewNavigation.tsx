@@ -1,10 +1,9 @@
 import type { MouseEvent } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
-const TABS = [
+const HASH_TABS = [
   { id: "overview", label: "Overview" },
-  { id: "tasks", label: "Tasks & Issues" },
   { id: "documents", label: "Documents" },
   { id: "discussions", label: "Discussions" },
   { id: "members", label: "Members" },
@@ -12,14 +11,31 @@ const TABS = [
   { id: "settings", label: "Settings" },
 ];
 
+/**
+ * Tab strip shown on both the project overview page and the dedicated
+ * tasks page. "Tasks & Issues" is a real route, not a hash section, so it
+ * navigates rather than scrolling — every other tab scrolls a section on
+ * the overview page and navigates there first if visited from elsewhere.
+ */
 export function ProjectOverviewNavigation() {
+  const { workspaceId, projectId } = useParams<{ workspaceId: string; projectId: string }>();
   const location = useLocation();
   const navigate = useNavigate();
 
-  const activeTab = location.hash ? location.hash.replace("#", "") : "overview";
+  const overviewPath = `/workspaces/${workspaceId}/projects/${projectId}`;
+  const tasksPath = `${overviewPath}/tasks`;
+  const isTasksRoute = location.pathname === tasksPath;
 
-  function handleTabClick(event: MouseEvent<HTMLAnchorElement>, id: string) {
+  const activeHashTab = location.hash ? location.hash.replace("#", "") : "overview";
+
+  function handleHashTabClick(event: MouseEvent<HTMLAnchorElement>, id: string) {
     event.preventDefault();
+
+    if (isTasksRoute) {
+      navigate(`${overviewPath}#${id}`);
+      return;
+    }
+
     navigate({ hash: id }, { replace: false });
     requestAnimationFrame(() => {
       document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -29,14 +45,41 @@ export function ProjectOverviewNavigation() {
   return (
     <nav aria-label="Project sections" className="-mx-1 overflow-x-auto border-b border-border px-1">
       <div className="flex min-w-max gap-1">
-        {TABS.map((tab) => {
-          const isActive = activeTab === tab.id;
+        <a
+          href={`${overviewPath}#overview`}
+          onClick={(event) => handleHashTabClick(event, "overview")}
+          aria-current={!isTasksRoute && activeHashTab === "overview" ? "true" : undefined}
+          className={cn(
+            "relative whitespace-nowrap px-3 py-2.5 text-sm font-medium transition-colors",
+            !isTasksRoute && activeHashTab === "overview" ? "text-primary" : "text-muted hover:text-foreground"
+          )}
+        >
+          Overview
+          {!isTasksRoute && activeHashTab === "overview" && (
+            <span className="absolute inset-x-3 -bottom-px h-0.5 rounded-full bg-primary" />
+          )}
+        </a>
+
+        <Link
+          to={tasksPath}
+          aria-current={isTasksRoute ? "true" : undefined}
+          className={cn(
+            "relative whitespace-nowrap px-3 py-2.5 text-sm font-medium transition-colors",
+            isTasksRoute ? "text-primary" : "text-muted hover:text-foreground"
+          )}
+        >
+          Tasks &amp; Issues
+          {isTasksRoute && <span className="absolute inset-x-3 -bottom-px h-0.5 rounded-full bg-primary" />}
+        </Link>
+
+        {HASH_TABS.filter((tab) => tab.id !== "overview").map((tab) => {
+          const isActive = !isTasksRoute && activeHashTab === tab.id;
 
           return (
             <a
               key={tab.id}
-              href={`#${tab.id}`}
-              onClick={(event) => handleTabClick(event, tab.id)}
+              href={`${overviewPath}#${tab.id}`}
+              onClick={(event) => handleHashTabClick(event, tab.id)}
               aria-current={isActive ? "true" : undefined}
               className={cn(
                 "relative whitespace-nowrap px-3 py-2.5 text-sm font-medium transition-colors",

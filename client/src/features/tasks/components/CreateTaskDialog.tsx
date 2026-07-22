@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
@@ -9,14 +10,16 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useCreateTaskMutation } from "../hooks/useTaskMutations";
 import { createTaskSchema, type CreateTaskFormValues } from "../schemas/task.schemas";
+import type { TaskType } from "../types/task.types";
 
 interface CreateTaskDialogProps {
   projectId: string;
   open: boolean;
   onClose: () => void;
+  initialType?: TaskType;
 }
 
-export function CreateTaskDialog({ projectId, open, onClose }: CreateTaskDialogProps) {
+export function CreateTaskDialog({ projectId, open, onClose, initialType = "task" }: CreateTaskDialogProps) {
   const createTaskMutation = useCreateTaskMutation(projectId);
 
   const {
@@ -26,8 +29,16 @@ export function CreateTaskDialog({ projectId, open, onClose }: CreateTaskDialogP
     formState: { errors },
   } = useForm<CreateTaskFormValues>({
     resolver: zodResolver(createTaskSchema),
-    defaultValues: { title: "", description: "", type: "task", priority: "MEDIUM", startDate: "", dueDate: "" },
+    defaultValues: { title: "", description: "", type: initialType, priority: "MEDIUM", startDate: "", dueDate: "" },
   });
+
+  useEffect(() => {
+    if (open) {
+      reset({ title: "", description: "", type: initialType, priority: "MEDIUM", startDate: "", dueDate: "" });
+      createTaskMutation.reset();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, initialType]);
 
   function handleClose() {
     if (createTaskMutation.isPending) return;

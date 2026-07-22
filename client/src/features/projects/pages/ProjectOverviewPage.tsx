@@ -1106,6 +1106,9 @@ export function ProjectOverviewPage() {
                         projectId={
                             project._id
                         }
+                        workspaceId={
+                            workspace._id
+                        }
                         tasks={
                             tasks
                         }

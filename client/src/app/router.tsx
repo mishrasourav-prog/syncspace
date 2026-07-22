@@ -10,6 +10,7 @@ import { AppShell } from "@/layouts/AppShell";
 import { WorkspaceDashboardPage } from "@/features/workspaces/pages/WorkspaceDashboardPage";
 import { WorkspaceOverviewPage } from "@/features/workspaces/pages/WorkspaceOverviewPage";
 import { ProjectOverviewPage } from "@/features/projects/pages/ProjectOverviewPage";
+import { ProjectTasksPage } from "@/features/tasks/pages/ProjectTasksPage";
 import { useAuthStore } from "./store";
 
 function useIsAuthenticated() {
@@ -164,6 +165,7 @@ export function AppRouter() {
         <Route path="/dashboard" element={<WorkspaceDashboardPage />} />
         <Route path="/workspaces/:workspaceId" element={<WorkspaceOverviewPage />} />
         <Route path="/workspaces/:workspaceId/projects/:projectId" element={<ProjectOverviewPage />} />
+        <Route path="/workspaces/:workspaceId/projects/:projectId/tasks" element={<ProjectTasksPage />} />
       </Route>
 
       {/* Preserve old bookmarks/links pointing at the previous /home route. */}

@@ -4,6 +4,7 @@ import {
   Activity,
   Archive,
   Bell,
+  CheckSquare,
   ChevronsUpDown,
   FileText,
   FolderKanban,
@@ -29,6 +30,7 @@ import { useUnreadNotificationCountQuery } from "@/features/notifications/hooks/
 import { useMyInvitationsQuery } from "@/features/workspace-invitations/hooks/useWorkspaceInvitationQueries";
 import { useWorkspacesQuery } from "@/features/workspaces/hooks/useWorkspaceQueries";
 import { useProjectQuery } from "@/features/projects/hooks/useProjectQueries";
+import { useProjectTasksQuery } from "@/features/tasks/hooks/useTaskQueries";
 import { cn } from "@/lib/utils";
 import { UserMenu } from "./UserMenu";
 
@@ -42,9 +44,8 @@ const WORKSPACE_TABS = [
   { id: "settings", label: "Settings", icon: Settings },
 ] as const;
 
-const PROJECT_TABS = [
+const PROJECT_HASH_TABS = [
   { id: "overview", label: "Overview", icon: LayoutGrid },
-  { id: "tasks", label: "Tasks & Issues", icon: FolderKanban },
   { id: "documents", label: "Documents", icon: FileText },
   { id: "discussions", label: "Discussions", icon: MessageSquare },
   { id: "members", label: "Members", icon: Users },
@@ -175,6 +176,12 @@ interface AppSidebarProps {
 export function AppSidebar({ onCreateWorkspace }: AppSidebarProps) {
   const location = useLocation();
   const { workspaceId, projectId } = useRouteContext();
+  const tasksQuery = useProjectTasksQuery(projectId);
+
+  const activeTaskCount = useMemo(() => {
+    if (!tasksQuery.data) return undefined;
+    return tasksQuery.data.filter((task) => !task.isArchived && !task.parentTask).length;
+  }, [tasksQuery.data]);
 
   return (
     <aside className="hidden h-screen w-[272px] shrink-0 flex-col border-r border-border bg-surface/40 lg:flex">
@@ -188,7 +195,13 @@ export function AppSidebar({ onCreateWorkspace }: AppSidebarProps) {
       <WorkspaceSwitcher currentWorkspaceId={workspaceId} onCreateWorkspace={onCreateWorkspace} />
 
       {projectId && workspaceId ? (
-        <ProjectContextNav workspaceId={workspaceId} projectId={projectId} activeHash={location.hash} />
+        <ProjectContextNav
+          workspaceId={workspaceId}
+          projectId={projectId}
+          activeHash={location.hash}
+          activePathname={location.pathname}
+          activeTaskCount={activeTaskCount}
+        />
       ) : workspaceId ? (
         <WorkspaceContextNav workspaceId={workspaceId} activeHash={location.hash} />
       ) : (
@@ -395,10 +408,13 @@ interface ProjectContextNavProps {
   workspaceId: string;
   projectId: string;
   activeHash: string;
+  activePathname: string;
+  activeTaskCount?: number;
 }
 
-function ProjectContextNav({ workspaceId, projectId, activeHash }: ProjectContextNavProps) {
+function ProjectContextNav({ workspaceId, projectId, activeHash, activePathname, activeTaskCount }: ProjectContextNavProps) {
   const activeTab = activeHash ? activeHash.replace("#", "") : "overview";
+  const isTasksRoute = activePathname === `/workspaces/${workspaceId}/projects/${projectId}/tasks`;
   const workspacesQuery = useWorkspacesQuery();
   const projectQuery = useProjectQuery(projectId);
   const workspaceName = workspacesQuery.data?.find((workspace) => workspace._id === workspaceId)?.name;
@@ -445,8 +461,37 @@ function ProjectContextNav({ workspaceId, projectId, activeHash }: ProjectContex
         {projectQuery.data?.name ?? "Project"}
       </p>
       <div className="mt-1.5 space-y-0.5">
-        {PROJECT_TABS.map((tab) => {
-          const isActive = activeTab === tab.id;
+        <NavLink
+          to={`/workspaces/${workspaceId}/projects/${projectId}#overview`}
+          className={cn(
+            "flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+            !isTasksRoute && activeTab === "overview"
+              ? "bg-primary/15 text-primary"
+              : "text-muted hover:bg-surface hover:text-foreground"
+          )}
+        >
+          <LayoutGrid className="h-4 w-4" />
+          Overview
+        </NavLink>
+
+        <NavLink
+          to={`/workspaces/${workspaceId}/projects/${projectId}/tasks`}
+          className={cn(
+            "flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+            isTasksRoute ? "bg-primary/15 text-primary" : "text-muted hover:bg-surface hover:text-foreground"
+          )}
+        >
+          <CheckSquare className="h-4 w-4" />
+          Tasks &amp; Issues
+          {typeof activeTaskCount === "number" && activeTaskCount > 0 && (
+            <Badge variant="neutral" className="ml-auto">
+              {activeTaskCount}
+            </Badge>
+          )}
+        </NavLink>
+
+        {PROJECT_HASH_TABS.filter((tab) => tab.id !== "overview").map((tab) => {
+          const isActive = !isTasksRoute && activeTab === tab.id;
           const Icon = tab.icon;
 
           return (

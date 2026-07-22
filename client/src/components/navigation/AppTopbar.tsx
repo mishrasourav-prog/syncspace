@@ -32,6 +32,7 @@ export function AppTopbar({ onOpenMobileNav, onCreateWorkspace }: AppTopbarProps
   const { workspaceId, projectId } = useParams<{ workspaceId?: string; projectId?: string }>();
   const isWorkspaceContext = location.pathname.startsWith("/workspaces/");
   const isProjectContext = Boolean(projectId) && location.pathname.includes("/projects/");
+  const isTasksRoute = isProjectContext && location.pathname.endsWith("/tasks");
 
   const workspaceQuery = useWorkspaceQuery(isWorkspaceContext ? workspaceId : undefined);
   const projectQuery = useProjectQuery(isProjectContext ? projectId : undefined);
@@ -73,11 +74,13 @@ export function AppTopbar({ onOpenMobileNav, onCreateWorkspace }: AppTopbarProps
     setSearchParams(next, { replace: true });
   }
 
-  const searchPlaceholder = isProjectContext
-    ? "Search tasks, issues, documents…"
-    : isWorkspaceContext
-      ? "Search projects or members…"
-      : "Search workspaces…";
+  const searchPlaceholder = isTasksRoute
+    ? "Search tasks and issues…"
+    : isProjectContext
+      ? "Search tasks, issues, documents…"
+      : isWorkspaceContext
+        ? "Search projects or members…"
+        : "Search workspaces…";
 
   return (
     <header className="flex h-16 shrink-0 items-center justify-between gap-3 border-b border-border bg-background/95 px-4 backdrop-blur sm:px-6">
@@ -105,7 +108,22 @@ export function AppTopbar({ onOpenMobileNav, onCreateWorkspace }: AppTopbarProps
               Projects
             </Link>
             <ChevronRight className="h-3.5 w-3.5 shrink-0 text-muted/60" />
-            <span className="truncate font-medium text-foreground">{projectQuery.data?.name ?? "…"}</span>
+            {isTasksRoute ? (
+              <Link
+                to={`/workspaces/${workspaceId}/projects/${projectId}`}
+                className="shrink-0 truncate text-muted transition-colors hover:text-foreground"
+              >
+                {projectQuery.data?.name ?? "…"}
+              </Link>
+            ) : (
+              <span className="truncate font-medium text-foreground">{projectQuery.data?.name ?? "…"}</span>
+            )}
+            {isTasksRoute && (
+              <>
+                <ChevronRight className="h-3.5 w-3.5 shrink-0 text-muted/60" />
+                <span className="truncate font-medium text-foreground">Tasks &amp; Issues</span>
+              </>
+            )}
           </nav>
         ) : isWorkspaceContext ? (
           <nav aria-label="Breadcrumb" className="hidden min-w-0 items-center gap-1.5 text-sm lg:flex">

@@ -5,6 +5,7 @@ import { NavLink, useLocation, useSearchParams } from "react-router-dom";
 import {
   Activity,
   Archive,
+  CheckSquare,
   FileText,
   FolderKanban,
   LayoutGrid,
@@ -37,9 +38,8 @@ const WORKSPACE_TABS = [
   { id: "settings", label: "Settings", icon: Settings },
 ] as const;
 
-const PROJECT_TABS = [
+const PROJECT_HASH_TABS = [
   { id: "overview", label: "Overview", icon: LayoutGrid },
-  { id: "tasks", label: "Tasks & Issues", icon: FolderKanban },
   { id: "documents", label: "Documents", icon: FileText },
   { id: "discussions", label: "Discussions", icon: MessageSquare },
   { id: "members", label: "Members", icon: Users },
@@ -413,7 +413,9 @@ interface ProjectContextMobileNavProps {
 }
 
 function ProjectContextMobileNav({ workspaceId, projectId, activeHash, onClose }: ProjectContextMobileNavProps) {
+  const location = useLocation();
   const activeTab = activeHash ? activeHash.replace("#", "") : "overview";
+  const isTasksRoute = location.pathname === `/workspaces/${workspaceId}/projects/${projectId}/tasks`;
   const workspacesQuery = useWorkspacesQuery();
   const projectQuery = useProjectQuery(projectId);
   const workspaceName = useMemo(
@@ -465,8 +467,34 @@ function ProjectContextMobileNav({ workspaceId, projectId, activeHash, onClose }
 
       <p className="mt-6 truncate px-3 text-caption uppercase tracking-wide">{projectQuery.data?.name ?? "Project"}</p>
       <div className="mt-1.5 space-y-0.5">
-        {PROJECT_TABS.map((tab) => {
-          const isActive = activeTab === tab.id;
+        <NavLink
+          to={`/workspaces/${workspaceId}/projects/${projectId}#overview`}
+          onClick={onClose}
+          className={cn(
+            "flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+            !isTasksRoute && activeTab === "overview"
+              ? "bg-primary/15 text-primary"
+              : "text-muted hover:bg-background hover:text-foreground"
+          )}
+        >
+          <LayoutGrid className="h-4 w-4" />
+          Overview
+        </NavLink>
+
+        <NavLink
+          to={`/workspaces/${workspaceId}/projects/${projectId}/tasks`}
+          onClick={onClose}
+          className={cn(
+            "flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+            isTasksRoute ? "bg-primary/15 text-primary" : "text-muted hover:bg-background hover:text-foreground"
+          )}
+        >
+          <CheckSquare className="h-4 w-4" />
+          Tasks &amp; Issues
+        </NavLink>
+
+        {PROJECT_HASH_TABS.filter((tab) => tab.id !== "overview").map((tab) => {
+          const isActive = !isTasksRoute && activeTab === tab.id;
           const Icon = tab.icon;
 
           return (

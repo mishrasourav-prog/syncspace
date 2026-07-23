@@ -1,5 +1,4 @@
 import {
-  useEffect,
   useMemo,
   useState,
 } from "react";
@@ -45,6 +44,10 @@ import type {
   Task,
 } from "../types/task.types";
 
+import type {
+  TaskAssignee,
+} from "../types/taskAssignee.types";
+
 interface ManageTaskAssigneesProps {
   task:
     Task;
@@ -57,6 +60,16 @@ interface ManageTaskAssigneesProps {
 
   canManage:
     boolean;
+
+  /**
+   * Optional detailed assignment records (username, assignedAt), keyed by
+   * user id. When supplied — as on the Task Detail page — each chip shows a
+   * secondary username line and an "Assigned <date>" tooltip. Callers that
+   * don't pass this (e.g. the quick-edit dialog) see the original compact
+   * chip, unchanged.
+   */
+  assigneeDetails?:
+    Record<string, TaskAssignee>;
 }
 
 export function ManageTaskAssignees({
@@ -64,14 +77,43 @@ export function ManageTaskAssignees({
   projectId,
   members,
   canManage,
+  assigneeDetails,
 }: ManageTaskAssigneesProps) {
   const [
-    search,
-    setSearch,
+    searchState,
+    setSearchState,
   ] =
-    useState(
-      ""
-    );
+    useState<{
+      taskId:
+        string;
+
+      value:
+        string;
+    }>({
+      taskId:
+        task._id,
+
+      value:
+        "",
+    });
+
+  const search =
+    searchState.taskId ===
+    task._id
+      ? searchState.value
+      : "";
+
+  function setSearch(
+    value:
+      string
+  ): void {
+    setSearchState({
+      taskId:
+        task._id,
+
+      value,
+    });
+  }
 
   const assignMutation =
     useAssignTaskMemberMutation(
@@ -82,17 +124,6 @@ export function ManageTaskAssignees({
     useRemoveTaskAssigneeMutation(
       projectId
     );
-
-  useEffect(
-    () => {
-      setSearch(
-        ""
-      );
-    },
-    [
-      task._id,
-    ]
-  );
 
   const assignedIds =
     useMemo(
@@ -264,10 +295,21 @@ export function ManageTaskAssignees({
           task.assignees.map(
             (
               assignee
-            ) => (
+            ) => {
+              const detail =
+                assigneeDetails?.[
+                  assignee._id
+                ];
+
+              return (
               <span
                 key={
                   assignee._id
+                }
+                title={
+                  detail
+                    ? `Assigned ${new Date(detail.assignedAt).toLocaleString()}`
+                    : undefined
                 }
                 className="flex items-center gap-1.5 rounded-full border border-border bg-background/60 py-1 pl-1 pr-2 text-xs text-foreground"
               >
@@ -281,9 +323,18 @@ export function ManageTaskAssignees({
                   size="sm"
                 />
 
-                {
-                  assignee.name
-                }
+                <span>
+                  {
+                    assignee.name
+                  }
+                  {
+                    detail && (
+                      <span className="ml-1 text-muted">
+                        @{detail.user.username}
+                      </span>
+                    )
+                  }
+                </span>
 
                 {
                   canManage && (
@@ -308,7 +359,8 @@ export function ManageTaskAssignees({
                   )
                 }
               </span>
-            )
+              );
+            }
           )
         }
 

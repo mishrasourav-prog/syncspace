@@ -24,7 +24,7 @@ export function ProjectOverviewNavigation() {
 
   const overviewPath = `/workspaces/${workspaceId}/projects/${projectId}`;
   const tasksPath = `${overviewPath}/tasks`;
-  const isTasksRoute = location.pathname === tasksPath;
+  const isTasksRoute = location.pathname === tasksPath || location.pathname.startsWith(`${tasksPath}/`);
 
   const activeHashTab = location.hash ? location.hash.replace("#", "") : "overview";
 

@@ -15,6 +15,7 @@ import {
 import { NotificationCenter } from "@/features/notifications/components/NotificationCenter";
 import { useWorkspaceQuery } from "@/features/workspaces/hooks/useWorkspaceQueries";
 import { useProjectQuery } from "@/features/projects/hooks/useProjectQueries";
+import { useTaskQuery } from "@/features/tasks/hooks/useTaskQueries";
 import { useAuthStore } from "@/app/store";
 import { useLogout } from "@/features/auth/hooks/useLogout";
 
@@ -29,10 +30,16 @@ export function AppTopbar({ onOpenMobileNav, onCreateWorkspace }: AppTopbarProps
   const [searchParams, setSearchParams] = useSearchParams();
   const searchInputRef = useRef<HTMLInputElement>(null);
 
-  const { workspaceId, projectId } = useParams<{ workspaceId?: string; projectId?: string }>();
+  const { workspaceId, projectId, taskId } = useParams<{ workspaceId?: string; projectId?: string; taskId?: string }>();
   const isWorkspaceContext = location.pathname.startsWith("/workspaces/");
   const isProjectContext = Boolean(projectId) && location.pathname.includes("/projects/");
-  const isTasksRoute = isProjectContext && location.pathname.endsWith("/tasks");
+  const tasksBasePath = projectId && workspaceId ? `/workspaces/${workspaceId}/projects/${projectId}/tasks` : undefined;
+  const isTasksRoute =
+    isProjectContext &&
+    Boolean(tasksBasePath) &&
+    (location.pathname === tasksBasePath || location.pathname.startsWith(`${tasksBasePath}/`));
+  const isTaskDetailRoute = isTasksRoute && Boolean(taskId);
+  const taskQuery = useTaskQuery(isTaskDetailRoute ? projectId : undefined, isTaskDetailRoute ? taskId : undefined);
 
   const workspaceQuery = useWorkspaceQuery(isWorkspaceContext ? workspaceId : undefined);
   const projectQuery = useProjectQuery(isProjectContext ? projectId : undefined);
@@ -121,7 +128,22 @@ export function AppTopbar({ onOpenMobileNav, onCreateWorkspace }: AppTopbarProps
             {isTasksRoute && (
               <>
                 <ChevronRight className="h-3.5 w-3.5 shrink-0 text-muted/60" />
-                <span className="truncate font-medium text-foreground">Tasks &amp; Issues</span>
+                {isTaskDetailRoute ? (
+                  <Link
+                    to={tasksBasePath ?? "/dashboard"}
+                    className="shrink-0 truncate text-muted transition-colors hover:text-foreground"
+                  >
+                    Tasks &amp; Issues
+                  </Link>
+                ) : (
+                  <span className="truncate font-medium text-foreground">Tasks &amp; Issues</span>
+                )}
+              </>
+            )}
+            {isTaskDetailRoute && (
+              <>
+                <ChevronRight className="h-3.5 w-3.5 shrink-0 text-muted/60" />
+                <span className="truncate font-medium text-foreground">{taskQuery.data?.title ?? "…"}</span>
               </>
             )}
           </nav>

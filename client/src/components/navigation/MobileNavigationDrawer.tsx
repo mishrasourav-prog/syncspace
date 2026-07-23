@@ -415,7 +415,8 @@ interface ProjectContextMobileNavProps {
 function ProjectContextMobileNav({ workspaceId, projectId, activeHash, onClose }: ProjectContextMobileNavProps) {
   const location = useLocation();
   const activeTab = activeHash ? activeHash.replace("#", "") : "overview";
-  const isTasksRoute = location.pathname === `/workspaces/${workspaceId}/projects/${projectId}/tasks`;
+  const tasksPath = `/workspaces/${workspaceId}/projects/${projectId}/tasks`;
+  const isTasksRoute = location.pathname === tasksPath || location.pathname.startsWith(`${tasksPath}/`);
   const workspacesQuery = useWorkspacesQuery();
   const projectQuery = useProjectQuery(projectId);
   const workspaceName = useMemo(

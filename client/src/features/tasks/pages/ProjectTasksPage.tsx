@@ -26,19 +26,12 @@ import {
   canCreateWorkItem,
   canEditProject,
   canInviteProjectMember,
-  canUpdateWorkItemStatus,
   deriveProjectRole,
 } from "@/features/projects/project.permissions";
 import { taskQueryKeys } from "../task.queryKeys";
 import { useProjectTasksQuery } from "../hooks/useTaskQueries";
 import { useReorderProjectTasksMutation } from "../hooks/useTaskMutations";
-import {
-  canArchiveTask,
-  canEditTask,
-  canManageTaskAssignees,
-  canReorderTaskBoard,
-  canRestoreTask,
-} from "../task.permissions";
+import { canReorderTaskBoard } from "../task.permissions";
 import {
   ALL_STATUSES,
   countActiveFilters,
@@ -51,8 +44,6 @@ import {
 } from "../task.filters";
 import type { Task, TaskPriority, TaskStatus, TaskType } from "../types/task.types";
 import { CreateTaskDialog } from "../components/CreateTaskDialog";
-import { EditTaskDialog } from "../components/EditTaskDialog";
-import { TaskArchiveDialogs, type TaskActionTarget } from "../components/TaskArchiveDialogs";
 import { TaskViewSwitcher } from "../components/TaskViewSwitcher";
 import { TaskSummaryRail } from "../components/TaskSummaryRail";
 import { TaskFilterToolbar } from "../components/filters/TaskFilterToolbar";
@@ -104,12 +95,18 @@ export function ProjectTasksPage() {
 
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [createDialogType, setCreateDialogType] = useState<TaskType>("task");
-  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
-  const [taskActionTarget, setTaskActionTarget] = useState<TaskActionTarget | null>(null);
 
   const hasShownInaccessibleToast = useRef(false);
   const hasShownWorkspaceNotFoundToast = useRef(false);
   const hasHandledWorkspaceMismatch = useRef(false);
+
+  function navigateToTaskDetail(taskId: string) {
+    if (!workspaceId || !projectId) return;
+    const search = searchParams.toString();
+    navigate(`/workspaces/${workspaceId}/projects/${projectId}/tasks/${taskId}`, {
+      state: search ? { fromTasksSearch: `?${search}` } : undefined,
+    });
+  }
 
   const isProjectInaccessible =
     projectQuery.isError && (projectQuery.error?.status === 403 || projectQuery.error?.status === 404);
@@ -311,14 +308,9 @@ export function ProjectTasksPage() {
   const role = deriveProjectRole(members, currentUserId);
   const allTasks = tasksQuery.data ?? [];
   const rootTasks = allTasks.filter((task) => !task.parentTask);
-  const selectedTask = allTasks.find((task) => task._id === selectedTaskId) ?? null;
-
   const canInvite = canInviteProjectMember(project, workspace, role);
   const canEdit = canEditProject(project, workspace, role);
   const canCreateTask = canCreateWorkItem(project, workspace, role);
-  const canUpdateStatus = canUpdateWorkItemStatus(project, workspace, role);
-  const canManageAssignees = selectedTask ? canManageTaskAssignees(selectedTask, project, workspace, role) : false;
-  const canEditSelectedTask = selectedTask ? canEditTask(selectedTask, project, workspace, role) : false;
 
   // A single "now" snapshot for this render pass, threaded down to every
   // component that needs to compare against due dates.
@@ -521,7 +513,7 @@ export function ProjectTasksPage() {
               <TaskBoard
                 columns={columns}
                 now={now}
-                onTaskClick={(task) => setSelectedTaskId(task._id)}
+                onTaskClick={(task) => navigateToTaskDetail(task._id)}
                 reorderDisabled={!reorderEnabled}
                 reorderDisabledReason={
                   reorderMutation.isPending
@@ -544,7 +536,7 @@ export function ProjectTasksPage() {
             <TaskListView
               tasks={filteredTasks}
               now={now}
-              onTaskClick={(task) => setSelectedTaskId(task._id)}
+              onTaskClick={(task) => navigateToTaskDetail(task._id)}
               emptyMessage={
                 rootTasks.length === 0 ? "No tasks or issues yet." : "No tasks or issues match your filters."
               }
@@ -563,7 +555,7 @@ export function ProjectTasksPage() {
             onRetry={() => {
               void tasksQuery.refetch();
             }}
-            onSelectTask={(task) => setSelectedTaskId(task._id)}
+            onSelectTask={(task) => navigateToTaskDetail(task._id)}
           />
         </div>
       </div>
@@ -585,28 +577,6 @@ export function ProjectTasksPage() {
           initialType={createDialogType}
         />
       )}
-
-      <EditTaskDialog
-        task={selectedTask}
-        projectId={project._id}
-        members={members}
-        canEdit={canEditSelectedTask}
-        canChangeStatus={canUpdateStatus && Boolean(selectedTask) && !selectedTask?.isArchived}
-        canManageAssignees={canManageAssignees}
-        canArchive={selectedTask ? canArchiveTask(selectedTask, project, workspace, role, currentUserId) : false}
-        canRestore={selectedTask ? canRestoreTask(selectedTask, project, workspace, role, currentUserId) : false}
-        onClose={() => setSelectedTaskId(null)}
-        onRequestArchive={(task) => {
-          setSelectedTaskId(null);
-          setTaskActionTarget({ type: "archive", task });
-        }}
-        onRequestRestore={(task) => {
-          setSelectedTaskId(null);
-          setTaskActionTarget({ type: "restore", task });
-        }}
-      />
-
-      <TaskArchiveDialogs target={taskActionTarget} projectId={project._id} onClose={() => setTaskActionTarget(null)} />
 
       {canEdit && (
         <EditProjectDialog

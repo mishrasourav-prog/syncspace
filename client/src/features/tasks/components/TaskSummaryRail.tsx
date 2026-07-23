@@ -202,11 +202,8 @@ export function TaskSummaryRail({
 
   const donutSegments =
     useMemo(
-      () => {
-        let offset =
-          0;
-
-        return SUMMARY_PRIORITIES
+      () =>
+        SUMMARY_PRIORITIES
           .filter(
             (
               priority
@@ -216,8 +213,24 @@ export function TaskSummaryRail({
               ] >
               0
           )
-          .map(
+          .reduce<{
+            offset:
+              number;
+
+            segments:
+              Array<{
+                priority:
+                  TaskPriority;
+
+                dashArray:
+                  string;
+
+                dashOffset:
+                  number;
+              }>;
+          }>(
             (
+              result,
               priority
             ) => {
               const fraction =
@@ -233,21 +246,32 @@ export function TaskSummaryRail({
                 fraction *
                 CIRCUMFERENCE;
 
-              const segment = {
-                priority,
-                dashArray:
-                  `${length} ${CIRCUMFERENCE - length}`,
-                dashOffset:
-                  -offset,
+              return {
+                offset:
+                  result.offset +
+                  length,
+
+                segments: [
+                  ...result.segments,
+                  {
+                    priority,
+                    dashArray:
+                      `${length} ${CIRCUMFERENCE - length}`,
+                    dashOffset:
+                      -result.offset,
+                  },
+                ],
               };
+            },
+            {
+              offset:
+                0,
 
-              offset +=
-                length;
-
-              return segment;
+              segments:
+                [],
             }
-          );
-      },
+          )
+          .segments,
       [
         priorityCounts,
         total,

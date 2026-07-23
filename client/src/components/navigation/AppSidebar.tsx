@@ -414,7 +414,8 @@ interface ProjectContextNavProps {
 
 function ProjectContextNav({ workspaceId, projectId, activeHash, activePathname, activeTaskCount }: ProjectContextNavProps) {
   const activeTab = activeHash ? activeHash.replace("#", "") : "overview";
-  const isTasksRoute = activePathname === `/workspaces/${workspaceId}/projects/${projectId}/tasks`;
+  const tasksPath = `/workspaces/${workspaceId}/projects/${projectId}/tasks`;
+  const isTasksRoute = activePathname === tasksPath || activePathname.startsWith(`${tasksPath}/`);
   const workspacesQuery = useWorkspacesQuery();
   const projectQuery = useProjectQuery(projectId);
   const workspaceName = workspacesQuery.data?.find((workspace) => workspace._id === workspaceId)?.name;

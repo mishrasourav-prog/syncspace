@@ -79,7 +79,7 @@ export function useSocketLifecycle() {
       queryClient.removeQueries({ queryKey: projectQueryKeys.detail(payload.projectId) });
       queryClient.removeQueries({ queryKey: projectMemberQueryKeys.list(payload.projectId) });
       queryClient.removeQueries({ queryKey: projectInvitationQueryKeys.list(payload.projectId) });
-      queryClient.removeQueries({ queryKey: taskQueryKeys.projectList(payload.projectId) });
+      queryClient.removeQueries({ queryKey: taskQueryKeys.project(payload.projectId) });
       queryClient.removeQueries({ queryKey: documentQueryKeys.project(payload.projectId) });
       queryClient.removeQueries({ queryKey: discussionQueryKeys.project(payload.projectId) });
       queryClient.removeQueries({ queryKey: activityQueryKeys.project(payload.projectId) });

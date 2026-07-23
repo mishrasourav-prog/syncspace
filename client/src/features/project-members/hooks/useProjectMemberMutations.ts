@@ -224,12 +224,9 @@ export function useLeaveProjectMutation(
 
                 queryClient.removeQueries({
                     queryKey:
-                        taskQueryKeys.projectList(
+                        taskQueryKeys.project(
                             projectId
                         ),
-
-                    exact:
-                        true,
                 });
 
                 /*

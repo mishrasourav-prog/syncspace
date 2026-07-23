@@ -38,6 +38,8 @@ export interface CreateTaskPayload {
   priority?: TaskPriority;
   startDate?: string;
   dueDate?: string;
+  /** Present only when creating a subtask from the Task Detail page. */
+  parentTask?: string;
 }
 
 /**

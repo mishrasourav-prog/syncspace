@@ -44,7 +44,7 @@ export function canArchiveTask(
   role: ProjectRole | undefined,
   currentUserId: string | undefined
 ): boolean {
-  if (task.isArchived || !isWritable(project, workspace)) return false;
+  if (!role || task.isArchived || !isWritable(project, workspace)) return false;
   return role === "admin" || (Boolean(currentUserId) && task.createdBy === currentUserId);
 }
 
@@ -56,8 +56,55 @@ export function canRestoreTask(
   role: ProjectRole | undefined,
   currentUserId: string | undefined
 ): boolean {
-  if (!task.isArchived || !isWritable(project, workspace)) return false;
+  if (!role || !task.isArchived || !isWritable(project, workspace)) return false;
   return role === "admin" || (Boolean(currentUserId) && task.createdBy === currentUserId);
+}
+
+/** Creating a subtask is a task-creation action scoped to an active, non-archived parent. */
+export function canCreateSubtask(
+  task: Task,
+  project: Project,
+  workspace: WorkspaceSummary,
+  role: ProjectRole | undefined
+): boolean {
+  return Boolean(role) && !task.isArchived && isWritable(project, workspace);
+}
+
+export function canCreateComment(
+  task: Task,
+  project: Project,
+  workspace: WorkspaceSummary,
+  role: ProjectRole | undefined
+): boolean {
+  return Boolean(role) && !task.isArchived && isWritable(project, workspace);
+}
+
+interface CommentLike {
+  author: { _id: string } | null;
+  isDeleted: boolean;
+}
+
+export function canEditComment(
+  comment: CommentLike,
+  task: Task,
+  project: Project,
+  workspace: WorkspaceSummary,
+  currentUserId: string | undefined
+): boolean {
+  if (comment.isDeleted || task.isArchived || !isWritable(project, workspace)) return false;
+  return Boolean(currentUserId) && comment.author?._id === currentUserId;
+}
+
+export function canDeleteComment(
+  comment: CommentLike,
+  task: Task,
+  project: Project,
+  workspace: WorkspaceSummary,
+  role: ProjectRole | undefined,
+  currentUserId: string | undefined
+): boolean {
+  if (comment.isDeleted || task.isArchived || !isWritable(project, workspace)) return false;
+  return role === "admin" || (Boolean(currentUserId) && comment.author?._id === currentUserId);
 }
 
 export interface TaskBoardFilterState {

@@ -24,3 +24,19 @@ export interface ProjectDocumentListResult {
   documents: ProjectDocument[];
   nextCursor: string | null;
 }
+
+export interface GetProjectDocumentsParams {
+  isArchived?: boolean;
+  search?: string;
+  cursor?: string;
+  limit?: number;
+}
+
+export interface CreateDocumentPayload {
+  title: string;
+}
+
+export interface RenameDocumentPayload {
+  title: string;
+  expectedRevision: number;
+}

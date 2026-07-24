@@ -4,7 +4,6 @@ import { cn } from "@/lib/utils";
 
 const HASH_TABS = [
   { id: "overview", label: "Overview" },
-  { id: "documents", label: "Documents" },
   { id: "discussions", label: "Discussions" },
   { id: "members", label: "Members" },
   { id: "activity", label: "Activity" },
@@ -13,9 +12,10 @@ const HASH_TABS = [
 
 /**
  * Tab strip shown on both the project overview page and the dedicated
- * tasks page. "Tasks & Issues" is a real route, not a hash section, so it
- * navigates rather than scrolling — every other tab scrolls a section on
- * the overview page and navigates there first if visited from elsewhere.
+ * tasks/documents pages. "Tasks & Issues" and "Documents" are real routes,
+ * not hash sections, so they navigate rather than scrolling — every other
+ * tab scrolls a section on the overview page and navigates there first if
+ * visited from elsewhere.
  */
 export function ProjectOverviewNavigation() {
   const { workspaceId, projectId } = useParams<{ workspaceId: string; projectId: string }>();
@@ -25,13 +25,16 @@ export function ProjectOverviewNavigation() {
   const overviewPath = `/workspaces/${workspaceId}/projects/${projectId}`;
   const tasksPath = `${overviewPath}/tasks`;
   const isTasksRoute = location.pathname === tasksPath || location.pathname.startsWith(`${tasksPath}/`);
+  const documentsPath = `${overviewPath}/documents`;
+  const isDocumentsRoute = location.pathname === documentsPath || location.pathname.startsWith(`${documentsPath}/`);
+  const isRealRoute = isTasksRoute || isDocumentsRoute;
 
   const activeHashTab = location.hash ? location.hash.replace("#", "") : "overview";
 
   function handleHashTabClick(event: MouseEvent<HTMLAnchorElement>, id: string) {
     event.preventDefault();
 
-    if (isTasksRoute) {
+    if (isRealRoute) {
       navigate(`${overviewPath}#${id}`);
       return;
     }
@@ -48,14 +51,14 @@ export function ProjectOverviewNavigation() {
         <a
           href={`${overviewPath}#overview`}
           onClick={(event) => handleHashTabClick(event, "overview")}
-          aria-current={!isTasksRoute && activeHashTab === "overview" ? "true" : undefined}
+          aria-current={!isRealRoute && activeHashTab === "overview" ? "true" : undefined}
           className={cn(
             "relative whitespace-nowrap px-3 py-2.5 text-sm font-medium transition-colors",
-            !isTasksRoute && activeHashTab === "overview" ? "text-primary" : "text-muted hover:text-foreground"
+            !isRealRoute && activeHashTab === "overview" ? "text-primary" : "text-muted hover:text-foreground"
           )}
         >
           Overview
-          {!isTasksRoute && activeHashTab === "overview" && (
+          {!isRealRoute && activeHashTab === "overview" && (
             <span className="absolute inset-x-3 -bottom-px h-0.5 rounded-full bg-primary" />
           )}
         </a>
@@ -72,8 +75,20 @@ export function ProjectOverviewNavigation() {
           {isTasksRoute && <span className="absolute inset-x-3 -bottom-px h-0.5 rounded-full bg-primary" />}
         </Link>
 
+        <Link
+          to={documentsPath}
+          aria-current={isDocumentsRoute ? "true" : undefined}
+          className={cn(
+            "relative whitespace-nowrap px-3 py-2.5 text-sm font-medium transition-colors",
+            isDocumentsRoute ? "text-primary" : "text-muted hover:text-foreground"
+          )}
+        >
+          Documents
+          {isDocumentsRoute && <span className="absolute inset-x-3 -bottom-px h-0.5 rounded-full bg-primary" />}
+        </Link>
+
         {HASH_TABS.filter((tab) => tab.id !== "overview").map((tab) => {
-          const isActive = !isTasksRoute && activeHashTab === tab.id;
+          const isActive = !isRealRoute && activeHashTab === tab.id;
 
           return (
             <a

@@ -41,6 +41,13 @@ export function AppTopbar({ onOpenMobileNav, onCreateWorkspace }: AppTopbarProps
   const isTaskDetailRoute = isTasksRoute && Boolean(taskId);
   const taskQuery = useTaskQuery(isTaskDetailRoute ? projectId : undefined, isTaskDetailRoute ? taskId : undefined);
 
+  const documentsBasePath =
+    projectId && workspaceId ? `/workspaces/${workspaceId}/projects/${projectId}/documents` : undefined;
+  const isDocumentsRoute =
+    isProjectContext &&
+    Boolean(documentsBasePath) &&
+    (location.pathname === documentsBasePath || location.pathname.startsWith(`${documentsBasePath}/`));
+
   const workspaceQuery = useWorkspaceQuery(isWorkspaceContext ? workspaceId : undefined);
   const projectQuery = useProjectQuery(isProjectContext ? projectId : undefined);
 
@@ -83,11 +90,13 @@ export function AppTopbar({ onOpenMobileNav, onCreateWorkspace }: AppTopbarProps
 
   const searchPlaceholder = isTasksRoute
     ? "Search tasks and issues…"
-    : isProjectContext
-      ? "Search tasks, issues, documents…"
-      : isWorkspaceContext
-        ? "Search projects or members…"
-        : "Search workspaces…";
+    : isDocumentsRoute
+      ? "Search documents…"
+      : isProjectContext
+        ? "Search tasks, issues, documents…"
+        : isWorkspaceContext
+          ? "Search projects or members…"
+          : "Search workspaces…";
 
   return (
     <header className="flex h-16 shrink-0 items-center justify-between gap-3 border-b border-border bg-background/95 px-4 backdrop-blur sm:px-6">
@@ -115,7 +124,7 @@ export function AppTopbar({ onOpenMobileNav, onCreateWorkspace }: AppTopbarProps
               Projects
             </Link>
             <ChevronRight className="h-3.5 w-3.5 shrink-0 text-muted/60" />
-            {isTasksRoute ? (
+            {isTasksRoute || isDocumentsRoute ? (
               <Link
                 to={`/workspaces/${workspaceId}/projects/${projectId}`}
                 className="shrink-0 truncate text-muted transition-colors hover:text-foreground"
@@ -144,6 +153,12 @@ export function AppTopbar({ onOpenMobileNav, onCreateWorkspace }: AppTopbarProps
               <>
                 <ChevronRight className="h-3.5 w-3.5 shrink-0 text-muted/60" />
                 <span className="truncate font-medium text-foreground">{taskQuery.data?.title ?? "…"}</span>
+              </>
+            )}
+            {isDocumentsRoute && (
+              <>
+                <ChevronRight className="h-3.5 w-3.5 shrink-0 text-muted/60" />
+                <span className="truncate font-medium text-foreground">Documents</span>
               </>
             )}
           </nav>

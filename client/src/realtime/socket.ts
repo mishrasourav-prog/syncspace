@@ -19,6 +19,15 @@ export interface SocketActionResponse {
   message: string;
 }
 
+export interface DocumentSocketPayload {
+  workspaceId: string;
+  projectId: string;
+  documentId: string;
+  actorId: string;
+  title: string;
+  revision: number;
+}
+
 interface ServerToClientEvents {
   "socket:ready": (payload: { userId: string; socketId: string }) => void;
   "notification:new": (payload: { notificationId: string }) => void;
@@ -29,10 +38,10 @@ interface ServerToClientEvents {
   "task:status-changed": (payload: { workspaceId: string; projectId: string; taskId: string }) => void;
   "task:assigned": (payload: { workspaceId: string; projectId: string; taskId: string }) => void;
   "tasks:reordered": (payload: { workspaceId: string; projectId: string }) => void;
-  "document:created": (payload: { workspaceId: string; projectId: string; documentId: string }) => void;
-  "document:updated": (payload: { workspaceId: string; projectId: string; documentId: string }) => void;
-  "document:archived": (payload: { workspaceId: string; projectId: string; documentId: string }) => void;
-  "document:restored": (payload: { workspaceId: string; projectId: string; documentId: string }) => void;
+  "document:created": (payload: DocumentSocketPayload) => void;
+  "document:updated": (payload: DocumentSocketPayload) => void;
+  "document:archived": (payload: DocumentSocketPayload) => void;
+  "document:restored": (payload: DocumentSocketPayload) => void;
   "discussion:changed": (payload: { workspaceId: string; projectId: string; discussionId: string }) => void;
   "discussion:reply-changed": (payload: { workspaceId: string; projectId: string; discussionId: string }) => void;
 }

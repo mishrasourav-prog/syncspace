@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link, useParams } from "react-router-dom";
 import { FileText } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatRelativeTime } from "@/lib/date";
@@ -25,8 +26,10 @@ interface ProjectDocumentsPreviewProps {
 }
 
 export function ProjectDocumentsPreview({ projectId, search }: ProjectDocumentsPreviewProps) {
+  const { workspaceId } = useParams<{ workspaceId: string }>();
   const documentsQuery = useProjectDocumentsQuery(projectId, search);
   const [showAll, setShowAll] = useState(false);
+  const documentsPath = `/workspaces/${workspaceId}/projects/${projectId}/documents`;
 
   const documents = documentsQuery.data?.documents ?? [];
   const nextCursor = documentsQuery.data?.nextCursor ?? null;
@@ -48,6 +51,9 @@ export function ProjectDocumentsPreview({ projectId, search }: ProjectDocumentsP
             <span className="ml-2 text-caption">{countLabel}</span>
           )}
         </h2>
+        <Link to={documentsPath} className="shrink-0 text-xs font-medium text-primary transition-colors hover:text-primary/80">
+          Open Documents
+        </Link>
       </div>
 
       {documentsQuery.isLoading && (

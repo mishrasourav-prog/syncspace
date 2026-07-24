@@ -40,7 +40,6 @@ const WORKSPACE_TABS = [
 
 const PROJECT_HASH_TABS = [
   { id: "overview", label: "Overview", icon: LayoutGrid },
-  { id: "documents", label: "Documents", icon: FileText },
   { id: "discussions", label: "Discussions", icon: MessageSquare },
   { id: "members", label: "Members", icon: Users },
   { id: "activity", label: "Activity", icon: Activity },
@@ -417,6 +416,9 @@ function ProjectContextMobileNav({ workspaceId, projectId, activeHash, onClose }
   const activeTab = activeHash ? activeHash.replace("#", "") : "overview";
   const tasksPath = `/workspaces/${workspaceId}/projects/${projectId}/tasks`;
   const isTasksRoute = location.pathname === tasksPath || location.pathname.startsWith(`${tasksPath}/`);
+  const documentsPath = `/workspaces/${workspaceId}/projects/${projectId}/documents`;
+  const isDocumentsRoute = location.pathname === documentsPath || location.pathname.startsWith(`${documentsPath}/`);
+  const isProjectSubRoute = isTasksRoute || isDocumentsRoute;
   const workspacesQuery = useWorkspacesQuery();
   const projectQuery = useProjectQuery(projectId);
   const workspaceName = useMemo(
@@ -473,7 +475,7 @@ function ProjectContextMobileNav({ workspaceId, projectId, activeHash, onClose }
           onClick={onClose}
           className={cn(
             "flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
-            !isTasksRoute && activeTab === "overview"
+            !isProjectSubRoute && activeTab === "overview"
               ? "bg-primary/15 text-primary"
               : "text-muted hover:bg-background hover:text-foreground"
           )}
@@ -494,8 +496,20 @@ function ProjectContextMobileNav({ workspaceId, projectId, activeHash, onClose }
           Tasks &amp; Issues
         </NavLink>
 
+        <NavLink
+          to={`/workspaces/${workspaceId}/projects/${projectId}/documents`}
+          onClick={onClose}
+          className={cn(
+            "flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+            isDocumentsRoute ? "bg-primary/15 text-primary" : "text-muted hover:bg-background hover:text-foreground"
+          )}
+        >
+          <FileText className="h-4 w-4" />
+          Documents
+        </NavLink>
+
         {PROJECT_HASH_TABS.filter((tab) => tab.id !== "overview").map((tab) => {
-          const isActive = !isTasksRoute && activeTab === tab.id;
+          const isActive = !isProjectSubRoute && activeTab === tab.id;
           const Icon = tab.icon;
 
           return (

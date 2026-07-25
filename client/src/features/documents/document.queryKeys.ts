@@ -14,4 +14,13 @@ export const documentQueryKeys = {
 
   infiniteList: (projectId: string, isArchived: boolean, search: string) =>
     [...documentQueryKeys.infinite(projectId), isArchived, search] as const,
+
+  /**
+   * Single-document detail query used by the Document Editor. Kept beneath
+   * the project prefix (rather than under `all` directly) so that the
+   * existing project-access-revocation cache cleanup — which invalidates
+   * everything under `project(projectId)` — removes it automatically.
+   */
+  detail: (projectId: string, documentId: string) =>
+    [...documentQueryKeys.project(projectId), "detail", documentId] as const,
 };

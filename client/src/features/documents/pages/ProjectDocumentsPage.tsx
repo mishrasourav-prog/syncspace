@@ -1364,6 +1364,12 @@ export function ProjectDocumentsPage() {
                   documents={
                     filteredDocuments
                   }
+                  workspaceId={
+                    workspaceId ?? ""
+                  }
+                  projectId={
+                    projectId ?? ""
+                  }
                   emptyMessage={
                     emptyMessage
                   }
@@ -1440,6 +1446,12 @@ export function ProjectDocumentsPage() {
                 <DocumentGridView
                   documents={
                     filteredDocuments
+                  }
+                  workspaceId={
+                    workspaceId ?? ""
+                  }
+                  projectId={
+                    projectId ?? ""
                   }
                   emptyMessage={
                     emptyMessage
@@ -1650,6 +1662,9 @@ export function ProjectDocumentsPage() {
         createOpen && (
           <CreateDocumentDialog
             key="create-document"
+            workspaceId={
+              workspaceId ?? ""
+            }
             projectId={
               project._id
             }

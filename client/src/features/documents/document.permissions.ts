@@ -66,3 +66,43 @@ export function getDocumentsReadOnlyReason(project: Project, workspace: Workspac
 
   return null;
 }
+
+/**
+ * The Document Editor's exact banner text (spec section 10). Priority
+ * follows the widest-scope resource first — an archived workspace's
+ * banner takes precedence over the project's, which takes precedence
+ * over the document's own archived state.
+ */
+export function getDocumentEditorReadOnlyBanner(
+  document: ProjectDocument,
+  project: Project,
+  workspace: WorkspaceSummary
+): string | null {
+  if (workspace.isArchived) {
+    return "This workspace is archived. This document is read-only.";
+  }
+
+  if (project.isArchived) {
+    return "This project is archived. This document is read-only.";
+  }
+
+  if (document.isArchived) {
+    return "This document is archived and read-only.";
+  }
+
+  return null;
+}
+
+/**
+ * Whether the editor's title/content should be editable at all — combines
+ * membership, the archived-state banner above, and (separately, by the
+ * caller) legacy-content and unresolved-conflict states (spec section 39).
+ */
+export function canEditDocumentContent(
+  document: ProjectDocument,
+  project: Project,
+  workspace: WorkspaceSummary,
+  role: ProjectRole | undefined
+): boolean {
+  return canRenameDocument(document, project, workspace, role);
+}

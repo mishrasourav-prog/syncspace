@@ -4,6 +4,8 @@ import { DocumentGridCard } from "./DocumentGridCard";
 
 interface DocumentGridViewProps {
   documents: ProjectDocument[];
+  workspaceId: string;
+  projectId: string;
   emptyMessage: string;
   canRename: (document: ProjectDocument) => boolean;
   canArchive: (document: ProjectDocument) => boolean;
@@ -15,6 +17,8 @@ interface DocumentGridViewProps {
 
 export function DocumentGridView({
   documents,
+  workspaceId,
+  projectId,
   emptyMessage,
   canRename,
   canArchive,
@@ -38,6 +42,8 @@ export function DocumentGridView({
         <DocumentGridCard
           key={document._id}
           document={document}
+          workspaceId={workspaceId}
+          projectId={projectId}
           canRename={canRename(document)}
           canArchive={canArchive(document)}
           canRestore={canRestore(document)}

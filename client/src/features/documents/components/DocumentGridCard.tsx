@@ -1,37 +1,15 @@
-import {
-  Archive,
-  ArchiveRestore,
-  FileText,
-  MoreHorizontal,
-  Pencil,
-} from "lucide-react";
-
-import {
-  Avatar,
-} from "@/components/ui/avatar";
-
-import {
-  Badge,
-} from "@/components/ui/badge";
-
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-
-import {
-  formatDateTime,
-  formatRelativeTime,
-} from "@/lib/date";
-
-import type {
-  ProjectDocument,
-} from "../types/document.types";
+import { Link } from "react-router-dom";
+import { Archive, ArchiveRestore, FileText, MoreHorizontal, Pencil } from "lucide-react";
+import { Avatar } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { formatDateTime, formatRelativeTime } from "@/lib/date";
+import type { ProjectDocument } from "../types/document.types";
 
 interface DocumentGridCardProps {
   document: ProjectDocument;
+  workspaceId: string;
+  projectId: string;
   canRename: boolean;
   canArchive: boolean;
   canRestore: boolean;
@@ -42,6 +20,8 @@ interface DocumentGridCardProps {
 
 export function DocumentGridCard({
   document,
+  workspaceId,
+  projectId,
   canRename,
   canArchive,
   canRestore,
@@ -49,146 +29,82 @@ export function DocumentGridCard({
   onArchive,
   onRestore,
 }: DocumentGridCardProps) {
-  const hasMenu =
-    canRename ||
-    canArchive ||
-    canRestore;
+  const hasMenu = canRename || canArchive || canRestore;
+  const documentUrl = `/workspaces/${workspaceId}/projects/${projectId}/documents/${document._id}`;
 
   return (
-    <article className="flex min-h-48 flex-col gap-3 rounded-xl border border-border/60 bg-surface/40 p-4 transition-colors hover:bg-surface/70">
-      <div className="flex items-start justify-between gap-2">
+    <article className="group relative flex min-h-48 flex-col gap-3 rounded-xl border border-border/60 bg-surface/40 p-4 transition-colors hover:bg-surface/70 focus-within:bg-surface/70">
+      <Link
+        to={documentUrl}
+        aria-label={`Open ${document.title}`}
+        className="absolute inset-0 z-0 rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+      />
+
+      <div className="pointer-events-none relative z-[1] flex items-start justify-between gap-2">
         <span
           className={
             "flex h-10 w-10 shrink-0 items-center justify-center rounded-lg " +
-            (document.isArchived
-              ? "bg-border/40 text-muted"
-              : "bg-primary/15 text-primary")
+            (document.isArchived ? "bg-border/40 text-muted" : "bg-primary/15 text-primary")
           }
         >
           <FileText className="h-5 w-5" />
         </span>
 
-        {
-          hasMenu ? (
+        {hasMenu ? (
+          <div className="pointer-events-auto relative z-10">
             <DropdownMenu>
-              <DropdownMenuTrigger
-                aria-label={
-                  `Actions for ${document.title}`
-                }
-              >
+              <DropdownMenuTrigger aria-label={`Actions for ${document.title}`}>
                 <MoreHorizontal className="h-4 w-4" />
               </DropdownMenuTrigger>
 
               <DropdownMenuContent>
-                {
-                  canRename && (
-                    <DropdownMenuItem
-                      onClick={
-                        onRename
-                      }
-                    >
-                      <Pencil className="h-3.5 w-3.5" />
-                      Rename
-                    </DropdownMenuItem>
-                  )
-                }
-
-                {
-                  canArchive && (
-                    <DropdownMenuItem
-                      variant="danger"
-                      onClick={
-                        onArchive
-                      }
-                    >
-                      <Archive className="h-3.5 w-3.5" />
-                      Archive
-                    </DropdownMenuItem>
-                  )
-                }
-
-                {
-                  canRestore && (
-                    <DropdownMenuItem
-                      onClick={
-                        onRestore
-                      }
-                    >
-                      <ArchiveRestore className="h-3.5 w-3.5" />
-                      Restore
-                    </DropdownMenuItem>
-                  )
-                }
+                {canRename && (
+                  <DropdownMenuItem onClick={onRename}>
+                    <Pencil className="h-3.5 w-3.5" />
+                    Rename
+                  </DropdownMenuItem>
+                )}
+                {canArchive && (
+                  <DropdownMenuItem variant="danger" onClick={onArchive}>
+                    <Archive className="h-3.5 w-3.5" />
+                    Archive
+                  </DropdownMenuItem>
+                )}
+                {canRestore && (
+                  <DropdownMenuItem onClick={onRestore}>
+                    <ArchiveRestore className="h-3.5 w-3.5" />
+                    Restore
+                  </DropdownMenuItem>
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
-          ) : (
-            <span
-              className="h-8 w-8 shrink-0"
-              aria-hidden
-            />
-          )
-        }
+          </div>
+        ) : (
+          <span className="h-8 w-8 shrink-0" aria-hidden />
+        )}
       </div>
 
-      <div className="min-w-0 flex-1">
-        <h3 className="truncate text-sm font-medium text-foreground">
-          {
-            document.title
-          }
-        </h3>
+      <div className="pointer-events-none relative z-[1] min-w-0 flex-1">
+        <h3 className="truncate text-sm font-medium text-foreground">{document.title}</h3>
 
-        <p className="mt-1 truncate text-caption">
-          Created by {document.createdBy?.name ?? "Unavailable member"}
-        </p>
+        <p className="mt-1 truncate text-caption">Created by {document.createdBy?.name ?? "Unavailable member"}</p>
 
-        <p
-          className="mt-1 truncate text-[11px] text-muted"
-          title={
-            formatDateTime(
-              document.updatedAt
-            )
-          }
-        >
+        <p className="mt-1 truncate text-[11px] text-muted" title={formatDateTime(document.updatedAt)}>
           Updated {formatRelativeTime(document.updatedAt)}
         </p>
       </div>
 
-      <div className="flex min-w-0 items-center gap-2 border-t border-border/60 pt-3">
-        <Avatar
-          src={
-            document.updatedBy
-              ?.avatar
-          }
-          name={
-            document.updatedBy
-              ?.name ??
-            "Unavailable member"
-          }
-          size="sm"
-        />
-
+      <div className="pointer-events-none relative z-[1] flex min-w-0 items-center gap-2 border-t border-border/60 pt-3">
+        <Avatar src={document.updatedBy?.avatar} name={document.updatedBy?.name ?? "Unavailable member"} size="sm" />
         <span className="min-w-0 flex-1 truncate text-caption">
           Updated by {document.updatedBy?.name ?? "Unavailable member"}
         </span>
       </div>
 
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <Badge variant="neutral">
-          v{document.revision}
-        </Badge>
-
-        <Badge
-          variant={
-            document.isArchived
-              ? "neutral"
-              : "success"
-          }
-        >
-          {
-            document.isArchived
-              ? "Archived"
-              : "Active"
-          }
+      <div className="pointer-events-none relative z-[1] flex flex-wrap items-center justify-between gap-2">
+        <Badge variant="neutral">v{document.revision}</Badge>
+        <Badge variant={document.isArchived ? "neutral" : "success"}>
+          {document.isArchived ? "Archived" : "Active"}
         </Badge>
       </div>
     </article>

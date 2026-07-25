@@ -1,5 +1,6 @@
 import {
   useForm,
+  useWatch,
 } from "react-hook-form";
 
 import {
@@ -59,7 +60,7 @@ export function RenameDocumentDialog({
   const {
     register,
     handleSubmit,
-    watch,
+    control,
     formState: {
       errors,
     },
@@ -76,9 +77,10 @@ export function RenameDocumentDialog({
     });
 
   const currentTitle =
-    watch(
-      "title"
-    );
+    useWatch({
+      control,
+      name: "title",
+    });
 
   const isUnchanged =
     currentTitle.trim() ===

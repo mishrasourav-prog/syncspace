@@ -12,6 +12,8 @@ import {
 
 interface DocumentListViewProps {
   documents: ProjectDocument[];
+  workspaceId: string;
+  projectId: string;
   emptyMessage: string;
   canRename: (
     document: ProjectDocument
@@ -35,6 +37,8 @@ interface DocumentListViewProps {
 
 export function DocumentListView({
   documents,
+  workspaceId,
+  projectId,
   emptyMessage,
   canRename,
   canArchive,
@@ -98,6 +102,8 @@ export function DocumentListView({
                 document={
                   document
                 }
+                workspaceId={workspaceId}
+                projectId={projectId}
                 canRename={
                   canRename(
                     document

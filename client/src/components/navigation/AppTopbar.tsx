@@ -16,6 +16,7 @@ import { NotificationCenter } from "@/features/notifications/components/Notifica
 import { useWorkspaceQuery } from "@/features/workspaces/hooks/useWorkspaceQueries";
 import { useProjectQuery } from "@/features/projects/hooks/useProjectQueries";
 import { useTaskQuery } from "@/features/tasks/hooks/useTaskQueries";
+import { useDocumentQuery } from "@/features/documents/hooks/useDocumentQueries";
 import { useAuthStore } from "@/app/store";
 import { useLogout } from "@/features/auth/hooks/useLogout";
 
@@ -30,7 +31,12 @@ export function AppTopbar({ onOpenMobileNav, onCreateWorkspace }: AppTopbarProps
   const [searchParams, setSearchParams] = useSearchParams();
   const searchInputRef = useRef<HTMLInputElement>(null);
 
-  const { workspaceId, projectId, taskId } = useParams<{ workspaceId?: string; projectId?: string; taskId?: string }>();
+  const { workspaceId, projectId, taskId, documentId } = useParams<{
+    workspaceId?: string;
+    projectId?: string;
+    taskId?: string;
+    documentId?: string;
+  }>();
   const isWorkspaceContext = location.pathname.startsWith("/workspaces/");
   const isProjectContext = Boolean(projectId) && location.pathname.includes("/projects/");
   const tasksBasePath = projectId && workspaceId ? `/workspaces/${workspaceId}/projects/${projectId}/tasks` : undefined;
@@ -47,6 +53,11 @@ export function AppTopbar({ onOpenMobileNav, onCreateWorkspace }: AppTopbarProps
     isProjectContext &&
     Boolean(documentsBasePath) &&
     (location.pathname === documentsBasePath || location.pathname.startsWith(`${documentsBasePath}/`));
+  const isDocumentDetailRoute = isDocumentsRoute && Boolean(documentId);
+  const documentQuery = useDocumentQuery(
+    isDocumentDetailRoute ? projectId : undefined,
+    isDocumentDetailRoute ? documentId : undefined
+  );
 
   const workspaceQuery = useWorkspaceQuery(isWorkspaceContext ? workspaceId : undefined);
   const projectQuery = useProjectQuery(isProjectContext ? projectId : undefined);
@@ -158,7 +169,22 @@ export function AppTopbar({ onOpenMobileNav, onCreateWorkspace }: AppTopbarProps
             {isDocumentsRoute && (
               <>
                 <ChevronRight className="h-3.5 w-3.5 shrink-0 text-muted/60" />
-                <span className="truncate font-medium text-foreground">Documents</span>
+                {isDocumentDetailRoute ? (
+                  <Link
+                    to={documentsBasePath ?? "/dashboard"}
+                    className="shrink-0 truncate text-muted transition-colors hover:text-foreground"
+                  >
+                    Documents
+                  </Link>
+                ) : (
+                  <span className="truncate font-medium text-foreground">Documents</span>
+                )}
+              </>
+            )}
+            {isDocumentDetailRoute && (
+              <>
+                <ChevronRight className="h-3.5 w-3.5 shrink-0 text-muted/60" />
+                <span className="truncate font-medium text-foreground">{documentQuery.data?.title ?? "…"}</span>
               </>
             )}
           </nav>

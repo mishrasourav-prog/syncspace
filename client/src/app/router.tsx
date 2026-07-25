@@ -13,6 +13,7 @@ import { ProjectOverviewPage } from "@/features/projects/pages/ProjectOverviewPa
 import { ProjectTasksPage } from "@/features/tasks/pages/ProjectTasksPage";
 import { TaskDetailPage } from "@/features/tasks/pages/TaskDetailPage";
 import { ProjectDocumentsPage } from "@/features/documents/pages/ProjectDocumentsPage";
+import { DocumentEditorPage } from "@/features/documents/pages/DocumentEditorPage";
 import { useAuthStore } from "./store";
 
 function useIsAuthenticated() {
@@ -169,6 +170,10 @@ export function AppRouter() {
         <Route path="/workspaces/:workspaceId/projects/:projectId" element={<ProjectOverviewPage />} />
         <Route path="/workspaces/:workspaceId/projects/:projectId/tasks" element={<ProjectTasksPage />} />
         <Route path="/workspaces/:workspaceId/projects/:projectId/documents" element={<ProjectDocumentsPage />} />
+        <Route
+          path="/workspaces/:workspaceId/projects/:projectId/documents/:documentId"
+          element={<DocumentEditorPage />}
+        />
         <Route path="/workspaces/:workspaceId/projects/:projectId/tasks/:taskId" element={<TaskDetailPage />} />
       </Route>
 

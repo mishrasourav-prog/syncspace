@@ -81,7 +81,11 @@ export function ProjectDocumentsPreview({ projectId, search }: ProjectDocumentsP
       {!documentsQuery.isLoading && !documentsQuery.isError && documents.length > 0 && (
         <div className="space-y-2">
           {visibleDocuments.map((document) => (
-            <div key={document._id} className="flex items-center gap-3 rounded-lg border border-border/60 px-3 py-2.5">
+            <Link
+              key={document._id}
+              to={`${documentsPath}/${document._id}`}
+              className="flex items-center gap-3 rounded-lg border border-border/60 px-3 py-2.5 transition-colors hover:bg-surface/70"
+            >
               <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-success/15 text-success">
                 <FileText className="h-4 w-4" />
               </span>
@@ -97,7 +101,7 @@ export function ProjectDocumentsPreview({ projectId, search }: ProjectDocumentsP
                 </p>
               </div>
               <span className="shrink-0 text-[11px] text-muted">{formatRelativeTime(document.updatedAt)}</span>
-            </div>
+            </Link>
           ))}
 
           {hasMore && (

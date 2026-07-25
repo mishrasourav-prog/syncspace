@@ -12,6 +12,7 @@ import type {
   ProjectDocument,
   ProjectDocumentListResult,
   RenameDocumentPayload,
+  UpdateDocumentPayload,
 } from "../types/document.types";
 
 function normalizeSearch(
@@ -116,21 +117,31 @@ export async function createDocumentRequest(
     );
 }
 
+/** Authoritative single-document detail request used by the Document Editor (spec section 8.1). */
+export async function getDocumentByIdRequest(
+  documentId: string
+): Promise<ProjectDocument> {
+  return axiosClient
+    .get<ApiResponse<ProjectDocument>>(`/documents/${documentId}`)
+    .then((response) => response.data.data);
+}
+
+/** Shared `PATCH /documents/:documentId` request (spec section 8.2/37). */
+export async function updateDocumentRequest(
+  documentId: string,
+  payload: UpdateDocumentPayload
+): Promise<ProjectDocument> {
+  return axiosClient
+    .patch<ApiResponse<ProjectDocument>>(`/documents/${documentId}`, payload)
+    .then((response) => response.data.data);
+}
+
+/** Thin wrapper kept for the existing Documents List rename dialog; delegates to the shared update request. */
 export async function renameDocumentRequest(
   documentId: string,
   payload: RenameDocumentPayload
 ): Promise<ProjectDocument> {
-  return axiosClient
-    .patch<ApiResponse<ProjectDocument>>(
-      `/documents/${documentId}`,
-      payload
-    )
-    .then(
-      (
-        response
-      ) =>
-        response.data.data
-    );
+  return updateDocumentRequest(documentId, payload);
 }
 
 export async function archiveDocumentRequest(

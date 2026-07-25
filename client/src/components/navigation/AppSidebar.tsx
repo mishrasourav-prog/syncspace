@@ -46,7 +46,6 @@ const WORKSPACE_TABS = [
 
 const PROJECT_HASH_TABS = [
   { id: "overview", label: "Overview", icon: LayoutGrid },
-  { id: "discussions", label: "Discussions", icon: MessageSquare },
   { id: "members", label: "Members", icon: Users },
   { id: "activity", label: "Activity", icon: Activity },
   { id: "settings", label: "Settings", icon: Settings },
@@ -417,7 +416,9 @@ function ProjectContextNav({ workspaceId, projectId, activeHash, activePathname,
   const isTasksRoute = activePathname === tasksPath || activePathname.startsWith(`${tasksPath}/`);
   const documentsPath = `/workspaces/${workspaceId}/projects/${projectId}/documents`;
   const isDocumentsRoute = activePathname === documentsPath || activePathname.startsWith(`${documentsPath}/`);
-  const isProjectSubRoute = isTasksRoute || isDocumentsRoute;
+  const discussionsPath = `/workspaces/${workspaceId}/projects/${projectId}/discussions`;
+  const isDiscussionsRoute = activePathname === discussionsPath || activePathname.startsWith(`${discussionsPath}/`);
+  const isProjectSubRoute = isTasksRoute || isDocumentsRoute || isDiscussionsRoute;
   const workspacesQuery = useWorkspacesQuery();
   const projectQuery = useProjectQuery(projectId);
   const workspaceName = workspacesQuery.data?.find((workspace) => workspace._id === workspaceId)?.name;
@@ -502,6 +503,17 @@ function ProjectContextNav({ workspaceId, projectId, activeHash, activePathname,
         >
           <FileText className="h-4 w-4" />
           Documents
+        </NavLink>
+
+        <NavLink
+          to={`/workspaces/${workspaceId}/projects/${projectId}/discussions`}
+          className={cn(
+            "flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+            isDiscussionsRoute ? "bg-primary/15 text-primary" : "text-muted hover:bg-surface hover:text-foreground"
+          )}
+        >
+          <MessageSquare className="h-4 w-4" />
+          Discussions
         </NavLink>
 
         {PROJECT_HASH_TABS.filter((tab) => tab.id !== "overview").map((tab) => {

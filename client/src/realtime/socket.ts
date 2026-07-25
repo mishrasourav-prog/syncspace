@@ -28,6 +28,25 @@ export interface DocumentSocketPayload {
   revision: number;
 }
 
+export interface DiscussionSocketPayload {
+  workspaceId: string;
+  projectId: string;
+  discussionId: string;
+  actorId: string;
+  title: string;
+  change: "created" | "updated" | "deleted" | "pinned" | "unpinned" | "locked" | "unlocked";
+}
+
+export interface DiscussionReplySocketPayload {
+  workspaceId: string;
+  projectId: string;
+  discussionId: string;
+  replyId: string;
+  actorId: string;
+  title: string;
+  change: "created" | "updated" | "deleted";
+}
+
 interface ServerToClientEvents {
   "socket:ready": (payload: { userId: string; socketId: string }) => void;
   "notification:new": (payload: { notificationId: string }) => void;
@@ -42,8 +61,8 @@ interface ServerToClientEvents {
   "document:updated": (payload: DocumentSocketPayload) => void;
   "document:archived": (payload: DocumentSocketPayload) => void;
   "document:restored": (payload: DocumentSocketPayload) => void;
-  "discussion:changed": (payload: { workspaceId: string; projectId: string; discussionId: string }) => void;
-  "discussion:reply-changed": (payload: { workspaceId: string; projectId: string; discussionId: string }) => void;
+  "discussion:changed": (payload: DiscussionSocketPayload) => void;
+  "discussion:reply-changed": (payload: DiscussionReplySocketPayload) => void;
 }
 
 interface ClientToServerEvents {

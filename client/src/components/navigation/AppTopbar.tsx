@@ -59,6 +59,12 @@ export function AppTopbar({ onOpenMobileNav, onCreateWorkspace }: AppTopbarProps
     isDocumentDetailRoute ? documentId : undefined
   );
 
+  const discussionsBasePath =
+    projectId && workspaceId ? `/workspaces/${workspaceId}/projects/${projectId}/discussions` : undefined;
+  const isDiscussionsRoute =
+    isProjectContext &&
+    Boolean(discussionsBasePath) &&
+    (location.pathname === discussionsBasePath || location.pathname.startsWith(`${discussionsBasePath}/`));
   const workspaceQuery = useWorkspaceQuery(isWorkspaceContext ? workspaceId : undefined);
   const projectQuery = useProjectQuery(isProjectContext ? projectId : undefined);
 
@@ -85,14 +91,16 @@ export function AppTopbar({ onOpenMobileNav, onCreateWorkspace }: AppTopbarProps
   }, []);
 
   function handleSearchChange(value: string) {
+    const constrainedValue = isDiscussionsRoute ? value.slice(0, 100) : value;
+
     if (!isDashboard && !isWorkspaceContext) {
-      navigate(value ? `/dashboard?q=${encodeURIComponent(value)}` : "/dashboard");
+      navigate(constrainedValue ? `/dashboard?q=${encodeURIComponent(constrainedValue)}` : "/dashboard");
       return;
     }
 
     const next = new URLSearchParams(searchParams);
-    if (value) {
-      next.set("q", value);
+    if (constrainedValue) {
+      next.set("q", constrainedValue);
     } else {
       next.delete("q");
     }
@@ -103,11 +111,13 @@ export function AppTopbar({ onOpenMobileNav, onCreateWorkspace }: AppTopbarProps
     ? "Search tasks and issues…"
     : isDocumentsRoute
       ? "Search documents…"
-      : isProjectContext
-        ? "Search tasks, issues, documents…"
-        : isWorkspaceContext
-          ? "Search projects or members…"
-          : "Search workspaces…";
+      : isDiscussionsRoute
+        ? "Search discussions…"
+        : isProjectContext
+          ? "Search tasks, issues, documents…"
+          : isWorkspaceContext
+            ? "Search projects or members…"
+            : "Search workspaces…";
 
   return (
     <header className="flex h-16 shrink-0 items-center justify-between gap-3 border-b border-border bg-background/95 px-4 backdrop-blur sm:px-6">
@@ -135,7 +145,7 @@ export function AppTopbar({ onOpenMobileNav, onCreateWorkspace }: AppTopbarProps
               Projects
             </Link>
             <ChevronRight className="h-3.5 w-3.5 shrink-0 text-muted/60" />
-            {isTasksRoute || isDocumentsRoute ? (
+            {isTasksRoute || isDocumentsRoute || isDiscussionsRoute ? (
               <Link
                 to={`/workspaces/${workspaceId}/projects/${projectId}`}
                 className="shrink-0 truncate text-muted transition-colors hover:text-foreground"
@@ -185,6 +195,12 @@ export function AppTopbar({ onOpenMobileNav, onCreateWorkspace }: AppTopbarProps
               <>
                 <ChevronRight className="h-3.5 w-3.5 shrink-0 text-muted/60" />
                 <span className="truncate font-medium text-foreground">{documentQuery.data?.title ?? "…"}</span>
+              </>
+            )}
+            {isDiscussionsRoute && (
+              <>
+                <ChevronRight className="h-3.5 w-3.5 shrink-0 text-muted/60" />
+                <span className="truncate font-medium text-foreground">Discussions</span>
               </>
             )}
           </nav>

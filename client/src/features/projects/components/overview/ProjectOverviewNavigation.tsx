@@ -4,7 +4,6 @@ import { cn } from "@/lib/utils";
 
 const HASH_TABS = [
   { id: "overview", label: "Overview" },
-  { id: "discussions", label: "Discussions" },
   { id: "members", label: "Members" },
   { id: "activity", label: "Activity" },
   { id: "settings", label: "Settings" },
@@ -12,7 +11,8 @@ const HASH_TABS = [
 
 /**
  * Tab strip shown on both the project overview page and the dedicated
- * tasks/documents pages. "Tasks & Issues" and "Documents" are real routes,
+ * tasks/documents/discussions pages. "Tasks & Issues", "Documents", and
+ * "Discussions" are real routes,
  * not hash sections, so they navigate rather than scrolling — every other
  * tab scrolls a section on the overview page and navigates there first if
  * visited from elsewhere.
@@ -27,7 +27,9 @@ export function ProjectOverviewNavigation() {
   const isTasksRoute = location.pathname === tasksPath || location.pathname.startsWith(`${tasksPath}/`);
   const documentsPath = `${overviewPath}/documents`;
   const isDocumentsRoute = location.pathname === documentsPath || location.pathname.startsWith(`${documentsPath}/`);
-  const isRealRoute = isTasksRoute || isDocumentsRoute;
+  const discussionsPath = `${overviewPath}/discussions`;
+  const isDiscussionsRoute = location.pathname === discussionsPath || location.pathname.startsWith(`${discussionsPath}/`);
+  const isRealRoute = isTasksRoute || isDocumentsRoute || isDiscussionsRoute;
 
   const activeHashTab = location.hash ? location.hash.replace("#", "") : "overview";
 
@@ -85,6 +87,18 @@ export function ProjectOverviewNavigation() {
         >
           Documents
           {isDocumentsRoute && <span className="absolute inset-x-3 -bottom-px h-0.5 rounded-full bg-primary" />}
+        </Link>
+
+        <Link
+          to={discussionsPath}
+          aria-current={isDiscussionsRoute ? "true" : undefined}
+          className={cn(
+            "relative whitespace-nowrap px-3 py-2.5 text-sm font-medium transition-colors",
+            isDiscussionsRoute ? "text-primary" : "text-muted hover:text-foreground"
+          )}
+        >
+          Discussions
+          {isDiscussionsRoute && <span className="absolute inset-x-3 -bottom-px h-0.5 rounded-full bg-primary" />}
         </Link>
 
         {HASH_TABS.filter((tab) => tab.id !== "overview").map((tab) => {

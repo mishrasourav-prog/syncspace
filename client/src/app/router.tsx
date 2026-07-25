@@ -12,6 +12,7 @@ import { WorkspaceOverviewPage } from "@/features/workspaces/pages/WorkspaceOver
 import { ProjectOverviewPage } from "@/features/projects/pages/ProjectOverviewPage";
 import { ProjectTasksPage } from "@/features/tasks/pages/ProjectTasksPage";
 import { TaskDetailPage } from "@/features/tasks/pages/TaskDetailPage";
+import { ProjectDiscussionsPage } from "@/features/discussions/pages/ProjectDiscussionsPage";
 import { ProjectDocumentsPage } from "@/features/documents/pages/ProjectDocumentsPage";
 import { DocumentEditorPage } from "@/features/documents/pages/DocumentEditorPage";
 import { useAuthStore } from "./store";
@@ -175,6 +176,11 @@ export function AppRouter() {
           element={<DocumentEditorPage />}
         />
         <Route path="/workspaces/:workspaceId/projects/:projectId/tasks/:taskId" element={<TaskDetailPage />} />
+        <Route path="/workspaces/:workspaceId/projects/:projectId/discussions" element={<ProjectDiscussionsPage />} />
+        <Route
+          path="/workspaces/:workspaceId/projects/:projectId/discussions/:discussionId"
+          element={<ProjectDiscussionsPage />}
+        />
       </Route>
 
       {/* Preserve old bookmarks/links pointing at the previous /home route. */}

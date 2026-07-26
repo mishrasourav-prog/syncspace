@@ -27,6 +27,8 @@ import documentRouter from "../modules/documents/document.routes";
 
 import discussionRouter from "../modules/discussions/discussions.routes";
 
+import userRoutes from "../modules/users/user.routes";
+
 const router = Router();
 
 router.use("/auth", authRoutes);
@@ -81,5 +83,9 @@ router.use(
     discussionRouter
 );
 
+router.use(
+  "/users",
+  userRoutes
+);
 
 export default router;

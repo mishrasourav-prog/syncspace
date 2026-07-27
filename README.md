@@ -2,84 +2,64 @@
 
 <img src="https://img.shields.io/badge/SyncSpace-v1.0.0-8B5CF6?style=for-the-badge&logo=socketdotio&logoColor=white" alt="SyncSpace" />
 
-SyncSpace
+# SyncSpace
 
-Secure, Real-Time Collaborative Workspace for Modern Teams
+**Secure, Real-Time Collaborative Workspace for Modern Teams**
 
+[![MIT License](https://img.shields.io/badge/License-MIT-green?style=flat-square)](LICENSE)
+[![Node.js](https://img.shields.io/badge/Node.js-LTS-339933?style=flat-square&logo=node.js&logoColor=white)](https://nodejs.org)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://typescriptlang.org)
+[![React](https://img.shields.io/badge/React-19.x-61DAFB?style=flat-square&logo=react&logoColor=black)](https://react.dev)
+[![MongoDB](https://img.shields.io/badge/MongoDB-Mongoose-47A248?style=flat-square&logo=mongodb&logoColor=white)](https://mongodb.com)
+[![Socket.IO](https://img.shields.io/badge/Socket.IO-4.x-010101?style=flat-square&logo=socket.io)](https://socket.io)
 
-
-View Repository · Report a Bug · Request a Feature
+[View Repository](https://github.com/mishrasourav-prog/syncspace) · [Report a Bug](https://github.com/mishrasourav-prog/syncspace/issues) · [Request a Feature](https://github.com/mishrasourav-prog/syncspace/issues)
 
 </div>
 
-Table of Contents
+---
 
-Overview
+## Table of Contents
 
-The Problem It Solves
+- [Overview](#overview)
+- [The Problem It Solves](#the-problem-it-solves)
+- [Key Features](#key-features)
+- [Tech Stack](#tech-stack)
+- [Project Structure](#project-structure)
+- [Getting Started](#getting-started)
+  - [Prerequisites](#prerequisites)
+  - [Installation](#installation)
+  - [Environment Variables](#environment-variables)
+  - [Running the App](#running-the-app)
+  - [Build and Verification](#build-and-verification)
+- [Architecture Deep Dive](#architecture-deep-dive)
+  - [Application Hierarchy](#application-hierarchy)
+  - [Request Lifecycle](#request-lifecycle)
+  - [Authentication and Token Refresh](#authentication-and-token-refresh)
+  - [Immediate Session Revocation](#immediate-session-revocation)
+  - [Workspace and Project Authorization](#workspace-and-project-authorization)
+  - [Event-Driven Backend](#event-driven-backend)
+  - [Real-Time Synchronization](#real-time-synchronization)
+  - [Frontend State Architecture](#frontend-state-architecture)
+  - [Account Deletion and Anonymization](#account-deletion-and-anonymization)
+  - [Data Model Overview](#data-model-overview)
+- [API Reference](#api-reference)
+- [Screenshots](#screenshots)
+- [Engineering Decisions](#engineering-decisions)
+- [Current Limitations](#current-limitations)
+- [Roadmap](#roadmap)
+- [Contributing](#contributing)
+- [License](#license)
 
-Key Features
+---
 
-Tech Stack
+## Overview
 
-Project Structure
-
-Getting Started
-
-Prerequisites
-
-Installation
-
-Environment Variables
-
-Running the App
-
-Build and Verification
-
-Architecture Deep Dive
-
-Application Hierarchy
-
-Request Lifecycle
-
-Authentication and Token Refresh
-
-Immediate Session Revocation
-
-Workspace and Project Authorization
-
-Event-Driven Backend
-
-Real-Time Synchronization
-
-Frontend State Architecture
-
-Account Deletion and Anonymization
-
-Data Model Overview
-
-API Reference
-
-Screenshots
-
-Engineering Decisions
-
-Current Limitations
-
-Roadmap
-
-Contributing
-
-License
-
-Author
-
-Overview
-
-SyncSpace is a production-oriented, full-stack collaboration platform that brings workspaces, projects, tasks, issues, documents, discussions, notifications, activity, and team profiles into one focused system.
+**SyncSpace** is a production-oriented, full-stack collaboration platform that brings workspaces, projects, tasks, issues, documents, discussions, notifications, activity, and team profiles into one focused system.
 
 Instead of forcing teams to move between disconnected tools, SyncSpace keeps every resource inside the correct organizational context:
 
+```
 User
 └── Workspace
     └── Project
@@ -89,661 +69,224 @@ User
         ├── Members
         ├── Activity
         └── Notifications
+```
 
 A user can create or join workspaces, manage projects, track work through a Kanban board, write structured documents, hold threaded discussions, invite teammates, receive real-time notifications, and manage a secure profile without leaving the platform.
 
-Workspace planning
-        +
-Project execution
-        +
-Team communication
-        +
-Real-time synchronization
-        =
-SyncSpace
+```
+Workspace planning + Project execution + Team communication + Real-time synchronization = SyncSpace
+```
 
 The project was built with a strong focus on:
 
-modular frontend and backend architecture;
+- Modular frontend and backend architecture
+- Role-based access control
+- Secure cookie-based authentication
+- Immediate session invalidation
+- Typed domain events
+- Scoped Socket.IO rooms
+- Server-state caching
+- Responsive design
+- Privacy-safe member profiles
+- Maintainable feature boundaries
 
-role-based access control;
+---
 
-secure cookie-based authentication;
-
-immediate session invalidation;
-
-typed domain events;
-
-scoped Socket.IO rooms;
-
-server-state caching;
-
-responsive design;
-
-privacy-safe member profiles;
-
-maintainable feature boundaries.
-
-The Problem It Solves
+## The Problem It Solves
 
 Teams frequently spread their work across separate products:
 
-Need
-
-Common Separate Tool
-
-Task tracking
-
-Kanban or issue tracker
-
-Documentation
-
-Wiki or document editor
-
-Discussions
-
-Chat or forum
-
-Invitations and roles
-
-Manual admin workflow
-
-Activity tracking
-
-Separate audit feed
-
-Notifications
-
-Email or third-party alerts
-
-Profile and account security
-
-Separate settings system
+| Need | Common Separate Tool |
+|---|---|
+| Task tracking | Kanban or issue tracker |
+| Documentation | Wiki or document editor |
+| Discussions | Chat or forum |
+| Invitations and roles | Manual admin workflow |
+| Activity tracking | Separate audit feed |
+| Notifications | Email or third-party alerts |
+| Profile and account security | Separate settings system |
 
 This creates several problems:
 
-Problem
-
-Impact
-
-Context is fragmented
-
-Tasks, decisions, documents, and discussions become difficult to connect
-
-Access rules drift
-
-Workspace and project permissions become inconsistent
-
-Updates become stale
-
-Multiple active users do not see authoritative changes immediately
-
-Important work is missed
-
-Notifications are detached from the original resource
-
-Account security is weak
-
-Old sessions may remain usable after logout or password changes
-
-Team history is fragile
-
-Deleting a user can break references to authored content
+| Problem | Impact |
+|---|---|
+| Context is fragmented | Tasks, decisions, documents, and discussions become difficult to connect |
+| Access rules drift | Workspace and project permissions become inconsistent |
+| Updates become stale | Multiple active users do not see authoritative changes immediately |
+| Important work is missed | Notifications are detached from the original resource |
+| Account security is weak | Old sessions may remain usable after logout or password changes |
+| Team history is fragile | Deleting a user can break references to authored content |
 
 SyncSpace solves this by organizing collaboration around a strict workspace → project hierarchy and connecting every feature through shared authorization, activity, notification, and real-time infrastructure.
 
-Key Features
-
-🛡️ Authentication and Account Security
-
-JWT Access and Refresh Tokens — Short-lived access tokens and longer-lived refresh tokens.
-
-HTTP-only Cookies — Browser JavaScript cannot directly access authentication tokens.
-
-Automatic Token Refresh — Axios refresh handling recovers an expired access session without forcing an unnecessary login.
-
-Refresh Request Queue — Multiple simultaneous 401 responses do not create multiple refresh requests.
-
-OTP Password Recovery — Forgot-password, OTP verification, reset-token, and password-reset flows.
-
-Enumeration-Safe Responses — Password-reset endpoints do not reveal whether an account exists.
-
-Password Hashing — Passwords are salted and hashed before storage.
-
-Session Versioning — Tokens are checked against the current database session version.
-
-Account-Wide Revocation — Logout, password changes, password resets, and account deletion revoke old sessions immediately.
-
-Multi-Tab Logout — Connected browser tabs receive a real-time session-revocation event and return to login.
-
-Centralized Error Handling — Validation, database, upload, authentication, and unexpected errors follow one response structure.
-
-🏢 Workspace Management
-
-Create shared workspaces
-
-View active and archived workspaces
-
-Update workspace name, description, and metadata
-
-Archive and restore workspaces
-
-Workspace overview dashboard
-
-Workspace statistics
-
-Workspace activity feed
-
-Workspace access summary
-
-Invite users by email
-
-Accept or reject workspace invitations
-
-Cancel pending invitations
-
-Role-based workspace membership
-
-Update member roles
-
-Remove workspace members
-
-Leave a workspace
-
-Owner-aware authorization rules
-
-Guest membership support
-
-Workspace roles:
-
-owner
-admin
-member
-guest
-
-📁 Project Management
-
-Create projects inside a workspace
-
-Project overview dashboard
-
-Edit project details
-
-Archive and restore projects
-
-Project-level access control
-
-Invite workspace users into projects
-
-Accept, reject, and cancel project invitations
-
-Manage project members
-
-Update project roles
-
-Remove members or leave a project
-
-Project statistics for tasks, issues, documents, and members
-
-Project activity feed
-
-Completion metrics and recent-work summaries
-
-Project roles:
-
-admin
-member
-
-✅ Tasks and Issues
-
-Separate task and issue work-item types
-
-Kanban board view
-
-List view
-
-Drag-and-drop task reordering
-
-Search and URL-driven filters
-
-Filter by status, type, priority, assignee, and due date
-
-Task and issue summaries
-
-Assignee management
-
-Start dates and due dates
-
-Parent-task relationships
-
-Task comments
-
-Archive and restore
-
-Completed-task profile statistics
-
-Real-time creation, status, assignment, and reorder updates
-
-Statuses:
-
-TODO
-IN_PROGRESS
-IN_REVIEW
-DONE
-
-Priorities:
-
-LOW
-MEDIUM
-HIGH
-URGENT
-
-📝 Rich Project Documents
-
-Project-scoped document library
-
-Search, sorting, filtering, list, and grid views
-
-Active and archived document states
-
-Rich-text editing powered by TipTap
-
-Paragraphs and headings
-
-Bold, italic, underline, and strike formatting
-
-Lists and task lists
-
-Blockquotes
-
-Links
-
-Tables
-
-Revision tracking
-
-Preview mode
-
-Duplicate document
-
-Export to HTML
-
-Export to JSON
-
-Copy document ID
-
-Archive and restore
-
-Server-authoritative save behavior
-
-Real-time document update notifications
-
-💬 Discussions
-
-Project discussion threads
-
-Replies
-
-Edit and delete operations
-
-Pin and unpin discussions
-
-Lock and unlock discussions
-
-Participant list
-
-Discussion metadata
-
-Recent discussion activity
-
-Role-aware moderation
-
-Real-time discussion and reply synchronization
-
-🔔 Notifications and Activity
-
-In-app notification center
-
-Unread notification count
-
-Mark one notification as read
-
-Mark all notifications as read
-
-Workspace activity feed
-
-Project activity feed
-
-Typed activity metadata
-
-Domain-event-generated activity records
-
-Real-time notification invalidation
-
-Access-revocation handling
-
-Resource-aware navigation from notifications
-
-👤 Profiles and Account Management
-
-Editable private profile
-
-Name and username
-
-Optional headline
-
-Optional bio
-
-Optional location
-
-Read-only account email
-
-Avatar upload and removal through Cloudinary
-
-JPEG, PNG, and WebP validation
-
-File-size and file-signature verification
-
-Workspace statistics
-
-Project statistics
-
-Completed-task statistics
-
-Account information
-
-Authentication-provider display
-
-User ID copy action
-
-Last login and update timestamps
-
-Password change
-
-Deletion-readiness checks
-
-Workspace-owner blockers
-
-Last-project-admin blockers
-
-Secure account deletion
-
-Historical-content anonymization
-
-Privacy-safe read-only member profiles
-
-Workspace/project-context authorization for member profiles
-
-📡 Real-Time Collaboration
-
-Socket.IO authenticated handshake
-
-User-scoped rooms
-
-Workspace-scoped rooms
-
-Project-scoped rooms
-
-Task event broadcasts
-
-Document event broadcasts
-
-Discussion event broadcasts
-
-Notification broadcasts
-
-Activity broadcasts
-
-Workspace and project access revocation
-
-Account session revocation
-
-Client-side Query cache invalidation
-
-No duplicate Socket.IO client instances
-
-🎨 Modern Responsive Frontend
-
-React 19 and TypeScript
-
-Tailwind CSS 4 design system
-
-Persistent authenticated AppShell
-
-Desktop sidebar
-
-Top navigation
-
-Mobile navigation drawer
-
-Responsive cards and dashboards
-
-Loading skeletons
-
-Empty states
-
-Recoverable error states
-
-Accessible dialogs and forms
-
-Toast notifications
-
-Framer Motion transitions
-
-Dark workspace-focused interface
-
-Touch-friendly mobile actions
-
-Responsive layouts down to narrow mobile widths
-
-Tech Stack
-
-Frontend
-
-Technology
-
-Purpose
-
-React 19
-
-Component-based user interface
-
-TypeScript
-
-Static type safety
-
-Vite
-
-Development server and production build
-
-Tailwind CSS 4
-
-Styling and responsive design
-
-React Router 7
-
-Public, authenticated, workspace, project, profile, and member routes
-
-TanStack Query 5
-
-Server-state caching, invalidation, retries, and mutation coordination
-
-Zustand 5
-
-Compact authenticated-user state
-
-Axios
-
-REST client and refresh-token interceptor
-
-Socket.IO Client 4
-
-Real-time communication
-
-React Hook Form
-
-Form-state management
-
-Zod 4
-
-Runtime form validation
-
-TipTap 2
-
-Rich-text project document editor
-
-dnd-kit
-
-Drag-and-drop task board
-
-Framer Motion
-
-UI transitions
-
-Lucide React
-
-Icons
-
-Sonner
-
-Toast notifications
-
-next-themes
-
-Theme handling
-
-cmdk
-
-Command-style search interface
-
-React Flow
-
-Graph/canvas-oriented UI support
-
-Backend
-
-Technology
-
-Purpose
-
-Node.js
-
-Server runtime
-
-Express 5
-
-REST API framework
-
-TypeScript
-
-Backend type safety
-
-MongoDB
-
-Primary database
-
-Mongoose 8
-
-Schemas, models, indexes, population, and transactions
-
-Socket.IO 4
-
-Real-time server and scoped rooms
-
-JSON Web Tokens
-
-Access, refresh, and reset tokens
-
-bcrypt / bcryptjs
-
-Password hashing and comparison
-
-Zod 4
-
-Request validation
-
-Multer 2
-
-Multipart avatar handling
-
-Cloudinary 2
-
-Managed avatar storage
-
-Nodemailer
-
-OTP email delivery
-
-Helmet
-
-HTTP security headers
-
-CORS
-
-Credential-aware cross-origin policy
-
-Compression
-
-Response compression
-
-Morgan
-
-HTTP request logging
-
-Pino
-
-Structured application logging
-
-dotenv
-
-Environment configuration
-
-Redis Client
-
-Future distributed real-time and infrastructure scaling
-
-Google GenAI SDK
-
-Future/experimental AI integration support
-
-Project Structure
-
+---
+
+## Key Features
+
+### 🛡️ Authentication and Account Security
+
+- **JWT Access and Refresh Tokens** — Short-lived access tokens and longer-lived refresh tokens.
+- **HTTP-only Cookies** — Browser JavaScript cannot directly access authentication tokens.
+- **Automatic Token Refresh** — Axios refresh handling recovers an expired access session without forcing an unnecessary login.
+- **Refresh Request Queue** — Multiple simultaneous 401 responses do not create multiple refresh requests.
+- **OTP Password Recovery** — Forgot-password, OTP verification, reset-token, and password-reset flows.
+- **Enumeration-Safe Responses** — Password-reset endpoints do not reveal whether an account exists.
+- **Password Hashing** — Passwords are salted and hashed before storage.
+- **Session Versioning** — Tokens are checked against the current database session version.
+- **Account-Wide Revocation** — Logout, password changes, password resets, and account deletion revoke old sessions immediately.
+- **Multi-Tab Logout** — Connected browser tabs receive a real-time session-revocation event and return to login.
+- **Centralized Error Handling** — Validation, database, upload, authentication, and unexpected errors follow one response structure.
+
+### 🏢 Workspace Management
+
+- Create shared workspaces
+- View active and archived workspaces
+- Update workspace name, description, and metadata
+- Archive and restore workspaces
+- Workspace overview dashboard, statistics, activity feed, and access summary
+- Invite users by email; accept, reject, or cancel invitations
+- Role-based workspace membership with owner-aware authorization rules
+- Update or remove members; leave a workspace
+- Guest membership support
+
+Workspace roles: `owner` · `admin` · `member` · `guest`
+
+### 📁 Project Management
+
+- Create projects inside a workspace
+- Project overview dashboard and edit project details
+- Archive and restore projects
+- Project-level access control
+- Invite workspace users into projects; accept, reject, and cancel invitations
+- Manage project members and roles; remove members or leave a project
+- Project statistics for tasks, issues, documents, and members
+- Project activity feed with completion metrics and recent-work summaries
+
+Project roles: `admin` · `member`
+
+### ✅ Tasks and Issues
+
+- Separate task and issue work-item types
+- Kanban board view and list view
+- Drag-and-drop task reordering
+- Search and URL-driven filters (status, type, priority, assignee, due date)
+- Task and issue summaries, assignee management, start/due dates
+- Parent-task relationships and task comments
+- Archive and restore; completed-task profile statistics
+- Real-time creation, status, assignment, and reorder updates
+
+Statuses: `TODO` · `IN_PROGRESS` · `IN_REVIEW` · `DONE`
+Priorities: `LOW` · `MEDIUM` · `HIGH` · `URGENT`
+
+### 📝 Rich Project Documents
+
+- Project-scoped document library with search, sorting, filtering, list, and grid views
+- Active and archived document states
+- Rich-text editing powered by TipTap — paragraphs, headings, bold/italic/underline/strike, lists, task lists, blockquotes, links, and tables
+- Revision tracking and preview mode
+- Duplicate document, export to HTML/JSON, copy document ID
+- Archive and restore
+- Server-authoritative save behavior with real-time document update notifications
+
+### 💬 Discussions
+
+- Project discussion threads with replies
+- Edit and delete operations
+- Pin/unpin and lock/unlock discussions
+- Participant list and discussion metadata
+- Recent discussion activity with role-aware moderation
+- Real-time discussion and reply synchronization
+
+### 🔔 Notifications and Activity
+
+- In-app notification center with unread count
+- Mark one or all notifications as read
+- Workspace and project activity feeds with typed activity metadata
+- Domain-event-generated activity records
+- Real-time notification invalidation and access-revocation handling
+- Resource-aware navigation from notifications
+
+### 👤 Profiles and Account Management
+
+- Editable private profile: name, username, optional headline/bio/location
+- Read-only account email
+- Avatar upload and removal through Cloudinary (JPEG/PNG/WebP validation, file-size and file-signature verification)
+- Workspace, project, and completed-task statistics
+- Account information, authentication-provider display, user ID copy action
+- Last login and update timestamps
+- Password change with deletion-readiness checks (workspace-owner and last-project-admin blockers)
+- Secure account deletion with historical-content anonymization
+- Privacy-safe, read-only member profiles with workspace/project-context authorization
+
+### 📡 Real-Time Collaboration
+
+- Socket.IO authenticated handshake
+- User-scoped, workspace-scoped, and project-scoped rooms
+- Task, document, discussion, notification, and activity broadcasts
+- Workspace/project access revocation and account session revocation
+- Client-side Query cache invalidation with no duplicate Socket.IO client instances
+
+### 🎨 Modern Responsive Frontend
+
+- React 19 and TypeScript with a Tailwind CSS 4 design system
+- Persistent authenticated AppShell — desktop sidebar, top navigation, mobile navigation drawer
+- Responsive cards and dashboards, loading skeletons, empty states, recoverable error states
+- Accessible dialogs and forms, toast notifications, Framer Motion transitions
+- Dark workspace-focused interface, touch-friendly mobile actions, responsive down to narrow mobile widths
+
+---
+
+## Tech Stack
+
+### Frontend
+
+| Layer | Technology |
+|---|---|
+| Framework | React 19, TypeScript, Vite |
+| Styling | Tailwind CSS 4 |
+| Routing | React Router 7 |
+| Server state | TanStack Query 5 |
+| Client state | Zustand 5 |
+| HTTP | Axios |
+| Real-time | Socket.IO Client 4 |
+| Forms | React Hook Form, Zod 4 |
+| Rich text | TipTap 2 |
+| Drag and drop | dnd-kit |
+| Motion & UI | Framer Motion, Lucide React, Sonner, next-themes, cmdk, React Flow |
+
+### Backend
+
+| Layer | Technology |
+|---|---|
+| Runtime | Node.js, Express 5, TypeScript |
+| Database | MongoDB, Mongoose 8 |
+| Real-time | Socket.IO 4 |
+| Auth | JSON Web Tokens, bcrypt/bcryptjs |
+| Validation | Zod 4 |
+| Uploads | Multer 2, Cloudinary 2 |
+| Email | Nodemailer |
+| Security & ops | Helmet, CORS, Compression, Morgan, Pino, dotenv |
+| Future scaling | Redis Client, Google GenAI SDK (experimental) |
+
+---
+
+## Project Structure
+
+```
 syncspace/
 ├── client/
 │   ├── src/
-│   │   ├── app/
-│   │   │   ├── App.tsx
-│   │   │   ├── providers.tsx
-│   │   │   ├── router.tsx
-│   │   │   └── store.ts
-│   │   ├── components/
-│   │   │   ├── navigation/
-│   │   │   └── ui/
-│   │   ├── features/
-│   │   │   ├── activity/
-│   │   │   ├── auth/
-│   │   │   ├── discussions/
-│   │   │   ├── documents/
-│   │   │   ├── landing/
-│   │   │   ├── notifications/
-│   │   │   ├── profile/
-│   │   │   ├── project-invitations/
-│   │   │   ├── project-members/
-│   │   │   ├── projects/
-│   │   │   ├── tasks/
-│   │   │   ├── workspace-invitations/
-│   │   │   ├── workspace-members/
-│   │   │   └── workspaces/
+│   │   ├── app/                # App shell, providers, router, store
+│   │   ├── components/         # Navigation and shared UI
+│   │   ├── features/           # Feature modules (auth, projects, tasks, ...)
 │   │   ├── layouts/
 │   │   ├── lib/
 │   │   ├── realtime/
 │   │   └── styles/
 │   ├── .env.example
 │   ├── package.json
-│   ├── package-lock.json
 │   ├── tsconfig.json
-│   ├── vite.config.ts
-│   └── eslint.config.js
+│   └── vite.config.ts
 │
 ├── server/
 │   ├── src/
@@ -752,25 +295,7 @@ syncspace/
 │   │   ├── helpers/
 │   │   ├── interfaces/
 │   │   ├── middlewares/
-│   │   ├── modules/
-│   │   │   ├── activity/
-│   │   │   ├── auth/
-│   │   │   ├── discussions/
-│   │   │   ├── documents/
-│   │   │   ├── mail/
-│   │   │   ├── notifications/
-│   │   │   ├── otp/
-│   │   │   ├── project/
-│   │   │   ├── projectInvitation/
-│   │   │   ├── projectMember/
-│   │   │   ├── system/
-│   │   │   ├── taskAssignee/
-│   │   │   ├── taskComment/
-│   │   │   ├── tasks/
-│   │   │   ├── users/
-│   │   │   ├── workspace/
-│   │   │   ├── workspace-member/
-│   │   │   └── workspaceInvitation/
+│   │   ├── modules/             # Domain modules (auth, workspace, project, tasks, ...)
 │   │   ├── routes/
 │   │   ├── runtime/
 │   │   ├── sockets/
@@ -781,7 +306,6 @@ syncspace/
 │   │   └── server.ts
 │   ├── .env.example
 │   ├── package.json
-│   ├── package-lock.json
 │   └── tsconfig.json
 │
 ├── docs/
@@ -789,9 +313,11 @@ syncspace/
 ├── .gitignore
 ├── LICENSE
 └── README.md
+```
 
-Frontend Feature Pattern
+**Frontend feature pattern:**
 
+```
 feature/
 ├── api/                 # Axios request functions
 ├── components/          # Feature UI
@@ -800,9 +326,11 @@ feature/
 ├── schemas/             # Zod form schemas
 ├── types/               # TypeScript contracts
 └── feature.queryKeys.ts # Stable TanStack Query keys
+```
 
-Backend Module Pattern
+**Backend module pattern:**
 
+```
 module/
 ├── module.model.ts
 ├── module.validation.ts
@@ -810,54 +338,63 @@ module/
 ├── module.controller.ts
 ├── module.routes.ts
 └── module.subscriber.ts
+```
 
-Not every module needs every file. Event subscribers are used where side effects such as activity, notifications, or real-time broadcasts are required.
+> Not every module needs every file. Event subscribers are used where side effects such as activity, notifications, or real-time broadcasts are required.
 
-Getting Started
+---
 
-Prerequisites
+## Getting Started
 
-Node.js — Current LTS release recommended
+### Prerequisites
 
-npm
+- **Node.js** — Current LTS release recommended
+- **npm**
+- **MongoDB** — Local instance or MongoDB Atlas
+- **Cloudinary account** — Required for profile avatars
+- **SMTP-capable email account** — Required for password-reset OTP delivery
+- **Git**
 
-MongoDB — Local instance or MongoDB Atlas
-
-Cloudinary account — Required for profile avatars
-
-SMTP-capable email account — Required for password-reset OTP delivery
-
-Git
-
-Installation
+### Installation
 
 Clone the repository:
 
+```bash
 git clone https://github.com/mishrasourav-prog/syncspace.git
 cd syncspace
+```
 
 Install server dependencies:
 
+```bash
 cd server
 npm install
+```
 
 Install client dependencies:
 
+```bash
 cd ../client
 npm install
+```
 
-Environment Variables
+### Environment Variables
 
-Server — server/.env
+**Server — `server/.env`**
 
 Copy the template:
 
+```bash
 cp .env.example .env
+```
 
 PowerShell:
 
+```powershell
 Copy-Item .env.example .env
+```
 
+```env
 # Application
 NODE_ENV=development
 PORT=5000
@@ -880,20 +417,24 @@ CLOUDINARY_CLOUD_NAME=your_cloud_name
 CLOUDINARY_API_KEY=your_api_key
 CLOUDINARY_API_SECRET=your_api_secret
 CLOUDINARY_AVATAR_FOLDER=syncspace/avatars
+```
 
-Client — client/.env
+**Client — `client/.env`**
 
 The client environment file is optional during local development when the Vite proxy is used.
 
+```env
 VITE_API_BASE_URL=http://localhost:5000/api/v1
 VITE_SOCKET_URL=http://localhost:5000
+```
 
-Never commit real .env files. Commit only .env.example templates.
+> Never commit real `.env` files. Commit only `.env.example` templates.
 
-Running the App
+### Running the App
 
-Development mode:
+**Development mode:**
 
+```bash
 # Terminal 1 — Start the backend
 cd server
 npm run dev
@@ -901,73 +442,51 @@ npm run dev
 # Terminal 2 — Start the frontend
 cd client
 npm run dev
+```
 
 Open:
 
-http://localhost:5173
+- App: `http://localhost:5173`
+- REST API: `http://localhost:5000/api/v1`
 
-REST API:
+### Build and Verification
 
-http://localhost:5000/api/v1
+**Client:**
 
-Build and Verification
-
-Client:
-
+```bash
 cd client
 npm run lint
 npm run build
+```
 
-Server:
+**Server:**
 
+```bash
 cd server
 npm run build
 npm start
+```
 
-Available client scripts:
+| Command (client) | Description |
+|---|---|
+| `npm run dev` | Start Vite development server |
+| `npm run build` | Type-check and create production build |
+| `npm run lint` | Run ESLint |
+| `npm run preview` | Preview the production client |
 
-Command
+| Command (server) | Description |
+|---|---|
+| `npm run dev` | Start server with tsx watch |
+| `npm run build` | Compile TypeScript to `dist/` |
+| `npm start` | Start compiled server |
 
-Description
+---
 
-npm run dev
+## Architecture Deep Dive
 
-Start Vite development server
+### Application Hierarchy
 
-npm run build
-
-Type-check and create production build
-
-npm run lint
-
-Run ESLint
-
-npm run preview
-
-Preview the production client
-
-Available server scripts:
-
-Command
-
-Description
-
-npm run dev
-
-Start server with tsx watch
-
-npm run build
-
-Compile TypeScript to dist/
-
-npm start
-
-Start compiled server
-
-Architecture Deep Dive
-
-Application Hierarchy
-
+```
 Authenticated User
 ├── Private Profile
 ├── Notifications
@@ -986,11 +505,13 @@ Authenticated User
         ├── Discussions
         ├── Discussion Replies
         └── Project Activity
+```
 
 This hierarchy is reflected in routes, service authorization, database references, real-time rooms, frontend query keys, and navigation.
 
-Request Lifecycle
+### Request Lifecycle
 
+```mermaid
 flowchart LR
     UI[React UI] --> RHF[React Hook Form]
     RHF --> ZV[Zod Validation]
@@ -1007,9 +528,11 @@ flowchart LR
     EB --> NOTIF[Notification Subscriber]
     EB --> SOCKET[Socket Subscriber]
     SOCKET --> CLIENT[Connected Clients]
+```
 
 Typical request flow:
 
+```
 Browser action
 → Form validation
 → Axios request
@@ -1025,11 +548,13 @@ Browser action
 → Activity / notification / Socket.IO subscribers
 → Client cache invalidation
 → Updated interface
+```
 
 Controllers remain thin. Services own business logic, authorization, transactions, and event publication.
 
-Authentication and Token Refresh
+### Authentication and Token Refresh
 
+```
 Registration
   └─► Validate request
       └─► Normalize email and username
@@ -1051,75 +576,55 @@ Protected Request
               └─► Compare sessionVersion
                   └─► Attach trusted req.user
                       └─► Continue request
+```
 
 The frontend Axios client:
 
-sends cookies with requests;
+- sends cookies with requests
+- receives a 401 when the access token expires
+- performs one refresh request
+- queues simultaneous failed requests
+- retries them after refresh
+- clears the session when refresh is no longer valid
 
-receives a 401 when the access token expires;
+### Immediate Session Revocation
 
-performs one refresh request;
-
-queues simultaneous failed requests;
-
-retries them after refresh;
-
-clears the session when refresh is no longer valid.
-
-Immediate Session Revocation
-
-Every access and refresh token carries:
-
-sessionVersion: number
-
-The User record stores the current database version.
+Every access and refresh token carries a `sessionVersion: number`. The User record stores the current database version.
 
 Protected requests require:
 
+```
 JWT sessionVersion === database sessionVersion
+```
 
-The version changes after:
+The version changes after: `logout` · `password change` · `password reset` · `account deletion`
 
-logout
-password change
-password reset
-account deletion
-
-The server publishes:
-
-USER_SESSION_REVOKED
-
-The Socket.IO subscriber emits:
-
-account:session-revoked
+The server publishes `USER_SESSION_REVOKED`. The Socket.IO subscriber emits `account:session-revoked`.
 
 Connected clients then:
 
+```
 clear Zustand auth state
 → clear TanStack Query cache
 → disconnect Socket.IO
 → navigate to /login
+```
 
 This invalidates old sessions immediately instead of waiting for token expiry.
 
-Workspace and Project Authorization
+### Workspace and Project Authorization
 
-Authorization is contextual.
+Authorization is contextual. A user may belong to:
 
-A user may belong to:
+- a workspace but not a project
+- a workspace as a guest
+- a project as a member
+- a project as an administrator
+- a workspace as an owner or administrator
 
-a workspace but not a project;
+Services verify the correct membership before performing operations:
 
-a workspace as a guest;
-
-a project as a member;
-
-a project as an administrator;
-
-a workspace as an owner or administrator.
-
-Services verify the correct membership before performing operations.
-
+```
 Authenticated identity
 → Workspace membership check
 → Workspace role check
@@ -1127,15 +632,15 @@ Authenticated identity
 → Project role check
 → Resource-level permission
 → Operation allowed or rejected
+```
 
 Workspace and project memberships use dedicated collections instead of large embedded arrays.
 
-Event-Driven Backend
+### Event-Driven Backend
 
-SyncSpace uses a typed in-process domain event bus.
+SyncSpace uses a typed in-process domain event bus. Primary business operations are persisted first. Side effects happen through subscribers.
 
-Primary business operations are persisted first. Side effects happen through subscribers.
-
+```mermaid
 sequenceDiagram
     participant Client
     participant API
@@ -1160,187 +665,102 @@ sequenceDiagram
 
     API-->>Client: Success response
     SocketIO-->>Client: Invalidate relevant query
+```
 
 Domain events cover:
 
-task creation;
-
-task status changes;
-
-task assignment;
-
-task reordering;
-
-document creation, update, archive, and restore;
-
-discussion creation, update, deletion, pinning, and locking;
-
-discussion reply creation, update, and deletion;
-
-activity creation;
-
-notification creation;
-
-project membership ending;
-
-workspace membership ending;
-
-user session revocation.
+- task creation, status changes, assignment, and reordering
+- document creation, update, archive, and restore
+- discussion creation, update, deletion, pinning, and locking
+- discussion reply creation, update, and deletion
+- activity creation and notification creation
+- project membership ending and workspace membership ending
+- user session revocation
 
 Subscriber failures do not falsely report an already-persisted business action as failed.
 
-Real-Time Synchronization
+### Real-Time Synchronization
 
 SyncSpace uses scoped Socket.IO rooms:
 
-Room
+| Room | Purpose |
+|---|---|
+| User room | Notifications and account session revocation |
+| Workspace room | Workspace activity and access changes |
+| Project room | Tasks, documents, discussions, and project activity |
 
-Purpose
-
-User room
-
-Notifications and account session revocation
-
-Workspace room
-
-Workspace activity and access changes
-
-Project room
-
-Tasks, documents, discussions, and project activity
-
+```
 Authenticated socket
 → Join private user room
 → Join authorized workspace room
 → Join authorized project room
 → Receive only relevant events
+```
 
 When access ends:
 
-the user leaves the relevant room;
-
-the client receives an access-revocation event;
-
-protected cached data is cleared or invalidated;
-
-navigation returns to a safe route.
+- the user leaves the relevant room
+- the client receives an access-revocation event
+- protected cached data is cleared or invalidated
+- navigation returns to a safe route
 
 REST remains authoritative. Socket.IO communicates that authoritative server state changed; it does not replace persistence.
 
-Frontend State Architecture
+### Frontend State Architecture
 
-State Type
+| State Type | Tool | Responsibility |
+|---|---|---|
+| Authentication identity | Zustand | Compact current-user session |
+| Server data | TanStack Query | Fetching, caching, retry, invalidation |
+| Forms | React Hook Form | Input state and submission |
+| Validation | Zod | Client-side runtime validation |
+| Routing and filters | React Router | URLs, params, search state |
+| HTTP | Axios | API calls and refresh interceptor |
+| Real-time | Socket.IO Client | Scoped live events |
+| Rich text | TipTap | Document editing |
+| Drag and drop | dnd-kit | Task-board movement |
 
-Tool
+The compact global `AuthUser` contains only:
 
-Responsibility
-
-Authentication identity
-
-Zustand
-
-Compact current-user session
-
-Server data
-
-TanStack Query
-
-Fetching, caching, retry, invalidation
-
-Forms
-
-React Hook Form
-
-Input state and submission
-
-Validation
-
-Zod
-
-Client-side runtime validation
-
-Routing and filters
-
-React Router
-
-URLs, params, search state
-
-HTTP
-
-Axios
-
-API calls and refresh interceptor
-
-Real-time
-
-Socket.IO Client
-
-Scoped live events
-
-Rich text
-
-TipTap
-
-Document editing
-
-Drag and drop
-
-dnd-kit
-
-Task-board movement
-
-The compact global AuthUser contains only:
-
+```json
 {
-    _id,
-    name,
-    username,
-    email,
-    avatar
+  "_id": "",
+  "name": "",
+  "username": "",
+  "email": "",
+  "avatar": ""
 }
+```
 
 Extended private profile data remains in TanStack Query rather than expanding every authentication consumer.
 
-Account Deletion and Anonymization
+### Account Deletion and Anonymization
 
 Account deletion is a controlled workflow.
 
 Before deletion, the server checks whether the user:
 
-owns one or more workspaces;
-
-is the last administrator of one or more projects.
+- owns one or more workspaces
+- is the last administrator of one or more projects
 
 If blockers exist, the Profile UI explains what must be resolved.
 
 When deletion is allowed:
 
-current workspace memberships are removed;
+- current workspace and project memberships are removed
+- task assignments are removed
+- received notifications are removed
+- OTP and invitation records are cleaned up
+- avatar cleanup is attempted
+- credentials are removed
+- all sessions are revoked
+- the User identity is anonymized
 
-current project memberships are removed;
+Historical authored content remains connected to a tombstone `Deleted user`, preserving project history without preserving personal access or identity.
 
-task assignments are removed;
+### Data Model Overview
 
-received notifications are removed;
-
-OTP and invitation records are cleaned up;
-
-avatar cleanup is attempted;
-
-credentials are removed;
-
-all sessions are revoked;
-
-the User identity is anonymized.
-
-Historical authored content remains connected to a tombstone user:
-
-Deleted user
-
-This preserves project history without preserving personal access or identity.
-
-Data Model Overview
-
+```mermaid
 erDiagram
     USER ||--o{ WORKSPACE_MEMBER : joins
     WORKSPACE ||--o{ WORKSPACE_MEMBER : contains
@@ -1365,767 +785,207 @@ erDiagram
     USER ||--o{ NOTIFICATION : receives
     WORKSPACE ||--o{ ACTIVITY : records
     PROJECT ||--o{ ACTIVITY : records
-
-Core collections:
-
-Users
-Workspaces
-Workspace Members
-Workspace Invitations
-Projects
-Project Members
-Project Invitations
-Tasks and Issues
-Task Assignees
-Task Comments
-Documents
-Discussions
-Discussion Replies
-Notifications
-Activities
-OTP Records
-
-Indexing Strategy
-
-Indexes support common access patterns such as:
-
-unique email and username;
-
-unique workspace membership;
-
-unique project membership;
-
-workspace and project member lookup;
-
-project role lookup;
-
-task status;
-
-task ordering;
-
-task type;
-
-archived state;
-
-due dates;
-
-parent tasks;
-
-completed-task profile statistics;
-
-invitation lookup;
-
-notification recipient lookup.
-
-API Reference
-
-All REST routes are prefixed with:
-
-/api/v1
-
-The following table lists representative routes.
-
-Authentication Routes /api/v1/auth
-
-Method
-
-Path
-
-Description
-
-Auth
-
-POST
-
-/register
-
-Register a new user
-
-—
-
-POST
-
-/login
-
-Login with email and password
-
-—
-
-POST
-
-/refresh
-
-Refresh access token
-
-Refresh cookie
-
-POST
-
-/logout
-
-Revoke the current account session
-
-✅
-
-GET
-
-/me
-
-Get current compact authenticated user
-
-✅
-
-POST
-
-/forgot-password
-
-Send password-reset OTP
-
-—
-
-POST
-
-/verify-reset-otp
-
-Verify password-reset OTP
-
-—
-
-POST
-
-/reset-password
-
-Reset password and revoke sessions
-
-—
-
-POST
-
-/resend-reset-otp
-
-Resend password-reset OTP
-
-—
-
-Workspace Routes
-
-Method
-
-Path
-
-Description
-
-Auth
-
-GET
-
-/workspaces
-
-List accessible workspaces
-
-✅
-
-POST
-
-/workspaces
-
-Create workspace
-
-✅
-
-GET
-
-/workspaces/:workspaceId
-
-Get workspace details
-
-✅
-
-PATCH
-
-/workspaces/:workspaceId
-
-Update workspace
-
-✅
-
-POST
-
-/workspaces/:workspaceId/archive
-
-Archive workspace
-
-✅
-
-POST
-
-/workspaces/:workspaceId/restore
-
-Restore workspace
-
-✅
-
-GET
-
-/workspaces/:workspaceId/members
-
-List members
-
-✅
-
-PATCH
-
-/workspaces/:workspaceId/members/:memberId
-
-Update member role
-
-✅
-
-DELETE
-
-/workspaces/:workspaceId/members/:memberId
-
-Remove member
-
-✅
-
-POST
-
-/workspaces/:workspaceId/leave
-
-Leave workspace
-
-✅
-
-Workspace Invitation Routes
-
-Method
-
-Path
-
-Description
-
-Auth
-
-POST
-
-/workspaces/:workspaceId/invitations
-
-Create invitation
-
-✅
-
-GET
-
-/workspace-invitations
-
-List current-user invitations
-
-✅
-
-POST
-
-/workspace-invitations/:invitationId/accept
-
-Accept invitation
-
-✅
-
-POST
-
-/workspace-invitations/:invitationId/reject
-
-Reject invitation
-
-✅
-
-DELETE
-
-/workspace-invitations/:invitationId
-
-Cancel invitation
-
-✅
-
-Project Routes
-
-Method
-
-Path
-
-Description
-
-Auth
-
-GET
-
-/workspaces/:workspaceId/projects
-
-List workspace projects
-
-✅
-
-POST
-
-/workspaces/:workspaceId/projects
-
-Create project
-
-✅
-
-GET
-
-/projects/:projectId
-
-Get project details
-
-✅
-
-PATCH
-
-/projects/:projectId
-
-Update project
-
-✅
-
-POST
-
-/projects/:projectId/archive
-
-Archive project
-
-✅
-
-POST
-
-/projects/:projectId/restore
-
-Restore project
-
-✅
-
-GET
-
-/projects/:projectId/members
-
-List project members
-
-✅
-
-PATCH
-
-/projects/:projectId/members/:memberId
-
-Update project role
-
-✅
-
-DELETE
-
-/projects/:projectId/members/:memberId
-
-Remove project member
-
-✅
-
-POST
-
-/projects/:projectId/leave
-
-Leave project
-
-✅
-
-Task and Issue Routes
-
-Method
-
-Path
-
-Description
-
-Auth
-
-GET
-
-/projects/:projectId/tasks
-
-List tasks and issues
-
-✅
-
-POST
-
-/projects/:projectId/tasks
-
-Create task or issue
-
-✅
-
-GET
-
-/tasks/:taskId
-
-Get task details
-
-✅
-
-PATCH
-
-/tasks/:taskId
-
-Update task
-
-✅
-
-DELETE
-
-/tasks/:taskId
-
-Archive/delete task according to service rules
-
-✅
-
-POST
-
-/projects/:projectId/tasks/reorder
-
-Reorder task board
-
-✅
-
-Document Routes
-
-Method
-
-Path
-
-Description
-
-Auth
-
-GET
-
-/projects/:projectId/documents
-
-List project documents
-
-✅
-
-POST
-
-/projects/:projectId/documents
-
-Create document
-
-✅
-
-GET
-
-/documents/:documentId
-
-Get document
-
-✅
-
-PATCH
-
-/documents/:documentId
-
-Update document
-
-✅
-
-POST
-
-/documents/:documentId/archive
-
-Archive document
-
-✅
-
-POST
-
-/documents/:documentId/restore
-
-Restore document
-
-✅
-
-Discussion Routes
-
-Method
-
-Path
-
-Description
-
-Auth
-
-GET
-
-/projects/:projectId/discussions
-
-List discussions
-
-✅
-
-POST
-
-/projects/:projectId/discussions
-
-Create discussion
-
-✅
-
-GET
-
-/discussions/:discussionId
-
-Get discussion
-
-✅
-
-PATCH
-
-/discussions/:discussionId
-
-Update discussion
-
-✅
-
-POST
-
-/discussions/:discussionId/replies
-
-Create reply
-
-✅
-
-PATCH
-
-/discussion-replies/:replyId
-
-Update reply
-
-✅
-
-DELETE
-
-/discussion-replies/:replyId
-
-Delete reply
-
-✅
-
-Activity and Notification Routes
-
-Method
-
-Path
-
-Description
-
-Auth
-
-GET
-
-/workspaces/:workspaceId/activities
-
-Workspace activity
-
-✅
-
-GET
-
-/projects/:projectId/activities
-
-Project activity
-
-✅
-
-GET
-
-/notifications
-
-List notifications
-
-✅
-
-GET
-
-/notifications/unread-count
-
-Get unread count
-
-✅
-
-PATCH
-
-/notifications/:notificationId/read
-
-Mark one as read
-
-✅
-
-PATCH
-
-/notifications/read-all
-
-Mark all as read
-
-✅
-
-Profile Routes /api/v1/users
-
-Method
-
-Path
-
-Description
-
-Auth
-
-GET
-
-/me/profile
-
-Get complete private profile
-
-✅
-
-PATCH
-
-/me/profile
-
-Update supported profile fields
-
-✅
-
-POST
-
-/me/avatar
-
-Upload or replace avatar
-
-✅
-
-DELETE
-
-/me/avatar
-
-Remove avatar
-
-✅
-
-PATCH
-
-/me/password
-
-Change password and revoke sessions
-
-✅
-
-GET
-
-/me/deletion-readiness
-
-Check account-deletion blockers
-
-✅
-
-DELETE
-
-/me
-
-Delete and anonymize account
-
-✅
-
-GET
-
-/:userId/profile?workspaceId=...&projectId=...
-
-Get context-authorized member profile
-
-✅
-
-Screenshots
+```
+
+Core collections: Users · Workspaces · Workspace Members · Workspace Invitations · Projects · Project Members · Project Invitations · Tasks and Issues · Task Assignees · Task Comments · Documents · Discussions · Discussion Replies · Notifications · Activities · OTP Records
+
+**Indexing strategy** supports common access patterns such as: unique email/username, unique workspace/project membership, workspace and project member lookup, project role lookup, task status/ordering/type, archived state, due dates, parent tasks, completed-task profile statistics, invitation lookup, and notification recipient lookup.
+
+---
+
+## API Reference
+
+All REST routes are prefixed with `/api/v1`. The following tables list representative routes.
+
+### Authentication Routes `/api/v1/auth`
+
+| Method | Path | Description | Auth |
+|---|---|---|---|
+| `POST` | `/register` | Register a new user | — |
+| `POST` | `/login` | Login with email and password | — |
+| `POST` | `/refresh` | Refresh access token | Refresh cookie |
+| `POST` | `/logout` | Revoke the current account session | ✅ |
+| `GET` | `/me` | Get current compact authenticated user | ✅ |
+| `POST` | `/forgot-password` | Send password-reset OTP | — |
+| `POST` | `/verify-reset-otp` | Verify password-reset OTP | — |
+| `POST` | `/reset-password` | Reset password and revoke sessions | — |
+| `POST` | `/resend-reset-otp` | Resend password-reset OTP | — |
+
+### Workspace Routes
+
+| Method | Path | Description | Auth |
+|---|---|---|---|
+| `GET` | `/workspaces` | List accessible workspaces | ✅ |
+| `POST` | `/workspaces` | Create workspace | ✅ |
+| `GET` | `/workspaces/:workspaceId` | Get workspace details | ✅ |
+| `PATCH` | `/workspaces/:workspaceId` | Update workspace | ✅ |
+| `POST` | `/workspaces/:workspaceId/archive` | Archive workspace | ✅ |
+| `POST` | `/workspaces/:workspaceId/restore` | Restore workspace | ✅ |
+| `GET` | `/workspaces/:workspaceId/members` | List members | ✅ |
+| `PATCH` | `/workspaces/:workspaceId/members/:memberId` | Update member role | ✅ |
+| `DELETE` | `/workspaces/:workspaceId/members/:memberId` | Remove member | ✅ |
+| `POST` | `/workspaces/:workspaceId/leave` | Leave workspace | ✅ |
+
+### Workspace Invitation Routes
+
+| Method | Path | Description | Auth |
+|---|---|---|---|
+| `POST` | `/workspaces/:workspaceId/invitations` | Create invitation | ✅ |
+| `GET` | `/workspace-invitations` | List current-user invitations | ✅ |
+| `POST` | `/workspace-invitations/:invitationId/accept` | Accept invitation | ✅ |
+| `POST` | `/workspace-invitations/:invitationId/reject` | Reject invitation | ✅ |
+| `DELETE` | `/workspace-invitations/:invitationId` | Cancel invitation | ✅ |
+
+### Project Routes
+
+| Method | Path | Description | Auth |
+|---|---|---|---|
+| `GET` | `/workspaces/:workspaceId/projects` | List workspace projects | ✅ |
+| `POST` | `/workspaces/:workspaceId/projects` | Create project | ✅ |
+| `GET` | `/projects/:projectId` | Get project details | ✅ |
+| `PATCH` | `/projects/:projectId` | Update project | ✅ |
+| `POST` | `/projects/:projectId/archive` | Archive project | ✅ |
+| `POST` | `/projects/:projectId/restore` | Restore project | ✅ |
+| `GET` | `/projects/:projectId/members` | List project members | ✅ |
+| `PATCH` | `/projects/:projectId/members/:memberId` | Update project role | ✅ |
+| `DELETE` | `/projects/:projectId/members/:memberId` | Remove project member | ✅ |
+| `POST` | `/projects/:projectId/leave` | Leave project | ✅ |
+
+### Task and Issue Routes
+
+| Method | Path | Description | Auth |
+|---|---|---|---|
+| `GET` | `/projects/:projectId/tasks` | List tasks and issues | ✅ |
+| `POST` | `/projects/:projectId/tasks` | Create task or issue | ✅ |
+| `GET` | `/tasks/:taskId` | Get task details | ✅ |
+| `PATCH` | `/tasks/:taskId` | Update task | ✅ |
+| `DELETE` | `/tasks/:taskId` | Archive/delete task according to service rules | ✅ |
+| `POST` | `/projects/:projectId/tasks/reorder` | Reorder task board | ✅ |
+
+### Document Routes
+
+| Method | Path | Description | Auth |
+|---|---|---|---|
+| `GET` | `/projects/:projectId/documents` | List project documents | ✅ |
+| `POST` | `/projects/:projectId/documents` | Create document | ✅ |
+| `GET` | `/documents/:documentId` | Get document | ✅ |
+| `PATCH` | `/documents/:documentId` | Update document | ✅ |
+| `POST` | `/documents/:documentId/archive` | Archive document | ✅ |
+| `POST` | `/documents/:documentId/restore` | Restore document | ✅ |
+
+### Discussion Routes
+
+| Method | Path | Description | Auth |
+|---|---|---|---|
+| `GET` | `/projects/:projectId/discussions` | List discussions | ✅ |
+| `POST` | `/projects/:projectId/discussions` | Create discussion | ✅ |
+| `GET` | `/discussions/:discussionId` | Get discussion | ✅ |
+| `PATCH` | `/discussions/:discussionId` | Update discussion | ✅ |
+| `POST` | `/discussions/:discussionId/replies` | Create reply | ✅ |
+| `PATCH` | `/discussion-replies/:replyId` | Update reply | ✅ |
+| `DELETE` | `/discussion-replies/:replyId` | Delete reply | ✅ |
+
+### Activity and Notification Routes
+
+| Method | Path | Description | Auth |
+|---|---|---|---|
+| `GET` | `/workspaces/:workspaceId/activities` | Workspace activity | ✅ |
+| `GET` | `/projects/:projectId/activities` | Project activity | ✅ |
+| `GET` | `/notifications` | List notifications | ✅ |
+| `GET` | `/notifications/unread-count` | Get unread count | ✅ |
+| `PATCH` | `/notifications/:notificationId/read` | Mark one as read | ✅ |
+| `PATCH` | `/notifications/read-all` | Mark all as read | ✅ |
+
+### Profile Routes `/api/v1/users`
+
+| Method | Path | Description | Auth |
+|---|---|---|---|
+| `GET` | `/me/profile` | Get complete private profile | ✅ |
+| `PATCH` | `/me/profile` | Update supported profile fields | ✅ |
+| `POST` | `/me/avatar` | Upload or replace avatar | ✅ |
+| `DELETE` | `/me/avatar` | Remove avatar | ✅ |
+| `PATCH` | `/me/password` | Change password and revoke sessions | ✅ |
+| `GET` | `/me/deletion-readiness` | Check account-deletion blockers | ✅ |
+| `DELETE` | `/me` | Delete and anonymize account | ✅ |
+| `GET` | `/:userId/profile?workspaceId=...&projectId=...` | Get context-authorized member profile | ✅ |
+
+---
+
+## Screenshots
 
 The screenshots below show the current SyncSpace interface across authentication, workspace management, project collaboration, rich-text documents, discussions, profiles, and mobile layouts.
 
-🚀 Landing Page
+### 🚀 Landing Page
 
 <p align="center">
   <img src="./docs/screenshots/landing-page.png" alt="SyncSpace Landing Page" width="100%" />
 </p>
 <p align="center"><em>Product landing experience and primary call-to-action</em></p>
 
-🔐 Authentication
+### 🔐 Authentication
 
 <p align="center">
   <img src="./docs/screenshots/authentication.png" alt="SyncSpace Registration Page" width="88%" />
 </p>
 <p align="center"><em>Account registration interface</em></p>
 
-📊 Workspace Dashboard
+### 📊 Workspace Dashboard
 
 <p align="center">
   <img src="./docs/screenshots/dashboard.png" alt="SyncSpace Dashboard" width="100%" />
 </p>
 <p align="center"><em>Workspace dashboard with statistics, invitations, notifications, and quick actions</em></p>
 
-🏢 Workspace Overview
+### 🏢 Workspace Overview
 
 <p align="center">
   <img src="./docs/screenshots/workspace-overview.png" alt="SyncSpace Workspace Overview" width="100%" />
 </p>
 <p align="center"><em>Workspace statistics, projects, members, access information, and activity</em></p>
 
-📁 Project Overview
+### 📁 Project Overview
 
 <p align="center">
   <img src="./docs/screenshots/project-overview.png" alt="SyncSpace Project Overview" width="100%" />
 </p>
 <p align="center"><em>Project metrics, task completion, member access, recent work, and activity</em></p>
 
-✅ Tasks and Issues
+### ✅ Tasks and Issues
 
 <p align="center">
   <img src="./docs/screenshots/tasks-and-issues.png" alt="SyncSpace Tasks and Issues Board" width="100%" />
 </p>
 <p align="center"><em>Kanban board, filters, summaries, priorities, and status-based workflow</em></p>
 
-📝 Document Library
+### 📝 Document Library
 
 <p align="center">
   <img src="./docs/screenshots/documents.png" alt="SyncSpace Document Library" width="100%" />
 </p>
 <p align="center"><em>Project document search, filtering, revisions, and archive state</em></p>
 
-✍️ Rich-Text Document Editor
+### ✍️ Rich-Text Document Editor
 
 <p align="center">
   <img src="./docs/screenshots/document-editor.png" alt="SyncSpace Document Editor" width="100%" />
 </p>
 <p align="center"><em>TipTap-powered rich-text editing, preview, export, duplication, and document metadata</em></p>
 
-💬 Project Discussions
+### 💬 Project Discussions
 
 <p align="center">
   <img src="./docs/screenshots/discussions.png" alt="SyncSpace Discussions" width="100%" />
 </p>
 <p align="center"><em>Threaded discussions, replies, participants, moderation, metadata, and activity</em></p>
 
-👤 Profile and Account Management
+### 👤 Profile and Account Management
 
 <p align="center">
   <img src="./docs/screenshots/profile.png" alt="SyncSpace Profile Page" width="100%" />
 </p>
 <p align="center"><em>Private profile, account metadata, statistics, avatar management, password security, and account deletion</em></p>
 
-📱 Responsive Mobile Experience
+### 📱 Responsive Mobile Experience
 
 <table>
   <tr>
@@ -2142,249 +1002,130 @@ The screenshots below show the current SyncSpace interface across authentication
   </tr>
 </table>
 
-Engineering Decisions
+---
 
-Referenced Membership Collections
+## Engineering Decisions
 
-Workspace and project memberships use separate collections instead of embedded arrays.
+**Referenced Membership Collections** — Workspace and project memberships use separate collections instead of embedded arrays, giving unique membership constraints, efficient role lookup, independent membership lifecycle, simpler leave/remove operations, support for larger teams, and clearer authorization queries.
 
-Benefits:
+**Feature-Based Frontend** — The frontend is organized by business feature. Each feature owns its request functions, schemas, types, query keys, hooks, components, and route-level pages — reducing cross-feature coupling.
 
-unique membership constraints;
+**Thin Controllers and Service-Owned Rules** — Controllers parse and validate request data, call services, and return a consistent response. Services enforce authorization, perform database queries and transactions, protect business invariants, and publish domain events.
 
-efficient role lookup;
+**REST Plus Socket.IO** — REST remains authoritative for reads and mutations. Socket.IO communicates that data changed so connected clients can invalidate or update the correct cache, avoiding real-time messages as an alternative database.
 
-independent membership lifecycle;
+**Context-Authorized Member Profiles** — Member profiles are not globally public. The request must contain a shared workspace or project context; unauthorized and nonexistent combinations return the same privacy-safe response.
 
-simpler leave/remove operations;
+**Anonymization Instead of Destructive History Removal** — Deleting a user should not destroy collaborative history. SyncSpace removes access and personal identity while preserving authored-resource references through an anonymized tombstone User.
 
-support for larger teams;
+**URL-Driven Task Filters** — Task view and filters use URL search parameters so filters survive refresh, views can be shared, browser navigation remains predictable, and task state is not hidden in local component state.
 
-clearer authorization queries.
+**Graceful Shutdown** — The server handles termination signals by closing Socket.IO, the HTTP server, and the MongoDB connection, with a timeout fallback to prevent stalled shutdowns.
 
-Feature-Based Frontend
+**Query Cache as the Server-State Source** — TanStack Query owns server data. Zustand stores only compact authentication identity, avoiding duplication of large workspace, project, task, document, or profile objects in global state.
 
-The frontend is organized by business feature.
+---
 
-Each feature owns:
+## Current Limitations
 
-request functions;
+- Automated unit, integration, and browser end-to-end tests are not yet included
+- A public production deployment URL is not yet documented
+- Distributed Socket.IO scaling is not yet enabled
+- Redis is not yet configured as a Socket.IO adapter
+- External email delivery is not yet processed through a background-job queue
+- CI/CD workflows are not yet included
+- Production monitoring and tracing are not yet configured
+- Workspace ownership transfer is not yet available
+- Workspace export is not yet available
+- AI-assisted workspace features are not yet part of the documented stable workflow
+- Additional screenshots such as read-only Member Profile, Notifications, Task Detail, and invitation dialogs can be added later
 
-schemas;
+---
 
-types;
+## Roadmap
 
-Query keys;
+- [ ] Add a public production deployment
+- [ ] Add unit tests for services, schemas, and permissions
+- [ ] Add API integration tests
+- [ ] Add browser end-to-end tests
+- [ ] Add GitHub Actions for lint, build, and tests
+- [ ] Add Redis-backed Socket.IO scaling
+- [ ] Add background jobs for email and external services
+- [ ] Add workspace ownership transfer
+- [ ] Add workspace export
+- [ ] Add structured monitoring and observability
+- [ ] Add deployment documentation
+- [ ] Add OpenAPI documentation
+- [ ] Add read-only Member Profile screenshots
+- [ ] Add task detail and notification screenshots
+- [ ] Evaluate AI-assisted workspace summaries and suggestions
 
-hooks;
+---
 
-components;
-
-route-level pages.
-
-This reduces cross-feature coupling and makes the application easier to evolve.
-
-Thin Controllers and Service-Owned Rules
-
-Controllers:
-
-parse and validate request data;
-
-call services;
-
-return a consistent response.
-
-Services:
-
-enforce authorization;
-
-perform database queries and transactions;
-
-protect business invariants;
-
-publish domain events.
-
-REST Plus Socket.IO
-
-REST remains authoritative for reads and mutations.
-
-Socket.IO communicates that data changed so connected clients can invalidate or update the correct cache.
-
-This avoids treating real-time messages as an alternative database.
-
-Context-Authorized Member Profiles
-
-Member profiles are not globally public.
-
-The request must contain a shared workspace or project context. Unauthorized and nonexistent combinations return the same privacy-safe response.
-
-Anonymization Instead of Destructive History Removal
-
-Deleting a user should not destroy collaborative history.
-
-SyncSpace removes access and personal identity while preserving authored-resource references through an anonymized tombstone User.
-
-URL-Driven Task Filters
-
-Task view and filters use URL search parameters.
-
-Benefits:
-
-filters survive refresh;
-
-views can be shared;
-
-browser navigation remains predictable;
-
-task state is not hidden in local component state.
-
-Graceful Shutdown
-
-The server handles termination signals by closing:
-
-Socket.IO
-HTTP server
-MongoDB connection
-
-A timeout fallback prevents stalled shutdowns.
-
-Query Cache as the Server-State Source
-
-TanStack Query owns server data.
-
-Zustand stores only compact authentication identity. This avoids duplicating large workspace, project, task, document, or profile objects in global state.
-
-Current Limitations
-
-Automated unit, integration, and browser end-to-end tests are not yet included.
-
-A public production deployment URL is not yet documented.
-
-Distributed Socket.IO scaling is not yet enabled.
-
-Redis is not yet configured as a Socket.IO adapter.
-
-External email delivery is not yet processed through a background-job queue.
-
-CI/CD workflows are not yet included.
-
-Production monitoring and tracing are not yet configured.
-
-Workspace ownership transfer is not yet available.
-
-Workspace export is not yet available.
-
-AI-assisted workspace features are not yet part of the documented stable workflow.
-
-Additional screenshots such as read-only Member Profile, Notifications, Task Detail, and invitation dialogs can be added later.
-
-Roadmap
-
-Add a public production deployment
-
-Add unit tests for services, schemas, and permissions
-
-Add API integration tests
-
-Add browser end-to-end tests
-
-Add GitHub Actions for lint, build, and tests
-
-Add Redis-backed Socket.IO scaling
-
-Add background jobs for email and external services
-
-Add workspace ownership transfer
-
-Add workspace export
-
-Add structured monitoring and observability
-
-Add deployment documentation
-
-Add OpenAPI documentation
-
-Add read-only Member Profile screenshots
-
-Add task detail and notification screenshots
-
-Evaluate AI-assisted workspace summaries and suggestions
-
-Contributing
+## Contributing
 
 Contributions, bug reports, and improvement suggestions are welcome.
 
-Fork the repository.
-
-Create a focused feature branch:
-
-git checkout -b feat/your-feature-name
-
-Make the required changes.
-
-Verify the client:
-
-cd client
-npm run lint
-npm run build
-
-Verify the server:
-
-cd server
-npm run build
-
-Commit with a clear conventional message:
-
-git commit -m "feat: describe the change"
-
-Push the branch:
-
-git push origin feat/your-feature-name
-
-Open a Pull Request against main.
+1. **Fork** the repository
+2. **Create** a focused feature branch:
+   ```bash
+   git checkout -b feat/your-feature-name
+   ```
+3. Make the required changes
+4. **Verify** the client:
+   ```bash
+   cd client
+   npm run lint
+   npm run build
+   ```
+5. **Verify** the server:
+   ```bash
+   cd server
+   npm run build
+   ```
+6. **Commit** with a clear conventional message:
+   ```bash
+   git commit -m "feat: describe the change"
+   ```
+7. **Push** the branch:
+   ```bash
+   git push origin feat/your-feature-name
+   ```
+8. **Open a Pull Request** against `main`
 
 Please follow these guidelines:
 
-keep pull requests focused;
+- Keep pull requests focused
+- Explain what changed and why
+- Do not commit `.env` files
+- Do not commit `node_modules` or `dist`
+- Do not commit credentials, logs, runtime uploads, or backup ZIPs
+- Run lint and builds before opening a pull request
 
-explain what changed and why;
+### Bug Reports
 
-do not commit .env files;
+Use the [GitHub Issues](https://github.com/mishrasourav-prog/syncspace/issues) page. Include:
 
-do not commit node_modules or dist;
+- Operating system
+- Node.js version
+- Browser
+- Steps to reproduce
+- Expected behavior
+- Actual behavior
+- Screenshots or logs when useful
 
-do not commit credentials, logs, runtime uploads, or backup ZIPs;
+---
 
-run lint and builds before opening a pull request.
+## License
 
-Bug Reports
+Distributed under the MIT License. See [`LICENSE`](LICENSE) for full terms.
 
-Use the GitHub Issues page.
-
-Include:
-
-operating system;
-
-Node.js version;
-
-browser;
-
-steps to reproduce;
-
-expected behavior;
-
-actual behavior;
-
-screenshots or logs when useful.
-
-License
-
-Distributed under the MIT License. See LICENSE for full terms.
+---
 
 <div align="center">
 
-Built by Sourav Mishra
+**Built by [Sourav Mishra](https://github.com/mishrasourav-prog)**
 
-SyncSpace — keeping teams, projects, and knowledge in sync.
+*SyncSpace — keeping teams, projects, and knowledge in sync.*
 
 </div>

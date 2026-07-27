@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ChangeEvent } from "react";
 import { toast } from "sonner";
 import { Crown, UserMinus, UserPlus, Users } from "lucide-react";
 import { Avatar } from "@/components/ui/avatar";
@@ -13,6 +13,7 @@ import { useProjectMembersQuery } from "../hooks/useProjectMemberQueries";
 import { useUpdateProjectMemberRoleMutation } from "../hooks/useProjectMemberMutations";
 import { RemoveProjectMemberDialog } from "./RemoveProjectMemberDialog";
 import { getProjectAdminCount , isLastProjectAdmin } from "../../projects/project.permissions";
+import { MemberProfileLink } from "@/features/profile/components/MemberProfileLink";
 import type { ProjectMember, ProjectRole } from "../types/projectMember.types";
 
 const INITIAL_VISIBLE = 6;
@@ -37,6 +38,7 @@ function MemberRowSkeleton() {
 }
 
 interface ProjectMembersPanelProps {
+  workspaceId: string;
   projectId: string;
   search: string;
   canManage: boolean;
@@ -44,7 +46,14 @@ interface ProjectMembersPanelProps {
   onInvite: () => void;
 }
 
-export function ProjectMembersPanel({ projectId, search, canManage, canInvite, onInvite }: ProjectMembersPanelProps) {
+export function ProjectMembersPanel({
+  workspaceId,
+  projectId,
+  search,
+  canManage,
+  canInvite,
+  onInvite,
+}: ProjectMembersPanelProps) {
   const currentUserId = useAuthStore((state) => state.user?._id);
   const membersQuery = useProjectMembersQuery(projectId);
   const updateRoleMutation = useUpdateProjectMemberRoleMutation(projectId);
@@ -152,24 +161,34 @@ export function ProjectMembersPanel({ projectId, search, canManage, canInvite, o
                 key={member._id}
                 className="flex items-center gap-3 rounded-lg border border-border/60 px-3 py-2.5 transition-colors hover:border-muted/40"
               >
-                <Avatar src={member.user.avatar} name={member.user.name} size="sm" />
-                <div className="min-w-0 flex-1">
-                  <p className="flex items-center gap-1.5 truncate text-sm font-medium text-foreground">
-                    {member.role === "admin" && <Crown className="h-3 w-3 shrink-0 text-warning" aria-hidden />}
-                    <span className="truncate">{member.user.name}</span>
-                    {isCurrentUser && <span className="shrink-0 text-caption">(you)</span>}
-                  </p>
-                  <p className="truncate text-caption">
-                    {member.user.email} · Joined {formatDate(member.joinedAt)}
-                  </p>
-                </div>
+                <MemberProfileLink
+                  userId={member.user._id}
+                  workspaceId={workspaceId}
+                  projectId={projectId}
+                  className="flex min-w-0 flex-1 items-center gap-3"
+                  ariaLabel={`View ${member.user.name}'s profile`}
+                >
+                  <Avatar src={member.user.avatar} name={member.user.name} size="sm" />
+                  <span className="min-w-0 flex-1">
+                    <span className="flex items-center gap-1.5 truncate text-sm font-medium text-foreground">
+                      {member.role === "admin" && <Crown className="h-3 w-3 shrink-0 text-warning" aria-hidden />}
+                      <span className="truncate">{member.user.name}</span>
+                      {isCurrentUser && <span className="shrink-0 text-caption">(you)</span>}
+                    </span>
+                    <span className="block truncate text-caption">
+                      {member.user.email} · Joined {formatDate(member.joinedAt)}
+                    </span>
+                  </span>
+                </MemberProfileLink>
 
                 {showControls ? (
                   <select
                     aria-label={`Change role for ${member.user.name}`}
                     value={member.role}
                     disabled={isUpdatingThis}
-                    onChange={(event) => handleRoleChange(member, event.target.value as ProjectRole)}
+                    onChange={(event: ChangeEvent<HTMLSelectElement>) =>
+                      handleRoleChange(member, event.target.value as ProjectRole)
+                    }
                     className={cn(
                       "shrink-0 rounded-md border border-border bg-background px-2 py-1 text-xs text-foreground outline-none transition-colors focus:border-muted/60",
                       isUpdatingThis && "opacity-60"

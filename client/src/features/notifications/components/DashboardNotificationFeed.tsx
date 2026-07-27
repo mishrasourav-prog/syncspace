@@ -1,4 +1,5 @@
 import { CheckCheck } from "lucide-react";
+import { Link } from "react-router-dom";
 import { Avatar } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
@@ -42,17 +43,22 @@ export function DashboardNotificationFeed() {
         <h2 id="notification-feed-heading" className="text-h3 text-foreground">
           Notifications
         </h2>
-        {unreadCount > 0 && (
-          <button
-            type="button"
-            onClick={() => markAllReadMutation.mutate()}
-            disabled={markAllReadMutation.isPending}
-            className="flex items-center gap-1 text-xs font-medium text-primary transition-colors hover:text-primary/80 disabled:opacity-50"
-          >
-            <CheckCheck className="h-3.5 w-3.5" />
-            Mark all read
-          </button>
-        )}
+        <div className="flex items-center gap-3">
+          <Link to="/notifications" className="text-xs font-medium text-primary transition-colors hover:text-primary/80">
+            View all
+          </Link>
+          {unreadCount > 0 && (
+            <button
+              type="button"
+              onClick={() => markAllReadMutation.mutate()}
+              disabled={markAllReadMutation.isPending}
+              className="flex items-center gap-1 text-xs font-medium text-primary transition-colors hover:text-primary/80 disabled:opacity-50"
+            >
+              <CheckCheck className="h-3.5 w-3.5" />
+              Mark all read
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="min-h-0 flex-1 overflow-y-auto">

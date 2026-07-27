@@ -21,10 +21,6 @@ export const axiosClient =
         timeout:
             10_000,
 
-        headers: {
-            "Content-Type":
-                "application/json",
-        },
 
         withCredentials:
             true,

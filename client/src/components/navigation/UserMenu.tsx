@@ -1,4 +1,5 @@
-import { LogOut } from "lucide-react";
+import { LogOut, UserCircle } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { Avatar } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -14,6 +15,7 @@ import { useLogout } from "@/features/auth/hooks/useLogout";
 export function UserMenu() {
   const user = useAuthStore((state) => state.user);
   const { logout, isPending } = useLogout();
+  const navigate = useNavigate();
 
   if (!user) return null;
 
@@ -32,6 +34,11 @@ export function UserMenu() {
 
       <DropdownMenuContent align="start" className="mb-1.5 bottom-full mt-0">
         <DropdownMenuLabel>{user.email}</DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onClick={() => navigate("/profile")}>
+          <UserCircle className="h-3.5 w-3.5" />
+          View profile
+        </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem variant="danger" onClick={logout} disabled={isPending}>
           <LogOut className="h-3.5 w-3.5" />

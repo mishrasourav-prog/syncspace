@@ -16,6 +16,7 @@ import {
   Plus,
   Settings,
   Sparkles,
+  UserCircle,
   Users,
   X,
 } from "lucide-react";
@@ -205,9 +206,25 @@ export function MobileNavigationDrawer({ open, onClose, onCreateWorkspace }: Mob
                     <p className="truncate text-caption">{user.email}</p>
                   </div>
                 </div>
+                <NavLink
+                  to="/profile"
+                  onClick={onClose}
+                  className={({ isActive }) =>
+                    cn(
+                      "flex items-center gap-2.5 rounded-lg px-2 py-2 text-sm transition-colors",
+                      isActive ? "bg-primary/15 text-primary" : "text-muted hover:bg-background hover:text-foreground"
+                    )
+                  }
+                >
+                  <UserCircle className="h-3.5 w-3.5" />
+                  View profile
+                </NavLink>
                 <button
                   type="button"
-                  onClick={logout}
+                  onClick={() => {
+                    onClose();
+                    logout();
+                  }}
                   disabled={isPending}
                   className="mt-1 flex w-full items-center gap-2.5 rounded-lg px-2 py-2 text-sm text-danger transition-colors hover:bg-danger/10 disabled:opacity-50"
                 >
@@ -240,7 +257,7 @@ function DashboardMobileNav({ onClose }: { onClose: () => void }) {
   const isActiveFilter = location.pathname === "/dashboard" && searchParams.get("status") === "active";
   const isArchivedFilter = location.pathname === "/dashboard" && searchParams.get("status") === "archived";
   const isInvitationsHash = location.pathname === "/dashboard" && location.hash === "#invitations";
-  const isNotificationsHash = location.pathname === "/dashboard" && location.hash === "#notifications";
+  const isNotificationsActive = location.pathname === "/notifications";
 
   return (
     <nav className="flex-1 overflow-y-auto px-3">
@@ -299,11 +316,11 @@ function DashboardMobileNav({ onClose }: { onClose: () => void }) {
       </NavLink>
 
       <NavLink
-        to="/dashboard#notifications"
+        to="/notifications"
         onClick={onClose}
         className={cn(
           "flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
-          isNotificationsHash ? "bg-primary/15 text-primary" : "text-muted hover:bg-background hover:text-foreground"
+          isNotificationsActive ? "bg-primary/15 text-primary" : "text-muted hover:bg-background hover:text-foreground"
         )}
       >
         <Bell className="h-4 w-4" />

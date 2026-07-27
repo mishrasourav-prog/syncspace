@@ -1,6 +1,7 @@
-
-
 import { io, type Socket } from "socket.io-client";
+
+import type { SessionRevokedPayload } from "@/features/auth/types/session.types";
+import type { TaskStatus, TaskType } from "@/features/tasks/types/task.types";
 
 export interface WorkspaceAccessRevokedPayload {
   workspaceId: string;
@@ -53,16 +54,47 @@ interface ServerToClientEvents {
   "access:workspace-revoked": (payload: WorkspaceAccessRevokedPayload) => void;
   "access:project-revoked": (payload: ProjectAccessRevokedPayload) => void;
   "activity:new": (payload: { activityId: string; workspaceId: string; projectId: string }) => void;
-  "task:created": (payload: { workspaceId: string; projectId: string; taskId: string }) => void;
-  "task:status-changed": (payload: { workspaceId: string; projectId: string; taskId: string }) => void;
-  "task:assigned": (payload: { workspaceId: string; projectId: string; taskId: string }) => void;
-  "tasks:reordered": (payload: { workspaceId: string; projectId: string }) => void;
+  "task:created": (payload: {
+    workspaceId: string;
+    projectId: string;
+    taskId: string;
+    actorId: string;
+    title: string;
+    status: TaskStatus;
+    taskType: TaskType;
+  }) => void;
+  "task:status-changed": (payload: {
+    workspaceId: string;
+    projectId: string;
+    taskId: string;
+    actorId: string;
+    title: string;
+    previousStatus: TaskStatus;
+    currentStatus: TaskStatus;
+    taskType: TaskType;
+  }) => void;
+  "task:assigned": (payload: {
+    workspaceId: string;
+    projectId: string;
+    taskId: string;
+    actorId: string;
+    assigneeId: string;
+    title: string;
+    taskType: TaskType;
+  }) => void;
+  "tasks:reordered": (payload: {
+    workspaceId: string;
+    projectId: string;
+    actorId: string;
+    affectedStatuses: TaskStatus[];
+  }) => void;
   "document:created": (payload: DocumentSocketPayload) => void;
   "document:updated": (payload: DocumentSocketPayload) => void;
   "document:archived": (payload: DocumentSocketPayload) => void;
   "document:restored": (payload: DocumentSocketPayload) => void;
   "discussion:changed": (payload: DiscussionSocketPayload) => void;
   "discussion:reply-changed": (payload: DiscussionReplySocketPayload) => void;
+  "account:session-revoked": (payload: SessionRevokedPayload) => void;
 }
 
 interface ClientToServerEvents {
@@ -70,18 +102,25 @@ interface ClientToServerEvents {
   "workspace:leave": (workspaceId: string, acknowledge: (response: SocketActionResponse) => void) => void;
   "project:join": (projectId: string, acknowledge: (response: SocketActionResponse) => void) => void;
   "project:leave": (projectId: string, acknowledge: (response: SocketActionResponse) => void) => void;
+  "tasks:reordered": (payload: {
+    workspaceId: string;
+    projectId: string;
+    actorId: string;
+    affectedStatuses: TaskStatus[];
+  }) => void;
 }
 
 /*
 Single Socket.IO client instance for the whole application.
 
 Authentication relies entirely on the HTTP-only `accessToken` cookie sent
-automatically during the handshake — never on a token read from JavaScript.
+by the browser during the handshake. No token is read from JavaScript.
 */
-export const socket: Socket<ServerToClientEvents, ClientToServerEvents> = io(
-  import.meta.env.VITE_SOCKET_URL ?? "http://localhost:5000",
-  {
-    autoConnect: false,
-    withCredentials: true,
-  }
-);
+const socketUrl = import.meta.env.VITE_SOCKET_URL?.trim() || window.location.origin;
+
+export const socket: Socket<ServerToClientEvents, ClientToServerEvents> = io(socketUrl, {
+  autoConnect: false,
+  withCredentials: true,
+});
+
+export type { SessionRevokedPayload } from "@/features/auth/types/session.types";

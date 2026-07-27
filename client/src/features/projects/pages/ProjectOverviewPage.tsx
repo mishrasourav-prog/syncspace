@@ -1170,6 +1170,9 @@ export function ProjectOverviewPage() {
 
                     <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
                         <ProjectMembersPanel
+                            workspaceId={
+                                workspaceId
+                            }
                             projectId={
                                 project._id
                             }

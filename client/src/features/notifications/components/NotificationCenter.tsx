@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { Bell, CheckCheck } from "lucide-react";
 import { Avatar } from "@/components/ui/avatar";
@@ -11,6 +12,7 @@ import {
 } from "../hooks/useNotificationMutations";
 
 export function NotificationCenter() {
+  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -136,6 +138,19 @@ export function NotificationCenter() {
                   </div>
                 </button>
               ))}
+            </div>
+
+            <div className="border-t border-border px-4 py-2.5 text-center">
+              <button
+                type="button"
+                onClick={() => {
+                  setOpen(false);
+                  navigate("/notifications");
+                }}
+                className="text-xs font-medium text-primary transition-colors hover:text-primary/80"
+              >
+                View all notifications
+              </button>
             </div>
           </motion.div>
         )}

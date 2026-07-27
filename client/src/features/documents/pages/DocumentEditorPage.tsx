@@ -222,7 +222,7 @@ function DocumentEditorWorkspace({
       setSaveError(null);
       setReloadError(null);
     },
-    [draft.acceptServerDocument, editor, projectId, queryClient]
+    [draft, editor, projectId, queryClient]
   );
 
   function persistSave(onSaved?: () => void) {

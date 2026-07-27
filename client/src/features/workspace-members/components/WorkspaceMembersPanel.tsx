@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ChangeEvent } from "react";
 import { toast } from "sonner";
 import { Crown, UserMinus, UserPlus, Users } from "lucide-react";
 import { Avatar } from "@/components/ui/avatar";
@@ -10,6 +10,7 @@ import { useAuthStore } from "@/app/store";
 import { DashboardSectionError } from "@/features/workspaces/components/dashboard/DashboardSectionError";
 import { canInviteWorkspaceMember, canManageWorkspaceMembers } from "@/features/workspaces/workspace.permissions";
 import type { WorkspaceSummary } from "@/features/workspaces/types/workspace.types";
+import { MemberProfileLink } from "@/features/profile/components/MemberProfileLink";
 import { useWorkspaceMembersQuery } from "../hooks/useWorkspaceMemberQueries";
 import { useUpdateWorkspaceMemberRoleMutation } from "../hooks/useWorkspaceMemberMutations";
 import { RemoveWorkspaceMemberDialog } from "./RemoveWorkspaceMemberDialog";
@@ -180,15 +181,22 @@ export function WorkspaceMembersPanel({ workspace, search, onInvite }: Workspace
                 key={member._id}
                 className="flex items-center gap-3 rounded-lg border border-border/60 px-3 py-2.5 transition-colors hover:border-muted/40"
               >
-                <Avatar src={member.user.avatar} name={member.user.name} size="sm" />
-                <div className="min-w-0 flex-1">
-                  <p className="flex items-center gap-1.5 truncate text-sm font-medium text-foreground">
-                    {isOwner && <Crown className="h-3 w-3 shrink-0 text-warning" aria-hidden />}
-                    <span className="truncate">{member.user.name}</span>
-                    {isCurrentUser && <span className="shrink-0 text-caption">(you)</span>}
-                  </p>
-                  <p className="truncate text-caption">{member.user.email}</p>
-                </div>
+                <MemberProfileLink
+                  userId={member.user._id}
+                  workspaceId={workspace._id}
+                  className="flex min-w-0 flex-1 items-center gap-3"
+                  ariaLabel={`View ${member.user.name}'s profile`}
+                >
+                  <Avatar src={member.user.avatar} name={member.user.name} size="sm" />
+                  <span className="min-w-0 flex-1">
+                    <span className="flex items-center gap-1.5 truncate text-sm font-medium text-foreground">
+                      {isOwner && <Crown className="h-3 w-3 shrink-0 text-warning" aria-hidden />}
+                      <span className="truncate">{member.user.name}</span>
+                      {isCurrentUser && <span className="shrink-0 text-caption">(you)</span>}
+                    </span>
+                    <span className="block truncate text-caption">{member.user.email}</span>
+                  </span>
+                </MemberProfileLink>
 
                 {canManage && !isOwner ? (
                   <select
@@ -204,7 +212,7 @@ export function WorkspaceMembersPanel({ workspace, search, onInvite }: Workspace
     }
     onChange={
         (
-            event
+            event: ChangeEvent<HTMLSelectElement>
         ) =>
             handleRoleChange(
                 member,

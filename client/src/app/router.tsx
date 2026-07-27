@@ -15,6 +15,9 @@ import { TaskDetailPage } from "@/features/tasks/pages/TaskDetailPage";
 import { ProjectDiscussionsPage } from "@/features/discussions/pages/ProjectDiscussionsPage";
 import { ProjectDocumentsPage } from "@/features/documents/pages/ProjectDocumentsPage";
 import { DocumentEditorPage } from "@/features/documents/pages/DocumentEditorPage";
+import { NotificationsPage } from "@/features/notifications/pages/NotificationsPage";
+import { ProfilePage } from "@/features/profile/pages/ProfilePage";
+import { MemberProfilePage } from "@/features/profile/pages/MemberProfilePage";
 import { useAuthStore } from "./store";
 
 function useIsAuthenticated() {
@@ -167,6 +170,9 @@ export function AppRouter() {
         }
       >
         <Route path="/dashboard" element={<WorkspaceDashboardPage />} />
+        <Route path="/notifications" element={<NotificationsPage />} />
+        <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/members/:userId" element={<MemberProfilePage />} />
         <Route path="/workspaces/:workspaceId" element={<WorkspaceOverviewPage />} />
         <Route path="/workspaces/:workspaceId/projects/:projectId" element={<ProjectOverviewPage />} />
         <Route path="/workspaces/:workspaceId/projects/:projectId/tasks" element={<ProjectTasksPage />} />

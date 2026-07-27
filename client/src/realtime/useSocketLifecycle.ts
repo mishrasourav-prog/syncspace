@@ -2,36 +2,44 @@ import { useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+
 import { useAuthStore } from "@/app/store";
-import { notificationQueryKeys } from "@/features/notifications/notification.queryKeys";
-import { workspaceQueryKeys } from "@/features/workspaces/workspace.queryKeys";
-import { workspaceInvitationQueryKeys } from "@/features/workspace-invitations/workspaceInvitation.queryKeys";
-import { projectQueryKeys } from "@/features/projects/project.queryKeys";
-import { workspaceMemberQueryKeys } from "@/features/workspace-members/workspaceMember.queryKeys";
-import { projectMemberQueryKeys } from "@/features/project-members/projectMember.queryKeys";
-import { projectInvitationQueryKeys } from "@/features/project-invitations/projectInvitation.queryKeys";
-import { taskQueryKeys } from "@/features/tasks/task.queryKeys";
-import { documentQueryKeys } from "@/features/documents/document.queryKeys";
-import { discussionQueryKeys } from "@/features/discussions/discussion.queryKeys";
 import { activityQueryKeys } from "@/features/activity/activity.queryKeys";
+import { endAuthenticatedSession } from "@/features/auth/session/endAuthenticatedSession";
+import type { SessionRevokedPayload } from "@/features/auth/types/session.types";
+import { discussionQueryKeys } from "@/features/discussions/discussion.queryKeys";
+import { documentQueryKeys } from "@/features/documents/document.queryKeys";
+import { notificationQueryKeys } from "@/features/notifications/notification.queryKeys";
+import { projectInvitationQueryKeys } from "@/features/project-invitations/projectInvitation.queryKeys";
+import { projectMemberQueryKeys } from "@/features/project-members/projectMember.queryKeys";
+import { projectQueryKeys } from "@/features/projects/project.queryKeys";
+import { taskQueryKeys } from "@/features/tasks/task.queryKeys";
+import { workspaceInvitationQueryKeys } from "@/features/workspace-invitations/workspaceInvitation.queryKeys";
+import { workspaceMemberQueryKeys } from "@/features/workspace-members/workspaceMember.queryKeys";
 import type { WorkspaceSummary } from "@/features/workspaces/types/workspace.types";
-import { socket } from "./socket";
+import { workspaceQueryKeys } from "@/features/workspaces/workspace.queryKeys";
+
+import {
+  socket,
+  type ProjectAccessRevokedPayload,
+  type WorkspaceAccessRevokedPayload,
+} from "./socket";
 
 /*
-Mounted once for the whole authenticated application shell.
-
-Owns the single Socket.IO connection lifecycle: connects when the user is
-authenticated, disconnects on logout, and reacts to global realtime events.
+Mounted once for the authenticated application shell. It owns the single
+Socket.IO connection and global account/access events.
 */
 export function useSocketLifecycle() {
-  const user = useAuthStore((state) => state.user);
+  const userId = useAuthStore((state) => state.user?._id);
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const location = useLocation();
 
   useEffect(() => {
-    if (!user) {
-      if (socket.connected) socket.disconnect();
+    if (!userId) {
+      if (socket.connected) {
+        socket.disconnect();
+      }
       return;
     }
 
@@ -42,25 +50,20 @@ export function useSocketLifecycle() {
     return () => {
       socket.disconnect();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?._id]);
+  }, [userId]);
 
   useEffect(() => {
     function handleNotificationNew() {
-      queryClient.invalidateQueries({ queryKey: notificationQueryKeys.list() });
-      queryClient.invalidateQueries({ queryKey: notificationQueryKeys.unreadCount() });
+      void queryClient.invalidateQueries({ queryKey: notificationQueryKeys.list() });
+      void queryClient.invalidateQueries({ queryKey: notificationQueryKeys.unreadCount() });
     }
 
-    function handleWorkspaceRevoked(payload: {
-      workspaceId: string;
-      projectIds: string[];
-      reason: "removed" | "left";
-    }) {
+    function handleWorkspaceRevoked(payload: WorkspaceAccessRevokedPayload) {
       queryClient.setQueryData<WorkspaceSummary[]>(workspaceQueryKeys.list(), (previous) =>
         previous?.filter((workspace) => workspace._id !== payload.workspaceId)
       );
-      queryClient.invalidateQueries({ queryKey: workspaceQueryKeys.list() });
-      queryClient.invalidateQueries({ queryKey: workspaceInvitationQueryKeys.list() });
+      void queryClient.invalidateQueries({ queryKey: workspaceQueryKeys.list() });
+      void queryClient.invalidateQueries({ queryKey: workspaceInvitationQueryKeys.list() });
       queryClient.removeQueries({ queryKey: workspaceQueryKeys.detail(payload.workspaceId) });
       queryClient.removeQueries({ queryKey: projectQueryKeys.workspaceList(payload.workspaceId) });
       queryClient.removeQueries({ queryKey: workspaceMemberQueryKeys.list(payload.workspaceId) });
@@ -75,7 +78,7 @@ export function useSocketLifecycle() {
       }
     }
 
-    function handleProjectRevoked(payload: { workspaceId: string; projectId: string; reason: "removed" | "left" }) {
+    function handleProjectRevoked(payload: ProjectAccessRevokedPayload) {
       queryClient.removeQueries({ queryKey: projectQueryKeys.detail(payload.projectId) });
       queryClient.removeQueries({ queryKey: projectMemberQueryKeys.list(payload.projectId) });
       queryClient.removeQueries({ queryKey: projectInvitationQueryKeys.list(payload.projectId) });
@@ -83,7 +86,7 @@ export function useSocketLifecycle() {
       queryClient.removeQueries({ queryKey: documentQueryKeys.project(payload.projectId) });
       queryClient.removeQueries({ queryKey: discussionQueryKeys.project(payload.projectId) });
       queryClient.removeQueries({ queryKey: activityQueryKeys.project(payload.projectId) });
-      queryClient.invalidateQueries({ queryKey: projectQueryKeys.workspaceList(payload.workspaceId) });
+      void queryClient.invalidateQueries({ queryKey: projectQueryKeys.workspaceList(payload.workspaceId) });
 
       if (location.pathname.startsWith(`/workspaces/${payload.workspaceId}/projects/${payload.projectId}`)) {
         navigate(`/workspaces/${payload.workspaceId}#projects`, { replace: true });
@@ -94,15 +97,23 @@ export function useSocketLifecycle() {
       }
     }
 
+    function handleAccountSessionRevoked(payload: SessionRevokedPayload) {
+      endAuthenticatedSession({
+        navigate,
+        reason: payload.reason,
+      });
+    }
+
     socket.on("notification:new", handleNotificationNew);
     socket.on("access:workspace-revoked", handleWorkspaceRevoked);
     socket.on("access:project-revoked", handleProjectRevoked);
+    socket.on("account:session-revoked", handleAccountSessionRevoked);
 
     return () => {
       socket.off("notification:new", handleNotificationNew);
       socket.off("access:workspace-revoked", handleWorkspaceRevoked);
       socket.off("access:project-revoked", handleProjectRevoked);
+      socket.off("account:session-revoked", handleAccountSessionRevoked);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [location.pathname]);
+  }, [location.pathname, navigate, queryClient]);
 }

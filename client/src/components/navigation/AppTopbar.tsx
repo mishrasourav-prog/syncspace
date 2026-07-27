@@ -1,6 +1,6 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type ChangeEvent, type KeyboardEvent as ReactKeyboardEvent } from "react";
 import { Link, useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { ChevronRight, Menu, Plus, Search, X, LogOut } from "lucide-react";
+import { ChevronRight, Menu, Plus, Search, X, LogOut, UserCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar } from "@/components/ui/avatar";
@@ -38,6 +38,9 @@ export function AppTopbar({ onOpenMobileNav, onCreateWorkspace }: AppTopbarProps
     documentId?: string;
   }>();
   const isWorkspaceContext = location.pathname.startsWith("/workspaces/");
+  const isNotificationsRoute = location.pathname === "/notifications";
+  const isProfileRoute = location.pathname === "/profile";
+  const isMemberProfileRoute = location.pathname.startsWith("/members/");
   const isProjectContext = Boolean(projectId) && location.pathname.includes("/projects/");
   const tasksBasePath = projectId && workspaceId ? `/workspaces/${workspaceId}/projects/${projectId}/tasks` : undefined;
   const isTasksRoute =
@@ -72,7 +75,9 @@ export function AppTopbar({ onOpenMobileNav, onCreateWorkspace }: AppTopbarProps
   const { logout, isPending: isLoggingOut } = useLogout();
 
   const isDashboard = location.pathname === "/dashboard";
-  const searchValue = isDashboard || isWorkspaceContext ? searchParams.get("q") ?? "" : "";
+  const searchValue =
+    isDashboard || isWorkspaceContext || isNotificationsRoute ? searchParams.get("q") ?? "" : "";
+  const showSearch = !isProfileRoute && !isMemberProfileRoute;
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
@@ -91,7 +96,22 @@ export function AppTopbar({ onOpenMobileNav, onCreateWorkspace }: AppTopbarProps
   }, []);
 
   function handleSearchChange(value: string) {
-    const constrainedValue = isDiscussionsRoute ? value.slice(0, 100) : value;
+    const constrainedValue = isDiscussionsRoute
+      ? value.slice(0, 100)
+      : isNotificationsRoute
+        ? value.slice(0, 200)
+        : value;
+
+    if (isNotificationsRoute) {
+      const next = new URLSearchParams(searchParams);
+      if (constrainedValue) {
+        next.set("q", constrainedValue);
+      } else {
+        next.delete("q");
+      }
+      setSearchParams(next, { replace: true });
+      return;
+    }
 
     if (!isDashboard && !isWorkspaceContext) {
       navigate(constrainedValue ? `/dashboard?q=${encodeURIComponent(constrainedValue)}` : "/dashboard");
@@ -107,17 +127,19 @@ export function AppTopbar({ onOpenMobileNav, onCreateWorkspace }: AppTopbarProps
     setSearchParams(next, { replace: true });
   }
 
-  const searchPlaceholder = isTasksRoute
-    ? "Search tasks and issues…"
-    : isDocumentsRoute
-      ? "Search documents…"
-      : isDiscussionsRoute
-        ? "Search discussions…"
-        : isProjectContext
-          ? "Search tasks, issues, documents…"
-          : isWorkspaceContext
-            ? "Search projects or members…"
-            : "Search workspaces…";
+  const searchPlaceholder = isNotificationsRoute
+    ? "Search notifications…"
+    : isTasksRoute
+      ? "Search tasks and issues…"
+      : isDocumentsRoute
+        ? "Search documents…"
+        : isDiscussionsRoute
+          ? "Search discussions…"
+          : isProjectContext
+            ? "Search tasks, issues, documents…"
+            : isWorkspaceContext
+              ? "Search projects or members…"
+              : "Search workspaces…";
 
   return (
     <header className="flex h-16 shrink-0 items-center justify-between gap-3 border-b border-border bg-background/95 px-4 backdrop-blur sm:px-6">
@@ -212,38 +234,46 @@ export function AppTopbar({ onOpenMobileNav, onCreateWorkspace }: AppTopbarProps
             <ChevronRight className="h-3.5 w-3.5 shrink-0 text-muted/60" />
             <span className="truncate font-medium text-foreground">{workspaceQuery.data?.name ?? "…"}</span>
           </nav>
+        ) : isNotificationsRoute ? (
+          <h1 className="hidden shrink-0 text-sm font-medium text-foreground lg:block">Notifications</h1>
+        ) : isProfileRoute ? (
+          <span className="hidden shrink-0 text-sm font-medium text-foreground lg:block">Profile</span>
+        ) : isMemberProfileRoute ? (
+          <span className="hidden shrink-0 text-sm font-medium text-foreground lg:block">Member Profile</span>
         ) : (
           <h1 className="hidden shrink-0 text-sm font-medium text-foreground lg:block">Dashboard</h1>
         )}
 
-        <Input
-          ref={searchInputRef}
-          icon={Search}
-          value={searchValue}
-          onChange={(event) => handleSearchChange(event.target.value)}
-          onKeyDown={(event) => {
-            if (event.key === "Escape") searchInputRef.current?.blur();
-          }}
-          placeholder={searchPlaceholder}
-          aria-label={searchPlaceholder}
-          className="max-w-xs"
-          rightSlot={
-            searchValue ? (
-              <button
-                type="button"
-                onClick={() => handleSearchChange("")}
-                aria-label="Clear search"
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted hover:text-foreground"
-              >
-                <X className="h-3.5 w-3.5" />
-              </button>
-            ) : undefined
-          }
-        />
+        {showSearch && (
+          <Input
+            ref={searchInputRef}
+            icon={Search}
+            value={searchValue}
+            onChange={(event: ChangeEvent<HTMLInputElement>) => handleSearchChange(event.target.value)}
+            onKeyDown={(event: ReactKeyboardEvent<HTMLInputElement>) => {
+              if (event.key === "Escape") searchInputRef.current?.blur();
+            }}
+            placeholder={searchPlaceholder}
+            aria-label={searchPlaceholder}
+            className="max-w-xs"
+            rightSlot={
+              searchValue ? (
+                <button
+                  type="button"
+                  onClick={() => handleSearchChange("")}
+                  aria-label="Clear search"
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted hover:text-foreground"
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              ) : undefined
+            }
+          />
+        )}
       </div>
 
       <div className="flex shrink-0 items-center gap-2">
-        {!isWorkspaceContext && (
+        {!isWorkspaceContext && !isNotificationsRoute && !isProfileRoute && !isMemberProfileRoute && (
           <>
             <Button size="sm" onClick={onCreateWorkspace} className="hidden sm:inline-flex">
               <Plus className="h-4 w-4" />
@@ -263,13 +293,18 @@ export function AppTopbar({ onOpenMobileNav, onCreateWorkspace }: AppTopbarProps
 
         <NotificationCenter />
 
-        {isWorkspaceContext && user && (
+        {(isWorkspaceContext || isProfileRoute || isMemberProfileRoute) && user && (
           <DropdownMenu>
             <DropdownMenuTrigger aria-label="Account menu" className="!h-9 !w-9 rounded-full p-0">
               <Avatar src={user.avatar} name={user.name} size="sm" />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>{user.email}</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => navigate("/profile")}>
+                <UserCircle className="h-3.5 w-3.5" />
+                Profile
+              </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem variant="danger" onClick={logout} disabled={isLoggingOut}>
                 <LogOut className="h-3.5 w-3.5" />

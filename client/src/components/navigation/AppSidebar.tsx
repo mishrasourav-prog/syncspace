@@ -242,7 +242,7 @@ function DashboardNav() {
   const isActiveFilter = location.pathname === "/dashboard" && searchParams.get("status") === "active";
   const isArchivedFilter = location.pathname === "/dashboard" && searchParams.get("status") === "archived";
   const isInvitationsHash = location.pathname === "/dashboard" && location.hash === "#invitations";
-  const isNotificationsHash = location.pathname === "/dashboard" && location.hash === "#notifications";
+  const isNotificationsActive = location.pathname === "/notifications";
 
   return (
     <nav className="flex-1 overflow-y-auto px-3 pt-4">
@@ -298,10 +298,10 @@ function DashboardNav() {
         </NavLink>
 
         <NavLink
-          to="/dashboard#notifications"
+          to="/notifications"
           className={cn(
             "flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-            isNotificationsHash ? "bg-primary/15 text-primary" : "text-muted hover:bg-surface hover:text-foreground"
+            isNotificationsActive ? "bg-primary/15 text-primary" : "text-muted hover:bg-surface hover:text-foreground"
           )}
         >
           <Bell className="h-4 w-4" />

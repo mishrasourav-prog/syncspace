@@ -19,7 +19,7 @@ export function AuthLayout({ children }: AuthLayoutProps) {
         aria-hidden
       />
 
-      <div className="relative w-full max-w-[400px]">
+      <div className="relative w-full max-w-[440px]">
         <motion.div
           initial={{ opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
@@ -36,7 +36,7 @@ export function AuthLayout({ children }: AuthLayoutProps) {
           initial={{ opacity: 0, y: 12, scale: 0.98 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ duration: 0.4, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
-          className="rounded-2xl border border-border bg-surface/80 backdrop-blur-xl shadow-elevated p-7 sm:p-8"
+          className="rounded-2xl border border-border bg-surface/80 p-5 shadow-elevated backdrop-blur-xl sm:p-8"
         >
           {children}
         </motion.div>

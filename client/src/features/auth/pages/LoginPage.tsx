@@ -3,7 +3,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff, Mail, Lock, ArrowRight } from "lucide-react";
 import { AuthLayout } from "@/layouts/AuthLayout";
-import { AuthDivider } from "../components/SocialAuthButtons";
 import { Input } from "@/components/ui/input";
 import { FormField } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -35,9 +34,6 @@ export function LoginPage({ onSuccess, onNavigateToSignup, onNavigateToForgotPas
     <AuthLayout>
       <h1 className="text-h1 text-foreground mb-1">Welcome back</h1>
       <p className="text-body mb-6">Log in to continue</p>
-
-      {/* <SocialAuthButtons /> */}
-      <AuthDivider />
 
       {loginMutation.isError && (
         <div className="mb-4 rounded-md border border-danger/30 bg-danger/10 px-3 py-2 text-xs text-danger">

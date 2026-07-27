@@ -26,11 +26,6 @@ export interface RegisterPayload {
 
 export type SignupPayload = RegisterPayload;
 
-export interface UploadAvatarPayload {
-  email: string;
-  file: File;
-}
-
 
 export type ForgotPasswordPayload = ForgotPasswordFormValues;
 

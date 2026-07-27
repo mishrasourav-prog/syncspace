@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm , useWatch } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -88,29 +88,28 @@ export function PersonalInformationCard({
     defaultValues: toDefaultValues(profile),
   });
 
-  const headlineValue = useWatch({ control, name: "headline",}) ?? "";
-
-  const bioValue = useWatch({ control, name: "bio",}) ?? "";
+  const headlineValue = useWatch({ control, name: "headline" }) ?? "";
+  const bioValue = useWatch({ control, name: "bio" }) ?? "";
 
   useEffect(() => {
-  if (!isEditing) {
-    reset({
-      name: profile.name,
-      username: profile.username,
-      headline: profile.headline ?? "",
-      bio: profile.bio ?? "",
-      location: profile.location ?? "",
-    });
-  }
-}, [
-  isEditing,
-  profile.name,
-  profile.username,
-  profile.headline,
-  profile.bio,
-  profile.location,
-  reset,
-]);
+    if (!isEditing) {
+      reset({
+        name: profile.name,
+        username: profile.username,
+        headline: profile.headline ?? "",
+        bio: profile.bio ?? "",
+        location: profile.location ?? "",
+      });
+    }
+  }, [
+    isEditing,
+    profile.name,
+    profile.username,
+    profile.headline,
+    profile.bio,
+    profile.location,
+    reset,
+  ]);
 
   function handleCancel() {
     reset(toDefaultValues(profile));

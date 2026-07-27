@@ -84,9 +84,7 @@ export function NotificationDetailPanel({
   function handleOpenRelated() {
     if (!destination || !canOpenRelated) return;
 
-    if (!notification) {
-    return;
-  }
+    if (!notification) return;
 
     if (!notification.isRead) {
       onMarkAsRead(notification._id);

@@ -100,7 +100,6 @@ function LandingRoute() {
   return (
     <LandingPageComponent
       onLogin={() => navigate("/login")}
-      onSignup={() => navigate("/signup")}
       onGetStarted={() => navigate("/signup")}
     />
   );

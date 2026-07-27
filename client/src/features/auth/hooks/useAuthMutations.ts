@@ -7,7 +7,6 @@ import {
   forgotPasswordRequest,
   verifyOtpRequest,
   resendOtpRequest,
-  uploadAvatarRequest,
   resetPasswordRequest,
   logoutRequest
 } from "../api/auth.api";
@@ -18,7 +17,6 @@ import type {
   SignupPayload,
   ForgotPasswordPayload,
   VerifyOtpPayload,
-  UploadAvatarPayload,
   AuthUser,
   ResetPasswordPayload,
   VerifyOtpResponse,
@@ -38,12 +36,6 @@ export function useLoginMutation() {
 
 export function useSignupMutation() {
   return useMutation<AuthUser, ApiErrorShape, SignupPayload>({ mutationFn: signupRequest });
-}
-
-export function useUploadAvatarMutation() {
-  return useMutation<{ avatarUrl: string }, ApiErrorShape, UploadAvatarPayload>({
-    mutationFn: uploadAvatarRequest,
-  });
 }
 
 export function useForgotPasswordMutation() {

@@ -25,7 +25,7 @@ export function CreateProjectDialog({ workspaceId, open, onClose }: CreateProjec
     formState: { errors },
   } = useForm<CreateProjectFormValues>({
     resolver: zodResolver(createProjectSchema),
-    defaultValues: { name: "", description: "", icon: "" },
+    defaultValues: { name: "", description: "" },
   });
 
   function handleClose() {
@@ -40,7 +40,6 @@ export function CreateProjectDialog({ workspaceId, open, onClose }: CreateProjec
       {
         name: values.name,
         description: values.description || undefined,
-        icon: values.icon || undefined,
       },
       {
         onSuccess: () => {
@@ -66,26 +65,15 @@ export function CreateProjectDialog({ workspaceId, open, onClose }: CreateProjec
       )}
 
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
-        <div className="mb-4 flex gap-3">
-          <div className="w-20 shrink-0">
-            <Label htmlFor="project-icon">Icon</Label>
-            <Input
-              id="project-icon"
-              placeholder="📁"
-              maxLength={10}
-              error={errors.icon?.message}
-              {...register("icon")}
-            />
-          </div>
-          <div className="min-w-0 flex-1">
-            <Label htmlFor="project-name">Name</Label>
-            <Input
-              id="project-name"
-              placeholder="Website Redesign"
-              error={errors.name?.message}
-              {...register("name")}
-            />
-          </div>
+        <div className="mb-4">
+          <Label htmlFor="project-name">Name</Label>
+          <Input
+            id="project-name"
+            placeholder="Website Redesign"
+            error={errors.name?.message}
+            {...register("name")}
+          />
+          <p className="mt-1 text-xs text-muted">A default project icon is assigned automatically.</p>
         </div>
 
         <div>

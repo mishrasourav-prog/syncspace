@@ -24,14 +24,14 @@ export function DocumentFilterToolbar({
   onClear,
 }: DocumentFilterToolbarProps) {
   return (
-    <div className="flex flex-wrap items-center gap-2">
+    <div className="flex min-w-0 w-full flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
       <Input
         icon={Search}
         value={search}
         onChange={(event) => onSearchChange(event.target.value)}
         placeholder="Search documents…"
         aria-label="Search documents by title"
-        className="h-9 w-full max-w-xs sm:w-56"
+        className="h-9 w-full sm:max-w-xs sm:w-64"
         rightSlot={
           search ? (
             <button
@@ -49,7 +49,7 @@ export function DocumentFilterToolbar({
       <Popover>
         <PopoverTrigger
           aria-label="Sort documents"
-          className="inline-flex h-9 items-center gap-1.5 rounded-md border border-border bg-surface px-3 text-sm text-foreground transition-colors hover:bg-border/30"
+          className="inline-flex h-9 w-full items-center justify-between sm:w-auto gap-1.5 rounded-md border border-border bg-surface px-3 text-sm text-foreground transition-colors hover:bg-border/30"
         >
           Sort: {SORT_LABEL[sort]}
           <ChevronDown className="h-3.5 w-3.5 text-muted" />

@@ -5,32 +5,32 @@ import { Reveal } from "./Reveal";
 
 const FAQ_ITEMS = [
   {
-    question: "What can I manage in SyncSpace?",
+    question: "What is SyncSpace used for?",
     answer:
-      "SyncSpace combines workspaces, projects, tasks, issues, documents, discussions, memberships, invitations, notifications, activity, and user profiles.",
+      "SyncSpace is a shared workspace for teams to organize projects, tasks and issues, documents, and discussions, so everyone works from the same project context.",
   },
   {
-    question: "How do workspace and project roles work?",
+    question: "Who can access a workspace or project?",
     answer:
       "Workspaces support owner, admin, member, and guest roles. Projects use admin and member roles. Protected operations are checked against the relevant membership and role.",
   },
   {
-    question: "Does SyncSpace update in real time?",
+    question: "Do task and discussion updates appear in real time?",
     answer:
-      "Socket.IO delivers scoped updates for tasks, documents, discussions, notifications, activity, access changes, and session revocation. REST remains the authoritative source of persisted data.",
+      "Yes. Scoped realtime updates cover tasks, documents, discussions, notifications, activity, and access changes. Persisted data remains the authoritative source.",
   },
   {
-    question: "How is authentication secured?",
+    question: "What can teams manage inside a project?",
     answer:
-      "SyncSpace uses HTTP-only access and refresh token cookies, password hashing, automatic token refresh, OTP-based recovery, and database-backed session-version checks.",
+      "Each project brings together tasks and issues, assignees, comments, documents, and discussions, alongside project membership and roles.",
   },
   {
-    question: "Can I run SyncSpace locally?",
+    question: "How are account sessions protected?",
     answer:
-      "Yes. The repository can run locally with Node.js, MongoDB, SMTP credentials for password recovery, and Cloudinary credentials for avatar storage.",
+      "SyncSpace uses HTTP-only access and refresh token cookies, password hashing, and OTP-based recovery. Sessions are invalidated on logout, password changes, resets, and account deletion.",
   },
   {
-    question: "Does SyncSpace currently support offline work?",
+    question: "Does SyncSpace support offline work?",
     answer: "No. SyncSpace currently requires an active connection to fetch and synchronize workspace data.",
   },
 ] as const;
@@ -55,7 +55,7 @@ export function FAQ() {
             const panelId = `faq-panel-${index}`;
             return (
               <Reveal key={item.question} delay={index * 40}>
-                <article className="overflow-hidden rounded-xl border border-border bg-surface/50">
+                <article className="overflow-hidden rounded-lg border border-border bg-surface/50">
                   <button
                     type="button"
                     onClick={() => setOpenIndex(isOpen ? -1 : index)}

@@ -6,6 +6,7 @@ import { WorkspaceRole } from "./workspace-member.model";
 
 
 
+
 import Project from "../project/project.model";
 import ProjectMember from "../projectMember/projectMember.model";
 import { ProjectRole } from "../../interfaces/projectMember.interface";
@@ -337,6 +338,19 @@ if (!workspace) {
     member.role = role;
 
     await member.save();
+
+    const affectedUserId = (member.user as any)._id.toString();
+
+    await eventBus.publish(
+        DomainEventName.WORKSPACE_MEMBER_ROLE_CHANGED,
+        {
+            workspaceId,
+            memberId: member._id.toString(),
+            affectedUserId,
+            actorId: userId,
+            role,
+        }
+    );
 
     return {
         _id: member._id.toString(),

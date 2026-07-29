@@ -4,12 +4,18 @@ import { Router } from "express";
 
 import { authenticateUser } from "../../middlewares/auth.middleware";
 
-import { inviteProjectMember , acceptProjectInvitation , rejectProjectInvitation, cancelProjectInvitation, getPendingProjectInvitations } from "./projectInvitation.controller";
+import { inviteProjectMember, acceptProjectInvitation, rejectProjectInvitation, cancelProjectInvitation, getPendingProjectInvitations, getMyProjectInvitations } from "./projectInvitation.controller";
 
 
 const router = Router();
 
 
+
+router.get(
+    "/project-invitations",
+    authenticateUser,
+    getMyProjectInvitations
+);
 
 router.post(
     "/projects/:projectId/invitations",

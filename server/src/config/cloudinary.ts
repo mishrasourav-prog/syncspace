@@ -25,6 +25,9 @@ import ApiError from "../utils/ApiError";
 const DEFAULT_AVATAR_FOLDER =
   "syncspace/avatars";
 
+const DEFAULT_WORKSPACE_AVATAR_FOLDER =
+  "syncspace/workspaces";
+
 let isConfigured =
   false;
 
@@ -71,6 +74,31 @@ export const getCloudinaryAvatarFolder =
     return (
       configuredFolder ||
       DEFAULT_AVATAR_FOLDER
+    );
+  };
+
+
+/*
+|--------------------------------------------------------------------------
+| Workspace Avatar Folder
+|--------------------------------------------------------------------------
+|
+| Optional environment override:
+|
+| CLOUDINARY_WORKSPACE_AVATAR_FOLDER
+|
+*/
+
+export const getCloudinaryWorkspaceAvatarFolder =
+  (): string => {
+    const configuredFolder =
+      process.env
+        .CLOUDINARY_WORKSPACE_AVATAR_FOLDER
+        ?.trim();
+
+    return (
+      configuredFolder ||
+      DEFAULT_WORKSPACE_AVATAR_FOLDER
     );
   };
 

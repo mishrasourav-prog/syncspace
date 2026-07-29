@@ -8,6 +8,8 @@ export function useProjectMembersQuery(projectId: string | undefined) {
   return useQuery<ProjectMember[], ApiErrorShape>({
     queryKey: projectMemberQueryKeys.list(projectId ?? ""),
     queryFn: () => getProjectMembersRequest(projectId!),
+    refetchOnWindowFocus: true,
+    refetchInterval: 30_000,
     enabled: Boolean(projectId),
   });
 }

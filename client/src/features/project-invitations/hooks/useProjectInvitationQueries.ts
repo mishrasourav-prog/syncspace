@@ -1,61 +1,31 @@
-import {
-    useQuery,
-} from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 
-import type {
-    ApiErrorShape,
-} from "@/lib/axios";
-
+import type { ApiErrorShape } from "@/lib/axios";
 import {
-    getPendingProjectInvitationsRequest,
+  getMyProjectInvitationsRequest,
+  getPendingProjectInvitationsRequest,
 } from "../api/projectInvitation.api";
-
-import {
-    projectInvitationQueryKeys,
-} from "../projectInvitation.queryKeys";
-
-import type {
-    ProjectInvitation,
-} from "../types/projectInvitation.types";
+import { projectInvitationQueryKeys } from "../projectInvitation.queryKeys";
+import type { ProjectInvitation } from "../types/projectInvitation.types";
 
 export function useProjectInvitationsQuery(
-    projectId:
-        string |
-        undefined,
-
-    enabled =
-        true
+  projectId: string | undefined,
+  enabled = true
 ) {
-    return useQuery<
-        ProjectInvitation[],
-        ApiErrorShape
-    >({
-        queryKey:
-            projectInvitationQueryKeys
-                .list(
-                    projectId ??
-                    ""
-                ),
+  return useQuery<ProjectInvitation[], ApiErrorShape>({
+    queryKey: projectInvitationQueryKeys.list(projectId ?? ""),
+    queryFn: () => (projectId ? getPendingProjectInvitationsRequest(projectId) : Promise.resolve([])),
+    enabled: Boolean(projectId) && enabled,
+    refetchOnWindowFocus: true,
+    refetchInterval: 30_000,
+  });
+}
 
-        queryFn:
-            () => {
-                if (
-                    !projectId
-                ) {
-                    return Promise.resolve(
-                        []
-                    );
-                }
-
-                return getPendingProjectInvitationsRequest(
-                    projectId
-                );
-            },
-
-        enabled:
-            Boolean(
-                projectId
-            ) &&
-            enabled,
-    });
+export function useMyProjectInvitationsQuery() {
+  return useQuery<ProjectInvitation[], ApiErrorShape>({
+    queryKey: projectInvitationQueryKeys.my(),
+    queryFn: getMyProjectInvitationsRequest,
+    refetchOnWindowFocus: true,
+    refetchInterval: 30_000,
+  });
 }

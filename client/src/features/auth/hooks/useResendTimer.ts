@@ -1,22 +1,78 @@
-import { useEffect, useRef, useState } from "react";
+import {
+  useEffect,
+  useState,
+} from "react";
 
-const RESEND_COOLDOWN_SECONDS = 45;
+const DEFAULT_RESEND_COOLDOWN_SECONDS =
+  60;
 
-export function useResendTimer(initialSeconds: number = RESEND_COOLDOWN_SECONDS) {
-  const [secondsRemaining, setSecondsRemaining] = useState(initialSeconds);
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+export function useResendTimer(
+  initialSeconds: number =
+    DEFAULT_RESEND_COOLDOWN_SECONDS
+) {
+  const [
+    secondsRemaining,
+    setSecondsRemaining,
+  ] =
+    useState(
+      initialSeconds
+    );
 
-  useEffect(() => {
-    intervalRef.current = setInterval(() => {
-      setSecondsRemaining((prev) => (prev > 0 ? prev - 1 : 0));
-    }, 1000);
-    return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-    };
-  }, []);
+  useEffect(
+    () => {
+      if (
+        secondsRemaining <=
+        0
+      ) {
+        return;
+      }
 
-  const reset = () => setSecondsRemaining(initialSeconds);
-  const formatted = `${Math.floor(secondsRemaining / 60)}:${String(secondsRemaining % 60).padStart(2, "0")}`;
+      const timeoutId =
+        window.setTimeout(
+          () => {
+            setSecondsRemaining(
+              (current) =>
+                Math.max(
+                  0,
+                  current - 1
+                )
+            );
+          },
+          1000
+        );
 
-  return { secondsRemaining, canResend: secondsRemaining === 0, formatted, reset };
+      return () => {
+        window.clearTimeout(
+          timeoutId
+        );
+      };
+    },
+    [secondsRemaining]
+  );
+
+  const reset = (
+    seconds: number =
+      initialSeconds
+  ): void => {
+    setSecondsRemaining(
+      Math.max(
+        0,
+        seconds
+      )
+    );
+  };
+
+  const formatted =
+    `${Math.floor(secondsRemaining / 60)}:${String(
+      secondsRemaining % 60
+    ).padStart(2, "0")}`;
+
+  return {
+    secondsRemaining,
+    canResend:
+      secondsRemaining ===
+      0,
+    formatted,
+    reset,
+  };
 }

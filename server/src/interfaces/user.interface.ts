@@ -71,6 +71,13 @@ export interface RegisterUser {
   username: string;
 }
 
+
+export interface PendingRegistrationResponse {
+  email: string;
+  expiresInSeconds: number;
+  resendAvailableInSeconds: number;
+}
+
 export interface LoginResponse {
   user: IUser;
   accessToken: string;

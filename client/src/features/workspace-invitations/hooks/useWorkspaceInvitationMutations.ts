@@ -1,33 +1,7 @@
-// import { useMutation, useQueryClient } from "@tanstack/react-query";
-// import type { ApiErrorShape } from "@/lib/axios";
-// import { acceptInvitationRequest, rejectInvitationRequest } from "../api/workspaceInvitation.api";
-// import { workspaceInvitationQueryKeys } from "../workspaceInvitation.queryKeys";
-// import { workspaceQueryKeys } from "@/features/workspaces/workspace.queryKeys";
-
-// export function useAcceptInvitationMutation() {
-//   const queryClient = useQueryClient();
-
-//   return useMutation<void, ApiErrorShape, string>({
-//     mutationFn: acceptInvitationRequest,
-//     onSuccess: () => {
-//       queryClient.invalidateQueries({ queryKey: workspaceInvitationQueryKeys.list() });
-//       queryClient.invalidateQueries({ queryKey: workspaceQueryKeys.list() });
-//     },
-//   });
-// }
-
-// export function useRejectInvitationMutation() {
-//   const queryClient = useQueryClient();
-
-//   return useMutation<void, ApiErrorShape, string>({
-//     mutationFn: rejectInvitationRequest,
-//     onSuccess: () => {
-//       queryClient.invalidateQueries({ queryKey: workspaceInvitationQueryKeys.list() });
-//     },
-//   });
-// }
-
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+
+import { notificationQueryKeys } from "@/features/notifications/notification.queryKeys";
+import { workspaceQueryKeys } from "@/features/workspaces/workspace.queryKeys";
 import type { ApiErrorShape } from "@/lib/axios";
 import {
   acceptInvitationRequest,
@@ -36,7 +10,6 @@ import {
   type InviteWorkspaceMemberPayload,
 } from "../api/workspaceInvitation.api";
 import { workspaceInvitationQueryKeys } from "../workspaceInvitation.queryKeys";
-import { workspaceQueryKeys } from "@/features/workspaces/workspace.queryKeys";
 import type { WorkspaceInvitation } from "../workspaceInvitation.types";
 
 /*
@@ -55,8 +28,9 @@ export function useAcceptInvitationMutation() {
   return useMutation<void, ApiErrorShape, string>({
     mutationFn: acceptInvitationRequest,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: workspaceInvitationQueryKeys.list() });
-      queryClient.invalidateQueries({ queryKey: workspaceQueryKeys.list() });
+      void queryClient.invalidateQueries({ queryKey: workspaceInvitationQueryKeys.list() });
+      void queryClient.invalidateQueries({ queryKey: workspaceQueryKeys.list() });
+      void queryClient.invalidateQueries({ queryKey: notificationQueryKeys.all });
     },
   });
 }
@@ -67,7 +41,8 @@ export function useRejectInvitationMutation() {
   return useMutation<void, ApiErrorShape, string>({
     mutationFn: rejectInvitationRequest,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: workspaceInvitationQueryKeys.list() });
+      void queryClient.invalidateQueries({ queryKey: workspaceInvitationQueryKeys.list() });
+      void queryClient.invalidateQueries({ queryKey: notificationQueryKeys.all });
     },
   });
 }

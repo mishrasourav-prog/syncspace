@@ -52,10 +52,12 @@ interface DocumentEditorHeaderProps {
   canDuplicate: boolean;
   isDuplicating: boolean;
   canDownloadHtml: boolean;
+  canDownloadPdf: boolean;
   onArchive: () => void;
   onRestore: () => void;
   onDuplicate: () => void;
   onDownloadHtml: () => void;
+  onDownloadPdf: () => void;
   onDownloadJson: () => void;
   onCopyId: () => void;
   onBackToDocuments: () => void;
@@ -82,10 +84,12 @@ export function DocumentEditorHeader({
   canDuplicate,
   isDuplicating,
   canDownloadHtml,
+  canDownloadPdf,
   onArchive,
   onRestore,
   onDuplicate,
   onDownloadHtml,
+  onDownloadPdf,
   onDownloadJson,
   onCopyId,
   onBackToDocuments,
@@ -95,8 +99,8 @@ export function DocumentEditorHeader({
   const [isEditingTitle, setIsEditingTitle] = useState(false);
 
   return (
-    <header className="rounded-xl border border-border bg-surface/60 p-4 shadow-soft sm:p-5">
-      <div className="flex flex-wrap items-start justify-between gap-3">
+    <header className="min-w-0 rounded-xl border border-border bg-surface/60 p-3 shadow-soft sm:p-5">
+      <div className="flex min-w-0 flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div className="flex min-w-0 flex-1 items-start gap-3">
           <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/15 text-primary">
             <FileText className="h-5 w-5" />
@@ -147,7 +151,7 @@ export function DocumentEditorHeader({
           </div>
         </div>
 
-        <div className="flex shrink-0 flex-wrap items-center gap-2">
+        <div className="flex min-w-0 w-full items-center gap-2 overflow-x-auto pb-1 lg:w-auto lg:shrink-0">
           <div className="flex items-center rounded-md border border-border bg-background/40 p-0.5">
             <button
               type="button"
@@ -158,7 +162,7 @@ export function DocumentEditorHeader({
               }`}
             >
               <Pencil className="h-3.5 w-3.5" />
-              Editing
+              <span className="hidden sm:inline">Editing</span>
             </button>
             <button
               type="button"
@@ -169,7 +173,7 @@ export function DocumentEditorHeader({
               }`}
             >
               <Eye className="h-3.5 w-3.5" />
-              Preview
+              <span className="hidden sm:inline">Preview</span>
             </button>
           </div>
 
@@ -186,7 +190,7 @@ export function DocumentEditorHeader({
 
           <Button type="button" variant="secondary" size="sm" onClick={onShowMembers}>
             <Users className="h-3.5 w-3.5" />
-            Project members
+            <span className="hidden sm:inline">Project members</span>
           </Button>
 
           {canArchive && (
@@ -229,6 +233,9 @@ export function DocumentEditorHeader({
             <DropdownMenuContent align="end">
               <DropdownMenuItem onClick={onDuplicate} disabled={!canDuplicate || isDuplicating}>
                 {isDuplicating ? "Duplicating…" : "Duplicate document"}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={onDownloadPdf} disabled={!canDownloadPdf}>
+                Download PDF
               </DropdownMenuItem>
               <DropdownMenuItem onClick={onDownloadHtml} disabled={!canDownloadHtml}>
                 Download HTML

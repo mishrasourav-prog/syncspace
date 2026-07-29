@@ -2,6 +2,8 @@ import { Router } from "express";
 
 import {
   registerUser,
+  verifyEmail,
+  resendEmailVerification,
   loginUser,
   logoutUser,
   refreshAccessToken,
@@ -20,6 +22,13 @@ const router = Router();
  * Public Routes
  */
 router.post("/register", registerUser);
+
+router.post("/verify-email", verifyEmail);
+
+router.post(
+  "/resend-verification-otp",
+  resendEmailVerification
+);
 
 router.post("/login", loginUser);
 

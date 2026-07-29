@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type ComponentType, type MouseEvent } from "react";
 import type { Editor } from "@tiptap/react";
 import {
   Bold,
@@ -21,11 +21,18 @@ import {
   Undo2,
   Unlink,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
 
 const HEADING_OPTIONS = [
   { label: "Paragraph", level: 0 as const },
@@ -37,9 +44,12 @@ const HEADING_OPTIONS = [
 const SAFE_LINK_PROTOCOLS = ["http://", "https://", "mailto:"];
 
 function isSafeUrl(url: string): boolean {
-  const trimmed = url.trim();
-  if (!trimmed) return false;
-  return SAFE_LINK_PROTOCOLS.some((protocol) => trimmed.toLowerCase().startsWith(protocol));
+  const trimmed = url.trim().toLowerCase();
+  return SAFE_LINK_PROTOCOLS.some((protocol) => trimmed.startsWith(protocol));
+}
+
+function preserveEditorSelection(event: MouseEvent<HTMLElement>): void {
+  event.preventDefault();
 }
 
 function ToolbarButton({
@@ -50,7 +60,7 @@ function ToolbarButton({
   onClick,
 }: {
   label: string;
-  icon: React.ComponentType<{ className?: string }>;
+  icon: ComponentType<{ className?: string }>;
   active?: boolean;
   disabled?: boolean;
   onClick: () => void;
@@ -62,9 +72,10 @@ function ToolbarButton({
       title={label}
       aria-pressed={active}
       disabled={disabled}
+      onMouseDown={preserveEditorSelection}
       onClick={onClick}
       className={cn(
-        "flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-muted transition-colors",
+        "flex h-9 w-9 shrink-0 items-center justify-center rounded-md text-muted transition-colors",
         "hover:bg-border/50 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50",
         "disabled:pointer-events-none disabled:opacity-40",
         active && "bg-primary/15 text-primary"
@@ -98,27 +109,27 @@ function LinkPopover({ editor, disabled }: { editor: Editor; disabled: boolean }
   }
 
   function removeLink() {
-    editor.chain().focus().unsetLink().run();
+    editor.chain().focus().extendMarkRange("link").unsetLink().run();
     setOpen(false);
   }
 
   if (disabled) {
-    return <ToolbarButton label="Link" icon={Link2} disabled onClick={() => {}} />;
+    return <ToolbarButton label="Add or edit link" icon={Link2} disabled onClick={() => undefined} />;
   }
 
   return (
     <Popover open={open} onOpenChange={handleOpenChange}>
       <PopoverTrigger
-        aria-label="Link"
+        aria-label="Add or edit link"
         className={cn(
-          "flex h-8 w-8 items-center justify-center rounded-md text-muted transition-colors",
+          "flex h-9 w-9 shrink-0 items-center justify-center rounded-md text-muted transition-colors",
           "hover:bg-border/50 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50",
           isActive && "bg-primary/15 text-primary"
         )}
       >
         <Link2 className="h-4 w-4" />
       </PopoverTrigger>
-      <PopoverContent className="w-64">
+      <PopoverContent className="w-[min(18rem,calc(100vw-2rem))]">
         <label htmlFor="document-link-url" className="mb-1.5 block text-xs font-medium text-foreground">
           Link URL
         </label>
@@ -127,6 +138,7 @@ function LinkPopover({ editor, disabled }: { editor: Editor; disabled: boolean }
           value={url}
           onChange={(event) => setUrl(event.target.value)}
           placeholder="https://example.com"
+          inputMode="url"
           onKeyDown={(event) => {
             if (event.key === "Enter") {
               event.preventDefault();
@@ -135,7 +147,7 @@ function LinkPopover({ editor, disabled }: { editor: Editor; disabled: boolean }
           }}
         />
         <p className="mt-1 text-[11px] text-muted">Only http, https, and mailto links are allowed.</p>
-        <div className="mt-3 flex justify-end gap-2">
+        <div className="mt-3 flex flex-wrap justify-end gap-2">
           {isActive && (
             <Button type="button" size="sm" variant="secondary" onClick={removeLink}>
               <Unlink className="h-3.5 w-3.5" />
@@ -158,180 +170,168 @@ interface DocumentEditorToolbarProps {
   onToggleFullscreen: () => void;
 }
 
-export function DocumentEditorToolbar({ editor, disabled, isFullscreen, onToggleFullscreen }: DocumentEditorToolbarProps) {
+export function DocumentEditorToolbar({
+  editor,
+  disabled,
+  isFullscreen,
+  onToggleFullscreen,
+}: DocumentEditorToolbarProps) {
   const activeHeading = HEADING_OPTIONS.find((option) =>
-    option.level === 0 ? editor.isActive("paragraph") : editor.isActive("heading", { level: option.level })
+    option.level === 0
+      ? editor.isActive("paragraph")
+      : editor.isActive("heading", { level: option.level })
   );
+
+  const can = {
+    paragraph: editor.can().chain().focus().setParagraph().run(),
+    h1: editor.can().chain().focus().setHeading({ level: 1 }).run(),
+    h2: editor.can().chain().focus().setHeading({ level: 2 }).run(),
+    h3: editor.can().chain().focus().setHeading({ level: 3 }).run(),
+    bold: editor.can().chain().focus().toggleBold().run(),
+    italic: editor.can().chain().focus().toggleItalic().run(),
+    underline: editor.can().chain().focus().toggleUnderline().run(),
+    strike: editor.can().chain().focus().toggleStrike().run(),
+    code: editor.can().chain().focus().toggleCode().run(),
+    bulletList: editor.can().chain().focus().toggleBulletList().run(),
+    orderedList: editor.can().chain().focus().toggleOrderedList().run(),
+    taskList: editor.can().chain().focus().toggleTaskList().run(),
+    blockquote: editor.can().chain().focus().toggleBlockquote().run(),
+    codeBlock: editor.can().chain().focus().toggleCodeBlock().run(),
+    horizontalRule: editor.can().chain().focus().setHorizontalRule().run(),
+    insertTable: editor.can().chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run(),
+    addRow: editor.can().chain().focus().addRowAfter().run(),
+    deleteRow: editor.can().chain().focus().deleteRow().run(),
+    addColumn: editor.can().chain().focus().addColumnAfter().run(),
+    deleteColumn: editor.can().chain().focus().deleteColumn().run(),
+    mergeCells: editor.can().chain().focus().mergeCells().run(),
+    splitCell: editor.can().chain().focus().splitCell().run(),
+    toggleHeaderRow: editor.can().chain().focus().toggleHeaderRow().run(),
+    deleteTable: editor.can().chain().focus().deleteTable().run(),
+  };
 
   return (
     <div
       role="toolbar"
       aria-label="Document formatting"
-      className="flex flex-wrap items-center gap-0.5 overflow-x-auto rounded-t-xl border border-b-0 border-border bg-surface/80 px-2 py-1.5"
+      className="min-w-0 overflow-x-auto rounded-t-xl border border-b-0 border-border bg-surface/80"
     >
-      <ToolbarButton
-        label="Undo"
-        icon={Undo2}
-        disabled={disabled || !editor.can().undo()}
-        onClick={() => editor.chain().focus().undo().run()}
-      />
-      <ToolbarButton
-        label="Redo"
-        icon={Redo2}
-        disabled={disabled || !editor.can().redo()}
-        onClick={() => editor.chain().focus().redo().run()}
-      />
+      <div className="flex min-w-max items-center gap-0.5 px-2 py-1.5">
+        <ToolbarButton
+          label="Undo"
+          icon={Undo2}
+          disabled={disabled || !editor.can().undo()}
+          onClick={() => editor.chain().focus().undo().run()}
+        />
+        <ToolbarButton
+          label="Redo"
+          icon={Redo2}
+          disabled={disabled || !editor.can().redo()}
+          onClick={() => editor.chain().focus().redo().run()}
+        />
 
-      <ToolbarDivider />
+        <ToolbarDivider />
 
-      <DropdownMenu>
-        <DropdownMenuTrigger
-          aria-label="Paragraph style"
-          className="!w-auto gap-1 px-2 text-xs font-medium text-foreground"
-        >
-          {activeHeading?.label ?? "Paragraph"}
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="start">
-          {HEADING_OPTIONS.map((option) => (
-            <DropdownMenuItem
-              key={option.level}
-              disabled={disabled}
-              onClick={() => {
-                if (option.level === 0) {
-                  editor.chain().focus().setParagraph().run();
-                } else {
-                  editor
-                    .chain()
-                    .focus()
-                    .setHeading({ level: option.level as 1 | 2 | 3 })
-                    .run();
-                }
-              }}
-            >
-              {option.label}
-            </DropdownMenuItem>
-          ))}
-        </DropdownMenuContent>
-      </DropdownMenu>
-
-      <ToolbarDivider />
-
-      <ToolbarButton
-        label="Bold"
-        icon={Bold}
-        active={editor.isActive("bold")}
-        disabled={disabled}
-        onClick={() => editor.chain().focus().toggleBold().run()}
-      />
-      <ToolbarButton
-        label="Italic"
-        icon={Italic}
-        active={editor.isActive("italic")}
-        disabled={disabled}
-        onClick={() => editor.chain().focus().toggleItalic().run()}
-      />
-      <ToolbarButton
-        label="Underline"
-        icon={UnderlineIcon}
-        active={editor.isActive("underline")}
-        disabled={disabled}
-        onClick={() => editor.chain().focus().toggleUnderline().run()}
-      />
-      <ToolbarButton
-        label="Strikethrough"
-        icon={Strikethrough}
-        active={editor.isActive("strike")}
-        disabled={disabled}
-        onClick={() => editor.chain().focus().toggleStrike().run()}
-      />
-      <ToolbarButton
-        label="Inline code"
-        icon={Code}
-        active={editor.isActive("code")}
-        disabled={disabled}
-        onClick={() => editor.chain().focus().toggleCode().run()}
-      />
-
-      <ToolbarDivider />
-
-      <ToolbarButton
-        label="Bullet list"
-        icon={List}
-        active={editor.isActive("bulletList")}
-        disabled={disabled}
-        onClick={() => editor.chain().focus().toggleBulletList().run()}
-      />
-      <ToolbarButton
-        label="Numbered list"
-        icon={ListOrdered}
-        active={editor.isActive("orderedList")}
-        disabled={disabled}
-        onClick={() => editor.chain().focus().toggleOrderedList().run()}
-      />
-      <ToolbarButton
-        label="Task list"
-        icon={ListChecks}
-        active={editor.isActive("taskList")}
-        disabled={disabled}
-        onClick={() => editor.chain().focus().toggleTaskList().run()}
-      />
-      <ToolbarButton
-        label="Blockquote"
-        icon={Quote}
-        active={editor.isActive("blockquote")}
-        disabled={disabled}
-        onClick={() => editor.chain().focus().toggleBlockquote().run()}
-      />
-
-      <ToolbarDivider />
-
-      <LinkPopover editor={editor} disabled={disabled} />
-
-      <DropdownMenu>
-        <DropdownMenuTrigger aria-label="More formatting options">
-          <MoreHorizontal className="h-4 w-4" />
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="start">
-          <DropdownMenuItem disabled={disabled} onClick={() => editor.chain().focus().toggleCodeBlock().run()}>
-            <Code2 className="h-3.5 w-3.5" />
-            Code block
-          </DropdownMenuItem>
-          <DropdownMenuItem disabled={disabled} onClick={() => editor.chain().focus().setHorizontalRule().run()}>
-            <Minus className="h-3.5 w-3.5" />
-            Horizontal rule
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            disabled={disabled}
-            onClick={() =>
-              editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()
-            }
+        <DropdownMenu>
+          <DropdownMenuTrigger
+            aria-label="Paragraph style"
+            className="!w-auto min-w-24 gap-1 px-2 text-xs font-medium text-foreground"
           >
-            <Table2 className="h-3.5 w-3.5" />
-            Insert table
-          </DropdownMenuItem>
-          {editor.isActive("table") && (
-            <>
-              <DropdownMenuItem disabled={disabled} onClick={() => editor.chain().focus().addRowAfter().run()}>
-                Add row
-              </DropdownMenuItem>
-              <DropdownMenuItem disabled={disabled} onClick={() => editor.chain().focus().deleteRow().run()}>
-                Delete row
-              </DropdownMenuItem>
-              <DropdownMenuItem disabled={disabled} onClick={() => editor.chain().focus().addColumnAfter().run()}>
-                Add column
-              </DropdownMenuItem>
-              <DropdownMenuItem disabled={disabled} onClick={() => editor.chain().focus().deleteColumn().run()}>
-                Delete column
-              </DropdownMenuItem>
-              <DropdownMenuItem disabled={disabled} onClick={() => editor.chain().focus().deleteTable().run()}>
-                Delete table
-              </DropdownMenuItem>
-            </>
-          )}
-        </DropdownMenuContent>
-      </DropdownMenu>
+            {activeHeading?.label ?? "Paragraph"}
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start">
+            {HEADING_OPTIONS.map((option) => {
+              const commandAvailable =
+                option.level === 0 ? can.paragraph : can[`h${option.level}` as "h1" | "h2" | "h3"];
 
-      <div className="ml-auto flex items-center">
+              return (
+                <DropdownMenuItem
+                  key={option.level}
+                  disabled={disabled || !commandAvailable}
+                  onClick={() => {
+                    if (option.level === 0) {
+                      editor.chain().focus().setParagraph().run();
+                    } else {
+                      editor.chain().focus().setHeading({ level: option.level }).run();
+                    }
+                  }}
+                >
+                  {option.label}
+                </DropdownMenuItem>
+              );
+            })}
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        <ToolbarDivider />
+
+        <ToolbarButton label="Bold" icon={Bold} active={editor.isActive("bold")} disabled={disabled || !can.bold} onClick={() => editor.chain().focus().toggleBold().run()} />
+        <ToolbarButton label="Italic" icon={Italic} active={editor.isActive("italic")} disabled={disabled || !can.italic} onClick={() => editor.chain().focus().toggleItalic().run()} />
+        <ToolbarButton label="Underline" icon={UnderlineIcon} active={editor.isActive("underline")} disabled={disabled || !can.underline} onClick={() => editor.chain().focus().toggleUnderline().run()} />
+        <ToolbarButton label="Strikethrough" icon={Strikethrough} active={editor.isActive("strike")} disabled={disabled || !can.strike} onClick={() => editor.chain().focus().toggleStrike().run()} />
+        <ToolbarButton label="Inline code" icon={Code} active={editor.isActive("code")} disabled={disabled || !can.code} onClick={() => editor.chain().focus().toggleCode().run()} />
+
+        <ToolbarDivider />
+
+        <ToolbarButton label="Bullet list" icon={List} active={editor.isActive("bulletList")} disabled={disabled || !can.bulletList} onClick={() => editor.chain().focus().toggleBulletList().run()} />
+        <ToolbarButton label="Numbered list" icon={ListOrdered} active={editor.isActive("orderedList")} disabled={disabled || !can.orderedList} onClick={() => editor.chain().focus().toggleOrderedList().run()} />
+        <ToolbarButton label="Task list" icon={ListChecks} active={editor.isActive("taskList")} disabled={disabled || !can.taskList} onClick={() => editor.chain().focus().toggleTaskList().run()} />
+        <ToolbarButton label="Blockquote" icon={Quote} active={editor.isActive("blockquote")} disabled={disabled || !can.blockquote} onClick={() => editor.chain().focus().toggleBlockquote().run()} />
+
+        <ToolbarDivider />
+        <LinkPopover editor={editor} disabled={disabled} />
+
+        <DropdownMenu>
+          <DropdownMenuTrigger aria-label="More formatting options">
+            <MoreHorizontal className="h-4 w-4" />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="max-h-[min(70vh,30rem)] overflow-y-auto">
+            <DropdownMenuItem disabled={disabled || !can.codeBlock} onClick={() => editor.chain().focus().toggleCodeBlock().run()}>
+              <Code2 className="h-3.5 w-3.5" />
+              Code block
+            </DropdownMenuItem>
+            <DropdownMenuItem disabled={disabled || !can.horizontalRule} onClick={() => editor.chain().focus().setHorizontalRule().run()}>
+              <Minus className="h-3.5 w-3.5" />
+              Horizontal rule
+            </DropdownMenuItem>
+            <DropdownMenuItem disabled={disabled || !can.insertTable} onClick={() => editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()}>
+              <Table2 className="h-3.5 w-3.5" />
+              Insert 3 × 3 table
+            </DropdownMenuItem>
+
+            {editor.isActive("table") && (
+              <>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem disabled={disabled || !can.addRow} onClick={() => editor.chain().focus().addRowAfter().run()}>
+                  Add row below
+                </DropdownMenuItem>
+                <DropdownMenuItem disabled={disabled || !can.deleteRow} onClick={() => editor.chain().focus().deleteRow().run()}>
+                  Delete current row
+                </DropdownMenuItem>
+                <DropdownMenuItem disabled={disabled || !can.addColumn} onClick={() => editor.chain().focus().addColumnAfter().run()}>
+                  Add column after
+                </DropdownMenuItem>
+                <DropdownMenuItem disabled={disabled || !can.deleteColumn} onClick={() => editor.chain().focus().deleteColumn().run()}>
+                  Delete current column
+                </DropdownMenuItem>
+                <DropdownMenuItem disabled={disabled || !can.mergeCells} onClick={() => editor.chain().focus().mergeCells().run()}>
+                  Merge selected cells
+                </DropdownMenuItem>
+                <DropdownMenuItem disabled={disabled || !can.splitCell} onClick={() => editor.chain().focus().splitCell().run()}>
+                  Split current cell
+                </DropdownMenuItem>
+                <DropdownMenuItem disabled={disabled || !can.toggleHeaderRow} onClick={() => editor.chain().focus().toggleHeaderRow().run()}>
+                  Toggle header row
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem variant="danger" disabled={disabled || !can.deleteTable} onClick={() => editor.chain().focus().deleteTable().run()}>
+                  Delete table
+                </DropdownMenuItem>
+              </>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        <ToolbarDivider />
         <ToolbarButton
           label={isFullscreen ? "Exit fullscreen" : "Fullscreen"}
           icon={isFullscreen ? Minimize2 : Maximize2}

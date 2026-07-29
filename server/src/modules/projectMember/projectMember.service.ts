@@ -255,6 +255,21 @@ if (requester.role !== ProjectRole.ADMIN) {
             member.role = role;
             await member.save();
 
+            const affectedUserId = (member.user as any)._id.toString();
+            const workspaceId = project.workspace.toString();
+
+            await eventBus.publish(
+                DomainEventName.PROJECT_MEMBER_ROLE_CHANGED,
+                {
+                    workspaceId,
+                    projectId,
+                    memberId: member._id.toString(),
+                    affectedUserId,
+                    actorId: userId,
+                    role,
+                }
+            );
+
             return {
                 _id: member._id.toString(),
                 project: member.project.toString(),

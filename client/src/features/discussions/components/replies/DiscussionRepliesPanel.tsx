@@ -1,3 +1,5 @@
+import { useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import type { InfiniteData, UseInfiniteQueryResult } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -43,8 +45,27 @@ export function DiscussionRepliesPanel({
   repliesQuery,
   replies,
 }: DiscussionRepliesPanelProps) {
+  const location = useLocation();
   const hasMore = repliesQuery.hasNextPage ?? false;
   const canReply = canCreateReply(discussion, project, workspace, role);
+  const { fetchNextPage, isFetchingNextPage } = repliesQuery;
+
+  useEffect(() => {
+    const targetId = location.hash.replace(/^#/, "");
+    if (!targetId.startsWith("reply-")) return;
+
+    const target = document.getElementById(targetId);
+    if (target) {
+      window.requestAnimationFrame(() => {
+        target.scrollIntoView({ behavior: "smooth", block: "center" });
+      });
+      return;
+    }
+
+    if (hasMore && !isFetchingNextPage) {
+      void fetchNextPage();
+    }
+  }, [location.hash, replies.length, hasMore, isFetchingNextPage, fetchNextPage]);
 
   const disabledReason = discussion.isLocked
     ? "This discussion is locked. New replies can't be added."

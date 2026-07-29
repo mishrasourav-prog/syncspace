@@ -31,8 +31,14 @@ export function NotificationDetailPanel({
   isMarkingAsRead,
   onNavigate,
 }: NotificationDetailPanelProps) {
-  const workspaceQuery = useWorkspaceQuery(notification?.workspace ?? undefined);
-  const projectQuery = useProjectQuery(notification?.project ?? undefined);
+  const destination = notification ? getNotificationDestination(notification) : null;
+  const shouldVerifyResourceAccess = Boolean(destination?.requiresResourceAccess);
+  const workspaceQuery = useWorkspaceQuery(
+    shouldVerifyResourceAccess ? notification?.workspace ?? undefined : undefined
+  );
+  const projectQuery = useProjectQuery(
+    shouldVerifyResourceAccess ? notification?.project ?? undefined : undefined
+  );
 
   if (!notification) {
     return (
@@ -47,17 +53,18 @@ export function NotificationDetailPanel({
 
   const actorName = getNotificationActorName(notification);
   const supplemental = getNotificationSupplementalText(notification);
-  const destination = getNotificationDestination(notification);
 
-  const workspaceLoading = Boolean(notification.workspace) && workspaceQuery.isLoading;
-  const projectLoading = Boolean(notification.project) && projectQuery.isLoading;
+  const workspaceLoading = shouldVerifyResourceAccess && Boolean(notification.workspace) && workspaceQuery.isLoading;
+  const projectLoading = shouldVerifyResourceAccess && Boolean(notification.project) && projectQuery.isLoading;
   const relatedContextLoading = workspaceLoading || projectLoading;
 
   const workspaceUnavailable =
+    shouldVerifyResourceAccess &&
     Boolean(notification.workspace) &&
     workspaceQuery.isError &&
     isUnavailableStatus(workspaceQuery.error?.status);
   const projectUnavailable =
+    shouldVerifyResourceAccess &&
     Boolean(notification.project) &&
     projectQuery.isError &&
     isUnavailableStatus(projectQuery.error?.status);
@@ -76,9 +83,10 @@ export function NotificationDetailPanel({
   const relatedContextFailed = workspaceContextFailed || projectContextFailed;
   const canOpenRelated = Boolean(
     destination &&
-      !relatedContextLoading &&
-      !relatedResourceUnavailable &&
-      !relatedContextFailed
+      (!destination.requiresResourceAccess ||
+        (!relatedContextLoading &&
+          !relatedResourceUnavailable &&
+          !relatedContextFailed))
   );
 
   function handleOpenRelated() {
@@ -145,7 +153,7 @@ export function NotificationDetailPanel({
           <dd className="truncate text-right text-foreground">{actorName}</dd>
         </div>
 
-        {notification.workspace && (
+        {shouldVerifyResourceAccess && notification.workspace && (
           <div className="flex items-center justify-between gap-2">
             <dt className="text-caption">Workspace</dt>
             <dd className="min-w-0 text-right text-foreground">
@@ -169,7 +177,7 @@ export function NotificationDetailPanel({
           </div>
         )}
 
-        {notification.project && (
+        {shouldVerifyResourceAccess && notification.project && (
           <div className="flex items-center justify-between gap-2">
             <dt className="text-caption">Project</dt>
             <dd className="min-w-0 text-right text-foreground">

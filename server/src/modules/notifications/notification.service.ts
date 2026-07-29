@@ -3,6 +3,7 @@ import {
 } from "mongoose";
 
 import ApiError from "../../utils/ApiError";
+import { DomainEventName, eventBus } from "../../events";
 
 import Notification, {
     NotificationEntityType,
@@ -78,7 +79,7 @@ interface INotificationForResponse {
         Date;
 }
 
-interface ICreateNotificationInternal {
+export interface CreateNotificationInput {
     recipientId:
         string;
 
@@ -196,7 +197,7 @@ export class NotificationService {
 
     async createNotification(
         data:
-            ICreateNotificationInternal
+            CreateNotificationInput
     ): Promise<string> {
         const notification = await Notification.create({
             recipient:
@@ -248,6 +249,22 @@ export class NotificationService {
                 data.metadata ?? {},
         });
         return notification._id.toString();
+    }
+
+    async createAndPublishNotification(
+        data: CreateNotificationInput
+    ): Promise<string> {
+        const notificationId = await this.createNotification(data);
+
+        await eventBus.publish(
+            DomainEventName.NOTIFICATION_CREATED,
+            {
+                notificationId,
+                recipientId: data.recipientId,
+            }
+        );
+
+        return notificationId;
     }
 
     async getNotifications(

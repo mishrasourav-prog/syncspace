@@ -144,3 +144,55 @@
   opacity: 0.7;
   pointer-events: none;
 }
+
+/* Responsive safety for user-generated document content. */
+.tiptap-prose,
+.tiptap-prose .ProseMirror {
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.tiptap-prose pre,
+.tiptap-prose table {
+  max-width: 100%;
+}
+
+.tiptap-prose table {
+  min-width: 36rem;
+  table-layout: fixed;
+}
+
+.tiptap-prose th,
+.tiptap-prose td {
+  min-width: 8rem;
+  overflow-wrap: anywhere;
+  vertical-align: top;
+}
+
+.tiptap-prose img,
+.tiptap-prose video,
+.tiptap-prose iframe {
+  max-width: 100%;
+  height: auto;
+}
+
+@media (max-width: 640px) {
+  .tiptap-prose .ProseMirror {
+    min-height: 55vh;
+  }
+
+  .tiptap-prose h1 {
+    font-size: 1.5rem;
+  }
+
+  .tiptap-prose h2 {
+    font-size: 1.25rem;
+  }
+
+  .tiptap-prose ul,
+  .tiptap-prose ol {
+    padding-left: 1.2rem;
+  }
+}

@@ -11,12 +11,13 @@ import {
 } from "../hooks/useNotificationMutations";
 import { useNotificationPageState } from "../hooks/useNotificationPageState";
 import { matchesNotificationFilter } from "../notification.display";
+import { getNotificationDestination } from "../notification.navigation";
 import { NotificationPageHeader } from "../components/NotificationPageHeader";
 import { NotificationFilterRail } from "../components/NotificationFilterRail";
 import { NotificationListPanel } from "../components/NotificationListPanel";
 import { NotificationDetailPanel } from "../components/NotificationDetailPanel";
 import { NotificationPageSkeleton } from "../components/NotificationPageSkeleton";
-import type { NotificationFilter } from "../notification.types";
+import type { NotificationFilter, NotificationItem } from "../notification.types";
 
 const FILTER_ORDER: NotificationFilter[] = ["all", "unread", "tasks", "discussions", "read"];
 
@@ -65,6 +66,20 @@ export function NotificationsPage() {
   function handleClearSearchOrFilter() {
     if (q) setQuery("");
     else if (filter !== "all") setFilter("all");
+  }
+
+  function handleNotificationSelect(notification: NotificationItem) {
+    if (!notification.isRead) {
+      markOneReadMutation.mutate(notification._id);
+    }
+
+    const destination = getNotificationDestination(notification);
+    if (destination) {
+      navigate(destination.path);
+      return;
+    }
+
+    selectNotification(notification._id);
   }
 
   const showMobileDetail = !isDesktopThreeColumn && Boolean(selectedId);
@@ -136,7 +151,7 @@ export function NotificationsPage() {
             totalLoadedCount={notifications.length}
             hasSearchQuery={Boolean(q)}
             selectedId={selectedId}
-            onSelect={(id) => selectNotification(id)}
+            onSelect={handleNotificationSelect}
             onClearSearchOrFilter={handleClearSearchOrFilter}
           />
 

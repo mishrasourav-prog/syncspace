@@ -529,12 +529,18 @@ export class TaskAssigneeService {
 
         await assignment.deleteOne();
 
-        /*
-        Future domain-event boundary:
-
-        TaskUnassignedEvent should be published here,
-        after successful deletion.
-        */
+        await eventBus.publish(
+            DomainEventName.TASK_UNASSIGNED,
+            {
+                workspaceId: context.workspace._id.toString(),
+                projectId: context.project._id.toString(),
+                taskId: context.task._id.toString(),
+                actorId: userId,
+                assigneeId,
+                title: context.task.title,
+                taskType: context.task.type,
+            }
+        );
     }
 }
 

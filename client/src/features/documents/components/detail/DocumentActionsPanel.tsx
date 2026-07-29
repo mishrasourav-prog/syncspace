@@ -1,4 +1,4 @@
-import { Archive, ArchiveRestore, ArrowLeft, Copy, Download, FileJson, RefreshCw } from "lucide-react";
+import { Archive, ArchiveRestore, ArrowLeft, Copy, Download, FileJson, FileText, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface DocumentActionsPanelProps {
@@ -7,8 +7,10 @@ interface DocumentActionsPanelProps {
   canDuplicate: boolean;
   isDuplicating: boolean;
   canDownloadHtml: boolean;
+  canDownloadPdf: boolean;
   onDuplicate: () => void;
   onDownloadHtml: () => void;
+  onDownloadPdf: () => void;
   onDownloadJson: () => void;
   onCopyId: () => void;
   onRefresh: () => void;
@@ -24,8 +26,10 @@ export function DocumentActionsPanel({
   canDuplicate,
   isDuplicating,
   canDownloadHtml,
+  canDownloadPdf,
   onDuplicate,
   onDownloadHtml,
+  onDownloadPdf,
   onDownloadJson,
   onCopyId,
   onRefresh,
@@ -38,7 +42,7 @@ export function DocumentActionsPanel({
     <section className="rounded-xl border border-border bg-surface/60 p-4 shadow-soft">
       <h2 className="text-h3 mb-3 text-foreground">Supported actions</h2>
 
-      <div className="space-y-1.5">
+      <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2 xl:grid-cols-1">
         <Button
           type="button"
           variant="secondary"
@@ -49,6 +53,18 @@ export function DocumentActionsPanel({
         >
           <Copy className="h-3.5 w-3.5" />
           {isDuplicating ? "Duplicating…" : "Duplicate document"}
+        </Button>
+
+        <Button
+          type="button"
+          variant="secondary"
+          size="sm"
+          onClick={onDownloadPdf}
+          disabled={!canDownloadPdf}
+          className="w-full justify-start"
+        >
+          <FileText className="h-3.5 w-3.5" />
+          Download PDF
         </Button>
 
         <Button

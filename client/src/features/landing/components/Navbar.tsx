@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Menu, Sparkles, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface NavbarProps {
@@ -9,7 +9,7 @@ interface NavbarProps {
 }
 
 const NAV_LINKS = [
-  { label: "Features", target: "features" },
+  { label: "Product", target: "product" },
   { label: "Workflow", target: "workflow" },
   { label: "Security", target: "security" },
   { label: "FAQ", target: "faq" },
@@ -61,8 +61,8 @@ export function Navbar({ onGetStarted, onLogin }: NavbarProps) {
     <header
       className={`fixed inset-x-0 top-0 z-50 border-b transition-colors duration-300 ${
         scrolled || drawerOpen
-          ? "border-border bg-background/90 backdrop-blur-xl"
-          : "border-transparent bg-background/40"
+          ? "border-border bg-background/95"
+          : "border-transparent bg-background/80"
       }`}
     >
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
@@ -72,8 +72,8 @@ export function Navbar({ onGetStarted, onLogin }: NavbarProps) {
           className="flex items-center gap-2 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
           aria-label="Go to the top of the SyncSpace landing page"
         >
-          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-secondary shadow-soft">
-            <Sparkles className="h-4 w-4 text-white" />
+          <span className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-sm font-semibold text-primary-foreground">
+            S
           </span>
           <span className="text-base font-semibold tracking-tight text-foreground">SyncSpace</span>
         </button>
@@ -120,7 +120,7 @@ export function Navbar({ onGetStarted, onLogin }: NavbarProps) {
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
-            className="overflow-hidden border-t border-border bg-background/95 backdrop-blur-xl lg:hidden"
+            className="overflow-hidden border-t border-border bg-background/95 lg:hidden"
           >
             <div className="flex max-h-[calc(100vh-4rem)] flex-col gap-2 overflow-y-auto px-4 py-4 sm:px-6">
               {NAV_LINKS.map((link) => (

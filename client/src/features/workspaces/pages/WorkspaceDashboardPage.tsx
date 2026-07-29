@@ -378,6 +378,8 @@ import { useWorkspacesQuery } from "../hooks/useWorkspaceQueries";
 import { useMyInvitationsQuery } from "@/features/workspace-invitations/hooks/useWorkspaceInvitationQueries";
 import { useUnreadNotificationCountQuery } from "@/features/notifications/hooks/useNotificationQueries";
 import { PendingInvitations } from "@/features/workspace-invitations/components/PendingInvitations";
+import { MyProjectInvitations } from "@/features/project-invitations/components/MyProjectInvitations";
+import { useMyProjectInvitationsQuery } from "@/features/project-invitations/hooks/useProjectInvitationQueries";
 import { DashboardNotificationFeed } from "@/features/notifications/components/DashboardNotificationFeed";
 import { DashboardGreeting } from "../components/dashboard/DashboardGreeting";
 import { DashboardQuickActions } from "../components/dashboard/DashboardQuickActions";
@@ -406,6 +408,7 @@ export function WorkspaceDashboardPage() {
 
   const workspacesQuery = useWorkspacesQuery();
   const invitationsQuery = useMyInvitationsQuery();
+  const projectInvitationsQuery = useMyProjectInvitationsQuery();
   const unreadCountQuery = useUnreadNotificationCountQuery();
 
   const [searchParams, setSearchParams] = useSearchParams();
@@ -452,6 +455,8 @@ export function WorkspaceDashboardPage() {
   }
 
   const workspaces = useMemo(() => workspacesQuery.data ?? [], [workspacesQuery.data]);
+  const pendingInvitationCount =
+    (invitationsQuery.data?.length ?? 0) + (projectInvitationsQuery.data?.length ?? 0);
 
   const counts = useMemo(
     () => ({
@@ -497,7 +502,7 @@ export function WorkspaceDashboardPage() {
       <DashboardQuickActions
         onCreateWorkspace={onCreateWorkspace}
         activeCount={counts.active}
-        pendingInvitationCount={invitationsQuery.data?.length ?? 0}
+        pendingInvitationCount={pendingInvitationCount}
         unreadNotificationCount={unreadCountQuery.data ?? 0}
       />
 
@@ -507,7 +512,7 @@ export function WorkspaceDashboardPage() {
             total={counts.all}
             active={counts.active}
             archived={counts.archived}
-            pendingInvitations={invitationsQuery.data?.length ?? 0}
+            pendingInvitations={pendingInvitationCount}
             isLoading={workspacesQuery.isLoading}
           />
 
@@ -576,6 +581,7 @@ export function WorkspaceDashboardPage() {
           )}
 
           <PendingInvitations />
+          <MyProjectInvitations />
         </div>
 
         <div className="xl:col-span-4">

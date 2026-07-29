@@ -10,6 +10,8 @@ export function useNotificationsQuery(enabled: boolean) {
     queryKey: notificationQueryKeys.list(),
     queryFn: getNotificationsRequest,
     enabled,
+    refetchInterval: enabled ? 30_000 : false,
+    refetchOnWindowFocus: true,
   });
 }
 
@@ -20,5 +22,7 @@ export function useUnreadNotificationCountQuery() {
     queryKey: notificationQueryKeys.unreadCount(),
     queryFn: getUnreadNotificationCountRequest,
     enabled: isAuthenticated,
+    refetchInterval: isAuthenticated ? 30_000 : false,
+    refetchOnWindowFocus: true,
   });
 }

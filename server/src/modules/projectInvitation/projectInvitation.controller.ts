@@ -229,3 +229,35 @@ export const getPendingProjectInvitations =
             return next(error);
         }
     };
+
+/*
+|--------------------------------------------------------------------------
+| Get Current User Project Invitations
+|--------------------------------------------------------------------------
+*/
+
+export const getMyProjectInvitations = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
+    try {
+        if (!req.user) {
+            throw new ApiError(401, "Unauthorized.");
+        }
+
+        const payload = await ProjectInvitationService.getMyInvitations(
+            req.user._id
+        );
+
+        return res.status(200).json(
+            new ApiResponse(
+                200,
+                "Project invitations fetched successfully.",
+                payload
+            )
+        );
+    } catch (error) {
+        return next(error);
+    }
+};

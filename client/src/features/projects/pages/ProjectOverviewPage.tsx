@@ -480,7 +480,22 @@ export function ProjectOverviewPage() {
             );
 
             socket.on(
+                "task:updated",
+                handleTaskChanged
+            );
+
+            socket.on(
                 "task:assigned",
+                handleTaskChanged
+            );
+
+            socket.on(
+                "task:unassigned",
+                handleTaskChanged
+            );
+
+            socket.on(
+                "task:assignment-request-accepted",
                 handleTaskChanged
             );
 
@@ -536,7 +551,22 @@ export function ProjectOverviewPage() {
                 );
 
                 socket.off(
+                    "task:updated",
+                    handleTaskChanged
+                );
+
+                socket.off(
                     "task:assigned",
+                    handleTaskChanged
+                );
+
+                socket.off(
+                    "task:unassigned",
+                    handleTaskChanged
+                );
+
+                socket.off(
+                    "task:assignment-request-accepted",
                     handleTaskChanged
                 );
 

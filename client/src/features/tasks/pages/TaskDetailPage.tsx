@@ -12,6 +12,7 @@ import { useProjectMembersQuery } from "@/features/project-members/hooks/useProj
 import { deriveProjectRole } from "@/features/projects/project.permissions";
 import { activityQueryKeys } from "@/features/activity/activity.queryKeys";
 import { taskQueryKeys } from "../task.queryKeys";
+import { taskCommentQueryKeys } from "../taskComment.queryKeys";
 import { useProjectTasksQuery, useTaskQuery } from "../hooks/useTaskQueries";
 import { useUpdateTaskStatusMutation } from "../hooks/useTaskMutations";
 import {
@@ -36,6 +37,7 @@ import { TaskDetailsRail } from "../components/detail/TaskDetailsRail";
 import { TaskHierarchyPanel } from "../components/detail/TaskHierarchyPanel";
 import { TaskActivityPanel } from "../components/detail/TaskActivityPanel";
 import { TaskCommentsPanel } from "../components/comments/TaskCommentsPanel";
+import { TaskAssignmentRequestsPanel } from "../components/detail/TaskAssignmentRequestsPanel";
 import type { Task, TaskStatus } from "../types/task.types";
 
 function TaskDetailSkeleton() {
@@ -198,6 +200,36 @@ export function TaskDetailPage() {
       }
     }
 
+    function handleUpdated(payload: { projectId: string; taskId: string }) {
+      if (payload.projectId !== projectId) return;
+      void queryClient.invalidateQueries({ queryKey: taskQueryKeys.projectList(projectId) });
+      if (payload.taskId === taskId) {
+        void queryClient.invalidateQueries({ queryKey: taskQueryKeys.detail(projectId, taskId) });
+      }
+    }
+
+    function handleUnassigned(payload: { projectId: string; taskId: string }) {
+      if (payload.projectId !== projectId) return;
+      void queryClient.invalidateQueries({ queryKey: taskQueryKeys.projectList(projectId) });
+      if (payload.taskId === taskId) {
+        void queryClient.invalidateQueries({ queryKey: taskQueryKeys.detail(projectId, taskId) });
+        void queryClient.invalidateQueries({ queryKey: taskQueryKeys.assignees(projectId, taskId) });
+      }
+    }
+
+    function handleCommentChanged(payload: { projectId: string; taskId: string }) {
+      if (payload.projectId !== projectId || payload.taskId !== taskId) return;
+      void queryClient.invalidateQueries({ queryKey: taskCommentQueryKeys.task(projectId, taskId) });
+    }
+
+    function handleAssignmentRequestChanged(payload: { projectId: string; taskId: string }) {
+      if (payload.projectId !== projectId || payload.taskId !== taskId) return;
+      void queryClient.invalidateQueries({ queryKey: taskQueryKeys.assignmentRequests(projectId, taskId) });
+      void queryClient.invalidateQueries({ queryKey: taskQueryKeys.assignees(projectId, taskId) });
+      void queryClient.invalidateQueries({ queryKey: taskQueryKeys.detail(projectId, taskId) });
+      void queryClient.invalidateQueries({ queryKey: taskQueryKeys.projectList(projectId) });
+    }
+
     function handleCreated(payload: { projectId: string }) {
       if (payload.projectId !== projectId) return;
       void queryClient.invalidateQueries({ queryKey: taskQueryKeys.projectList(projectId) });
@@ -214,14 +246,24 @@ export function TaskDetailPage() {
     }
 
     socket.on("task:status-changed", handleStatusChanged);
+    socket.on("task:updated", handleUpdated);
     socket.on("task:assigned", handleAssigned);
+    socket.on("task:unassigned", handleUnassigned);
+    socket.on("task:comment-changed", handleCommentChanged);
+    socket.on("task:assignment-requested", handleAssignmentRequestChanged);
+    socket.on("task:assignment-request-accepted", handleAssignmentRequestChanged);
     socket.on("task:created", handleCreated);
     socket.on("tasks:reordered", handleReordered);
     socket.on("activity:new", handleActivity);
 
     return () => {
       socket.off("task:status-changed", handleStatusChanged);
+      socket.off("task:updated", handleUpdated);
       socket.off("task:assigned", handleAssigned);
+      socket.off("task:unassigned", handleUnassigned);
+      socket.off("task:comment-changed", handleCommentChanged);
+      socket.off("task:assignment-requested", handleAssignmentRequestChanged);
+      socket.off("task:assignment-request-accepted", handleAssignmentRequestChanged);
       socket.off("task:created", handleCreated);
       socket.off("tasks:reordered", handleReordered);
       socket.off("activity:new", handleActivity);
@@ -379,6 +421,13 @@ export function TaskDetailPage() {
           <section className="space-y-6 rounded-xl border border-border bg-surface/60 p-5 shadow-soft sm:p-6">
             <TaskDescriptionPanel description={task.description} />
             <TaskAssigneesSection task={task} projectId={projectId} members={members} canManage={canManageAssignees} />
+            <TaskAssignmentRequestsPanel
+              projectId={projectId}
+              task={task}
+              role={role}
+              currentUserId={currentUserId}
+              canMutate={!task.isArchived && !project.isArchived && !workspace.isArchived}
+            />
             <TaskSubtasksSection
               subtasks={subtasks}
               workspaceId={workspaceId}

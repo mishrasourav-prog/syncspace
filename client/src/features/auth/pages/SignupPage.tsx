@@ -8,9 +8,10 @@ import { FormField } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { signupSchema, type SignupFormValues } from "../schemas/auth.schemas";
 import { useSignupMutation } from "../hooks/useAuthMutations";
+import type { PendingRegistrationResponse } from "../types/auth.types";
 
 interface SignupPageProps {
-  onSuccess?: (email: string) => void;
+  onSuccess?: (result: PendingRegistrationResponse) => void;
   onNavigateToLogin?: () => void;
 }
 
@@ -43,7 +44,7 @@ export function SignupPage({ onSuccess, onNavigateToLogin }: SignupPageProps) {
         password: values.password,
       },
       {
-        onSuccess: (data) => onSuccess?.(data.email),
+        onSuccess: (data) => onSuccess?.(data),
       }
     );
   };
@@ -51,7 +52,7 @@ export function SignupPage({ onSuccess, onNavigateToLogin }: SignupPageProps) {
   return (
     <AuthLayout>
       <h1 className="mb-1 text-h1 text-foreground">Create your account</h1>
-      <p className="mb-6 text-body">Create an account to start your workspace.</p>
+      <p className="mb-6 text-body">Create an account, then verify your email to start your workspace.</p>
 
       {signupMutation.isError ? (
         <div className="mb-4 rounded-md border border-danger/30 bg-danger/10 px-3 py-2 text-xs text-danger" role="alert">
@@ -148,7 +149,7 @@ export function SignupPage({ onSuccess, onNavigateToLogin }: SignupPageProps) {
         </p>
 
         <Button type="submit" className="w-full" disabled={signupMutation.isPending}>
-          {signupMutation.isPending ? "Creating account..." : "Create account"}
+          {signupMutation.isPending ? "Sending verification code..." : "Continue with email verification"}
           {!signupMutation.isPending ? <ArrowRight className="h-3.5 w-3.5" /> : null}
         </Button>
       </form>

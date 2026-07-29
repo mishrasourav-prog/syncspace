@@ -1,91 +1,73 @@
-import {
-  BellRing,
-  FileText,
-  FolderKanban,
-  KanbanSquare,
-  MessageSquareText,
-  ShieldCheck,
-  type LucideIcon,
-} from "lucide-react";
+import { BellRing, FileText, FolderKanban, KanbanSquare, type LucideIcon } from "lucide-react";
 import { Reveal } from "./Reveal";
 
-interface Feature {
+interface FeatureRow {
   icon: LucideIcon;
   title: string;
   description: string;
-  colorClass: string;
 }
 
-const FEATURES: Feature[] = [
+const FEATURE_ROWS: FeatureRow[] = [
   {
     icon: FolderKanban,
     title: "Workspaces and projects",
-    description:
-      "Organize teams into workspaces and run focused projects with invitations, roles, archive states, members, and activity.",
-    colorClass: "bg-primary/10 text-primary",
+    description: "Organize members, roles, invitations, projects, and recent activity.",
   },
   {
     icon: KanbanSquare,
     title: "Tasks and issues",
-    description:
-      "Track work through board and list views with statuses, priorities, assignees, due dates, filters, comments, and reordering.",
-    colorClass: "bg-secondary/10 text-secondary",
+    description: "Track ownership, status, priority, due dates, comments, and realtime changes.",
   },
   {
     icon: FileText,
-    title: "Project documents",
-    description:
-      "Create rich project documents with formatting, revisions, preview, duplication, exports, archive, and restore support.",
-    colorClass: "bg-success/10 text-success",
-  },
-  {
-    icon: MessageSquareText,
-    title: "Project discussions",
-    description:
-      "Keep decisions connected to projects through threaded discussions, replies, participants, pinning, locking, and moderation.",
-    colorClass: "bg-warning/10 text-warning",
+    title: "Documents",
+    description: "Keep project knowledge and working notes beside the rest of the work.",
   },
   {
     icon: BellRing,
-    title: "Notifications and activity",
-    description:
-      "Follow meaningful workspace and project changes through unread notifications, activity feeds, and resource-aware navigation.",
-    colorClass: "bg-primary/10 text-primary",
-  },
-  {
-    icon: ShieldCheck,
-    title: "Secure profiles and access",
-    description:
-      "Protect collaboration with role checks, HTTP-only authentication, OTP recovery, session revocation, and privacy-safe member profiles.",
-    colorClass: "bg-secondary/10 text-secondary",
+    title: "Discussions and notifications",
+    description: "Make decisions visible and help members follow relevant project activity.",
   },
 ];
 
 export function Features() {
   return (
-    <section id="features" className="scroll-mt-20 border-t border-border px-4 py-16 sm:px-6 sm:py-20 lg:py-28">
-      <div className="mx-auto max-w-6xl">
-        <Reveal className="mb-10 max-w-2xl sm:mb-14">
-          <span className="text-xs font-medium uppercase tracking-wide text-secondary">What is included</span>
-          <h2 className="mt-3 text-h1 text-foreground">Every feature is connected to real project context.</h2>
-          <p className="mt-4 text-sm leading-relaxed text-muted sm:text-base">
-            Move from team setup to project delivery without splitting tasks, knowledge, decisions, and access across disconnected tools.
-          </p>
+    <section id="product" className="scroll-mt-20 px-4 py-16 sm:px-6 sm:py-20 lg:py-24">
+      <div className="mx-auto grid max-w-6xl gap-10 lg:grid-cols-2 lg:items-center lg:gap-16">
+        <Reveal>
+          <div className="overflow-hidden rounded-lg border border-border bg-surface">
+            <img
+              src="/landing/workspace-overview.png"
+              alt="SyncSpace workspace overview showing projects, members, access information, and activity"
+              className="h-auto w-full"
+              width={1800}
+              height={1033}
+              loading="lazy"
+            />
+          </div>
         </Reveal>
 
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-5">
-          {FEATURES.map(({ icon: Icon, title, description, colorClass }, index) => (
-            <Reveal key={title} delay={index * 55}>
-              <article className="h-full rounded-2xl border border-border bg-surface/50 p-5 transition-colors duration-300 hover:border-muted/40 hover:bg-surface sm:p-6">
-                <div className={`mb-4 flex h-10 w-10 items-center justify-center rounded-lg ${colorClass}`}>
-                  <Icon className="h-5 w-5" />
+        <Reveal delay={80}>
+          <h2 className="text-h1 text-foreground">Everything your team needs to stay aligned.</h2>
+          <p className="mt-4 max-w-md text-sm leading-relaxed text-muted sm:text-base">
+            Work stays easier to follow when tasks, knowledge, conversations, and access all live beside the
+            project they belong to.
+          </p>
+
+          <div className="mt-8 flex flex-col divide-y divide-border border-t border-border">
+            {FEATURE_ROWS.map(({ icon: Icon, title, description }) => (
+              <div key={title} className="flex gap-4 py-5">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
+                  <Icon className="h-4 w-4" />
+                </span>
+                <div>
+                  <h3 className="text-sm font-medium text-foreground">{title}</h3>
+                  <p className="mt-1 text-sm leading-relaxed text-muted">{description}</p>
                 </div>
-                <h3 className="text-base font-medium text-foreground">{title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-muted">{description}</p>
-              </article>
-            </Reveal>
-          ))}
-        </div>
+              </div>
+            ))}
+          </div>
+        </Reveal>
       </div>
     </section>
   );

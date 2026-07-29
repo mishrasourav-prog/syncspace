@@ -38,7 +38,6 @@ export interface CreateWorkspace {
 export interface UpdateWorkspace {
   name?: string;
   description?: string;
-  avatar?: string;
   timezone?: string;
 }
 

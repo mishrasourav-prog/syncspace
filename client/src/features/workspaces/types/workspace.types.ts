@@ -31,8 +31,12 @@ export interface CreateWorkspacePayload {
 export interface UpdateWorkspacePayload {
   name?: string;
   description?: string;
-  avatar?: string;
   timezone?: string;
+}
+
+export interface ReplaceWorkspaceAvatarPayload {
+  workspaceId: string;
+  file: File;
 }
 
 /*

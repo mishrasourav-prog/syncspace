@@ -17,4 +17,7 @@ export const taskQueryKeys = {
 
   assignees: (projectId: string, taskId: string) =>
     [...taskQueryKeys.detail(projectId, taskId), "assignees"] as const,
+
+  assignmentRequests: (projectId: string, taskId: string) =>
+    [...taskQueryKeys.detail(projectId, taskId), "assignment-requests"] as const,
 };

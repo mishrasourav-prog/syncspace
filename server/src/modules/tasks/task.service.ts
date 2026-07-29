@@ -1169,7 +1169,17 @@ export class TaskService {
 
         await task.save();
 
-        
+        await eventBus.publish(
+            DomainEventName.TASK_UPDATED,
+            {
+                workspaceId: workspace._id.toString(),
+                projectId: project._id.toString(),
+                taskId: task._id.toString(),
+                actorId: userId,
+                title: task.title,
+                taskType: task.type,
+            }
+        );
 
         const assignees =
             await this.getTaskAssigneePreview(

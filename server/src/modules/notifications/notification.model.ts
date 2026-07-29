@@ -9,15 +9,44 @@ import type {
 } from "mongoose";
 
 export enum NotificationType {
+    TASK_CREATED =
+        "task_created",
+
     TASK_ASSIGNED =
         "task_assigned",
 
     TASK_STATUS_CHANGED =
         "task_status_changed",
 
-    
+    TASK_ASSIGNMENT_REQUESTED =
+        "task.assignment_requested",
+
+    TASK_ASSIGNMENT_REQUEST_ACCEPTED =
+        "task.assignment_request_accepted",
+
+    DISCUSSION_CREATED =
+        "discussion.created",
+
     DISCUSSION_REPLY =
         "discussion.reply",
+
+    WORKSPACE_INVITATION =
+        "workspace.invitation",
+
+    PROJECT_INVITATION =
+        "project.invitation",
+
+    WORKSPACE_ROLE_CHANGED =
+        "workspace.role_changed",
+
+    PROJECT_ROLE_CHANGED =
+        "project.role_changed",
+
+    WORKSPACE_MEMBER_JOINED =
+        "workspace.member_joined",
+
+    PROJECT_MEMBER_JOINED =
+        "project.member_joined",
 }
 
 export enum NotificationEntityType {
@@ -27,7 +56,17 @@ export enum NotificationEntityType {
     DISCUSSION =
         "discussion",
 
-    
+    WORKSPACE =
+        "workspace",
+
+    PROJECT =
+        "project",
+
+    WORKSPACE_INVITATION =
+        "workspace_invitation",
+
+    PROJECT_INVITATION =
+        "project_invitation",
 }
 
 export interface INotificationDocument

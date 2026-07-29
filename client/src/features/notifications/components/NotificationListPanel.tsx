@@ -25,7 +25,7 @@ interface NotificationListPanelProps {
   totalLoadedCount: number;
   hasSearchQuery: boolean;
   selectedId: string | null;
-  onSelect: (id: string) => void;
+  onSelect: (notification: NotificationItem) => void;
   onClearSearchOrFilter: () => void;
 }
 
@@ -72,7 +72,7 @@ export function NotificationListPanel({
                 <NotificationListItem
                   notification={notification}
                   isSelected={selectedId === notification._id}
-                  onSelect={() => onSelect(notification._id)}
+                  onSelect={() => onSelect(notification)}
                 />
               </li>
             ))}

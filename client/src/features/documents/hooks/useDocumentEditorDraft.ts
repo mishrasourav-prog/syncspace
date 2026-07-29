@@ -15,37 +15,29 @@ export interface UseDocumentEditorDraftResult {
   isTitleDirty: boolean;
   isContentDirty: (liveContent: unknown) => boolean;
   isDirty: (liveContent: unknown) => boolean;
-  /**
-   * Replaces both the accepted server snapshot and the visible title.
-   * Use this only for an explicit reload or when no newer local edits exist.
-   */
   acceptServerDocument: (document: ProjectDocument, content: unknown) => void;
-  /**
-   * Advances only the accepted server snapshot after a save. The visible
-   * title remains untouched so edits made while the request was in flight
-   * stay dirty instead of being silently discarded.
-   */
   acceptSavedSnapshot: (document: ProjectDocument, content: unknown) => void;
 }
 
 /**
- * Keyed by the caller to `document._id` (i.e. mounted fresh per document),
- * this hook tracks only the last accepted title/content pair — never a live
- * mirror of the query. Tiptap is the source of truth for live content; this
- * hook answers whether the current draft has diverged from the latest server
- * revision that the editor has safely accepted.
+ * The accepted snapshot always represents server state. An optional restored
+ * title may be shown as the current local draft, while dirty checks still
+ * compare it with the authoritative server title/content.
  */
 export function useDocumentEditorDraft(
   initialDocument: ProjectDocument,
-  initialContent: unknown
+  serverContent: unknown,
+  restoredTitle?: string
 ): UseDocumentEditorDraftResult {
   const [snapshot, setSnapshot] = useState<DocumentSnapshot>(() => ({
     revision: initialDocument.revision,
     title: initialDocument.title,
-    content: initialContent,
+    content: serverContent,
   }));
 
-  const [draftTitle, setDraftTitle] = useState<string>(() => initialDocument.title);
+  const [draftTitle, setDraftTitle] = useState<string>(
+    () => restoredTitle ?? initialDocument.title
+  );
 
   const isTitleDirty = draftTitle.trim() !== snapshot.title;
 

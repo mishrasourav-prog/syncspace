@@ -405,6 +405,23 @@ export interface WorkspaceAccessRevokedSocketPayload {
         | "left";
 }
 
+export interface WorkspaceMemberChangedSocketPayload {
+    workspaceId: string;
+    memberId: string;
+    affectedUserId: string;
+    actorId: string;
+    role?: string;
+}
+
+export interface ProjectMemberChangedSocketPayload {
+    workspaceId: string;
+    projectId: string;
+    memberId: string;
+    affectedUserId: string;
+    actorId: string;
+    role?: string;
+}
+
 export interface AccountSessionRevokedSocketPayload {
     reason: UserSessionRevocationReason;
 }
@@ -434,6 +451,15 @@ export interface ServerToClientEvents {
         taskType: TaskType;
     }) => void;
 
+    "task:updated": (payload: {
+        workspaceId: string;
+        projectId: string;
+        taskId: string;
+        actorId: string;
+        title: string;
+        taskType: TaskType;
+    }) => void;
+
     "task:status-changed": (payload: {
         workspaceId: string;
         projectId: string;
@@ -451,6 +477,48 @@ export interface ServerToClientEvents {
         taskId: string;
         actorId: string;
         assigneeId: string;
+        title: string;
+        taskType: TaskType;
+    }) => void;
+
+    "task:unassigned": (payload: {
+        workspaceId: string;
+        projectId: string;
+        taskId: string;
+        actorId: string;
+        assigneeId: string;
+        title: string;
+        taskType: TaskType;
+    }) => void;
+
+    "task:comment-changed": (payload: {
+        workspaceId: string;
+        projectId: string;
+        taskId: string;
+        commentId: string;
+        actorId: string;
+        change: "created" | "updated" | "deleted";
+    }) => void;
+
+    "task:assignment-requested": (payload: {
+        workspaceId: string;
+        projectId: string;
+        taskId: string;
+        requestId: string;
+        actorId: string;
+        requesterId: string;
+        title: string;
+        taskType: TaskType;
+    }) => void;
+
+    "task:assignment-request-accepted": (payload: {
+        workspaceId: string;
+        projectId: string;
+        taskId: string;
+        requestId: string;
+        actorId: string;
+        requesterId: string;
+        acceptedById: string;
         title: string;
         taskType: TaskType;
     }) => void;
@@ -494,6 +562,22 @@ export interface ServerToClientEvents {
 
     "discussion:reply-changed": (
         payload: DiscussionReplySocketPayload
+    ) => void;
+
+    "workspace:member-added": (
+        payload: WorkspaceMemberChangedSocketPayload
+    ) => void;
+
+    "workspace:member-role-changed": (
+        payload: WorkspaceMemberChangedSocketPayload
+    ) => void;
+
+    "project:member-added": (
+        payload: ProjectMemberChangedSocketPayload
+    ) => void;
+
+    "project:member-role-changed": (
+        payload: ProjectMemberChangedSocketPayload
     ) => void;
 
     "access:project-revoked": (

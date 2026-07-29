@@ -8,5 +8,7 @@ export function useMyInvitationsQuery() {
   return useQuery<WorkspaceInvitation[], ApiErrorShape>({
     queryKey: workspaceInvitationQueryKeys.list(),
     queryFn: getMyInvitationsRequest,
+    refetchOnWindowFocus: true,
+    refetchInterval: 30_000,
   });
 }

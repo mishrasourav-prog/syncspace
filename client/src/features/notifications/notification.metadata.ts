@@ -1,4 +1,5 @@
 import type {
+  CollaborationNotificationMetadata,
   DiscussionReplyMetadata,
   NotificationItem,
   TaskAssignedMetadata,
@@ -24,7 +25,6 @@ function readTaskStatus(source: Record<string, unknown>, key: string): TaskStatu
     : undefined;
 }
 
-/** Narrows unknown metadata into the shape expected for a task-assigned notification, never throwing. */
 export function getTaskAssignedMetadata(notification: NotificationItem): TaskAssignedMetadata {
   if (!isRecord(notification.metadata)) return {};
 
@@ -35,7 +35,6 @@ export function getTaskAssignedMetadata(notification: NotificationItem): TaskAss
   };
 }
 
-/** Narrows unknown metadata into the shape expected for a task-status-changed notification, never throwing. */
 export function getTaskStatusChangedMetadata(notification: NotificationItem): TaskStatusChangedMetadata {
   if (!isRecord(notification.metadata)) return {};
 
@@ -46,13 +45,27 @@ export function getTaskStatusChangedMetadata(notification: NotificationItem): Ta
   };
 }
 
-/** Narrows unknown metadata into the shape expected for a discussion-reply notification, never throwing. */
 export function getDiscussionReplyMetadata(notification: NotificationItem): DiscussionReplyMetadata {
   if (!isRecord(notification.metadata)) return {};
 
   return {
     discussionTitle: readString(notification.metadata, "discussionTitle"),
     replyId: readString(notification.metadata, "replyId"),
+  };
+}
+
+export function getCollaborationNotificationMetadata(
+  notification: NotificationItem
+): CollaborationNotificationMetadata {
+  if (!isRecord(notification.metadata)) return {};
+
+  return {
+    invitationId: readString(notification.metadata, "invitationId"),
+    workspaceName: readString(notification.metadata, "workspaceName"),
+    projectName: readString(notification.metadata, "projectName"),
+    role: readString(notification.metadata, "role"),
+    memberId: readString(notification.metadata, "memberId"),
+    joinedUserId: readString(notification.metadata, "joinedUserId"),
   };
 }
 
@@ -63,28 +76,37 @@ const TASK_STATUS_LABELS: Record<TaskStatus, string> = {
   DONE: "Done",
 };
 
-/** Converts a raw task-status enum value into a human-readable label. */
 export function formatTaskStatus(status: TaskStatus | undefined): string | undefined {
   return status ? TASK_STATUS_LABELS[status] : undefined;
 }
 
-/** Returns a safe, non-crashing subtitle for the notification's supplemental metadata row, or undefined when unavailable. */
 export function getNotificationSupplementalText(notification: NotificationItem): string | undefined {
   switch (notification.type) {
-    case "task_assigned": {
-      const { taskTitle } = getTaskAssignedMetadata(notification);
-      return taskTitle;
-    }
+    case "task_assigned":
+    case "task_created":
+    case "task.assignment_requested":
+    case "task.assignment_request_accepted":
+      return getTaskAssignedMetadata(notification).taskTitle;
     case "task_status_changed": {
       const { previousStatus, currentStatus } = getTaskStatusChangedMetadata(notification);
       const from = formatTaskStatus(previousStatus);
       const to = formatTaskStatus(currentStatus);
-      if (from && to) return `${from} → ${to}`;
-      return undefined;
+      return from && to ? `${from} → ${to}` : undefined;
     }
-    case "discussion.reply": {
-      const { discussionTitle } = getDiscussionReplyMetadata(notification);
-      return discussionTitle;
+    case "discussion.created":
+    case "discussion.reply":
+      return getDiscussionReplyMetadata(notification).discussionTitle;
+    case "workspace.invitation":
+    case "workspace.role_changed":
+    case "workspace.member_joined": {
+      const { workspaceName, role } = getCollaborationNotificationMetadata(notification);
+      return role ? `${workspaceName ?? "Workspace"} · ${role}` : workspaceName;
+    }
+    case "project.invitation":
+    case "project.role_changed":
+    case "project.member_joined": {
+      const { projectName, role } = getCollaborationNotificationMetadata(notification);
+      return role ? `${projectName ?? "Project"} · ${role}` : projectName;
     }
     default:
       return undefined;

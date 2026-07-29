@@ -3,6 +3,8 @@ import type { FilterQuery } from "mongoose";
 
 import ApiError from "../../utils/ApiError";
 
+import { DomainEventName, eventBus } from "../../events";
+
 import {
     decodePaginationCursor,
     encodePaginationCursor,
@@ -238,12 +240,16 @@ export class TaskCommentService {
                     data.body,
             });
 
-        /*
-        Future event boundary:
-
-        TaskCommentCreatedEvent should be
-        published after persistence.
-        */
+        await eventBus.publish(
+            DomainEventName.TASK_COMMENT_CREATED,
+            {
+                workspaceId: workspace._id.toString(),
+                projectId: project._id.toString(),
+                taskId: task._id.toString(),
+                commentId: comment._id.toString(),
+                actorId: userId,
+            }
+        );
 
         return this.populateAndMap(
             comment
@@ -570,12 +576,16 @@ export class TaskCommentService {
 
         await comment.save();
 
-        /*
-        Future event boundary:
-
-        TaskCommentUpdatedEvent should be
-        published after persistence.
-        */
+        await eventBus.publish(
+            DomainEventName.TASK_COMMENT_UPDATED,
+            {
+                workspaceId: workspace._id.toString(),
+                projectId: project._id.toString(),
+                taskId: task._id.toString(),
+                commentId: comment._id.toString(),
+                actorId: userId,
+            }
+        );
 
         return this.populateAndMap(
             comment
@@ -744,12 +754,16 @@ export class TaskCommentService {
 
         await comment.save();
 
-        /*
-        Future event boundary:
-
-        TaskCommentDeletedEvent should be
-        published after persistence.
-        */
+        await eventBus.publish(
+            DomainEventName.TASK_COMMENT_DELETED,
+            {
+                workspaceId: workspace._id.toString(),
+                projectId: project._id.toString(),
+                taskId: task._id.toString(),
+                commentId: comment._id.toString(),
+                actorId: userId,
+            }
+        );
 
         return this.populateAndMap(
             comment

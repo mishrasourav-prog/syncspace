@@ -1,51 +1,6 @@
-// import { DomainEventName } from "../interfaces/domainEvent.interface";
+export { default as eventBus } from "./eventBus";
 
-// export {
-//     default as eventBus,
-// } from "./eventBus";
-
-// export {
-//     DomainEventName,
-// } from "../interfaces/domainEvent.interface";
-
-// export type {
-//     ActivityCreatedEventPayload,
-//     AnyDomainEvent,
-//     DomainEvent,
-//     DomainEventHandler,
-//     DomainEventPayloadMap,
-//     NotificationCreatedEventPayload,
-//     TaskAssignedEventPayload,
-//     TaskCreatedEventPayload,
-//     TaskStatusChangedEventPayload,
-// } from "../interfaces/domainEvent.interface";
-
-// export type {
-//     DocumentChangedEventPayload,
-// } from "../interfaces/domainEvent.interface";
-
-// export type {
-//     DiscussionChangedEventPayload,
-//     DiscussionReplyChangedEventPayload,
-// } from "../interfaces/domainEvent.interface";
-
-// export type {
-//     TasksReorderedEventPayload,
-// } from "../interfaces/domainEvent.interface";
-
-// export type {
-//     MembershipEndReason,
-//     ProjectMembershipEndedEventPayload,
-//     WorkspaceMembershipEndedEventPayload,
-// } from "../interfaces/domainEvent.interface";
-
-export {
-  default as eventBus,
-} from "./eventBus";
-
-export {
-  DomainEventName,
-} from "../interfaces/domainEvent.interface";
+export { DomainEventName } from "../interfaces/domainEvent.interface";
 
 export type {
   ActivityCreatedEventPayload,
@@ -58,12 +13,21 @@ export type {
   DomainEventPayloadMap,
   MembershipEndReason,
   NotificationCreatedEventPayload,
+  ProjectMemberAddedEventPayload,
+  ProjectMemberRoleChangedEventPayload,
   ProjectMembershipEndedEventPayload,
   TaskAssignedEventPayload,
+  TaskAssignmentRequestAcceptedEventPayload,
+  TaskAssignmentRequestEventPayload,
+  TaskCommentChangedEventPayload,
   TaskCreatedEventPayload,
   TasksReorderedEventPayload,
   TaskStatusChangedEventPayload,
+  TaskUnassignedEventPayload,
+  TaskUpdatedEventPayload,
   UserSessionRevocationReason,
   UserSessionRevokedEventPayload,
+  WorkspaceMemberAddedEventPayload,
+  WorkspaceMemberRoleChangedEventPayload,
   WorkspaceMembershipEndedEventPayload,
 } from "../interfaces/domainEvent.interface";

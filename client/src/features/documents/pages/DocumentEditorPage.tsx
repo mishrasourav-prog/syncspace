@@ -52,7 +52,17 @@ import {
   countWordsAndCharacters,
   normalizeDocumentContent,
 } from "../document.content";
-import { downloadDocumentAsHtml, downloadDocumentAsJson, downloadLocalDraft } from "../document.exports";
+import {
+  downloadDocumentAsHtml,
+  downloadDocumentAsJson,
+  downloadDocumentAsPdf,
+  downloadLocalDraft,
+} from "../document.exports";
+import {
+  clearDocumentDraft,
+  readDocumentDraft,
+  writeDocumentDraft,
+} from "../document.draftStorage";
 import type { ProjectDocument, UpdateDocumentPayload } from "../types/document.types";
 
 import { DocumentEditorHeader, type DocumentSaveState } from "../components/editor/DocumentEditorHeader";
@@ -120,12 +130,27 @@ function DocumentEditorWorkspace({
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
+  const canEditBase = canEditDocumentContent(document, project, workspace, role);
+
   const normalized = useMemo(
     () => normalizeDocumentContent(document.content),
     [document.content]
   );
 
-  const draft = useDocumentEditorDraft(document, normalized.editorContent);
+  const recoveredDraft = useMemo(
+    () =>
+      canEditBase
+        ? readDocumentDraft(currentUserId, document._id, document.revision)
+        : null,
+    [canEditBase, currentUserId, document._id, document.revision]
+  );
+
+  const initialEditorContent = recoveredDraft?.content ?? normalized.editorContent;
+  const draft = useDocumentEditorDraft(
+    document,
+    normalized.editorContent,
+    recoveredDraft?.title
+  );
 
   const [mode, setMode] = useState<"editing" | "preview">("editing");
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -139,6 +164,9 @@ function DocumentEditorWorkspace({
   const [hasConfirmedLegacyConversion, setHasConfirmedLegacyConversion] = useState(false);
   const [isInviteOpen, setIsInviteOpen] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [hasRecoveredLocalDraft, setHasRecoveredLocalDraft] = useState(
+    () => Boolean(recoveredDraft)
+  );
   const [, setRenderTick] = useState(0);
 
   const updateMutation = useUpdateDocumentMutation(projectId);
@@ -146,7 +174,6 @@ function DocumentEditorWorkspace({
   const restoreMutation = useRestoreDocumentMutation(projectId);
   const createMutation = useCreateDocumentMutation(projectId);
 
-  const canEditBase = canEditDocumentContent(document, project, workspace, role);
   const isLegacyBlocked = normalized.isUnsupportedLegacyContent && !hasConfirmedLegacyConversion;
   const canWrite = canEditBase && !isLegacyBlocked && !hasRemoteUpdate;
   const editorEditable = canWrite && !updateMutation.isPending && mode === "editing";
@@ -169,7 +196,7 @@ function DocumentEditorWorkspace({
         TableHeader,
         TableCell,
       ],
-      content: normalized.editorContent,
+      content: initialEditorContent,
       editable: editorEditable,
       onUpdate: () => setRenderTick((tick) => tick + 1),
       onSelectionUpdate: () => setRenderTick((tick) => tick + 1),
@@ -196,6 +223,32 @@ function DocumentEditorWorkspace({
     draftTitleRef.current = draft.draftTitle;
   }, [draft.draftTitle, hasRemoteUpdate, isDirty]);
 
+  useEffect(() => {
+    if (!currentUserId || !editor) return;
+
+    if (!isDirty) {
+      clearDocumentDraft(currentUserId, document._id);
+      return;
+    }
+
+    writeDocumentDraft({
+      documentId: document._id,
+      userId: currentUserId,
+      baseRevision: draft.snapshot.revision,
+      title: draft.draftTitle,
+      content: editor.getJSON(),
+      updatedAt: new Date().toISOString(),
+    });
+  }, [
+    currentUserId,
+    document._id,
+    draft.draftTitle,
+    draft.snapshot.revision,
+    editor,
+    isDirty,
+    liveContent,
+  ]);
+
   const unsavedGuard = useUnsavedChangesGuard(isDirty);
 
   const canArchive = canArchiveDocument(document, project, workspace, role, currentUserId);
@@ -221,8 +274,10 @@ function DocumentEditorWorkspace({
       setIsConflictOpen(false);
       setSaveError(null);
       setReloadError(null);
+      setHasRecoveredLocalDraft(false);
+      clearDocumentDraft(currentUserId, latest._id);
     },
-    [draft, editor, projectId, queryClient]
+    [currentUserId, draft, editor, projectId, queryClient]
   );
 
   function persistSave(onSaved?: () => void) {
@@ -277,6 +332,8 @@ function DocumentEditorWorkspace({
             // title/content returned by the server and complete navigation.
             draft.acceptServerDocument(updated, acceptedContent);
             editor.commands.setContent(acceptedContent, false);
+            clearDocumentDraft(currentUserId, document._id);
+            setHasRecoveredLocalDraft(false);
             toast.success("Document saved.");
           }
 
@@ -385,6 +442,21 @@ function DocumentEditorWorkspace({
     downloadDocumentAsHtml(draft.draftTitle, editor.getHTML());
   }
 
+  function handleDownloadPdf() {
+    if (!editor || !canDownloadHtml) {
+      toast.error("PDF export is unavailable until this legacy document is converted.");
+      return;
+    }
+
+    const opened = downloadDocumentAsPdf(draft.draftTitle, editor.getHTML());
+    if (!opened) {
+      toast.error("The PDF window was blocked. Allow pop-ups for SyncSpace and try again.");
+      return;
+    }
+
+    toast.info("Use the browser print dialog and choose Save as PDF.");
+  }
+
   function handleDownloadJson() {
     const content =
       normalized.isUnsupportedLegacyContent && !hasConfirmedLegacyConversion ? document.content : liveContent;
@@ -416,6 +488,22 @@ function DocumentEditorWorkspace({
     } finally {
       setIsRefreshing(false);
     }
+  }
+
+  function handleDiscardRecoveredDraft() {
+    clearDocumentDraft(currentUserId, document._id);
+    draft.acceptServerDocument(document, normalized.editorContent);
+    editor?.commands.setContent(normalized.editorContent, false);
+    setHasRecoveredLocalDraft(false);
+    setHasConfirmedLegacyConversion(false);
+    setSaveError(null);
+    toast.info("Recovered browser draft discarded.");
+  }
+
+  function handleDiscardAndLeave() {
+    clearDocumentDraft(currentUserId, document._id);
+    setHasRecoveredLocalDraft(false);
+    unsavedGuard.confirmDiscardAndLeave();
   }
 
   function handleBackToDocuments() {
@@ -538,11 +626,20 @@ function DocumentEditorWorkspace({
 
   return (
     <div
-      className={`space-y-5 ${
-        isFullscreen ? "fixed inset-0 z-[70] overflow-y-auto bg-background p-4 sm:p-6" : ""
+      className={`min-w-0 space-y-5 overflow-x-hidden ${
+        isFullscreen ? "fixed inset-0 z-[70] overflow-y-auto bg-background p-2 sm:p-6" : ""
       }`}
     >
       {readOnlyBanner && <DocumentEditorReadOnlyBanner message={readOnlyBanner} />}
+
+      {hasRecoveredLocalDraft && (
+        <div className="flex flex-col gap-2 rounded-lg border border-primary/30 bg-primary/10 px-4 py-3 text-sm text-foreground sm:flex-row sm:items-center sm:justify-between">
+          <span>Recovered unsaved changes from this browser. Save them to persist across devices.</span>
+          <Button type="button" size="sm" variant="secondary" onClick={handleDiscardRecoveredDraft}>
+            Discard recovered draft
+          </Button>
+        </div>
+      )}
 
       {isLegacyBlocked && (
         <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-warning/30 bg-warning/10 px-4 py-2.5 text-sm text-warning">
@@ -594,10 +691,12 @@ function DocumentEditorWorkspace({
         canDuplicate={canDuplicate && !updateMutation.isPending}
         isDuplicating={createMutation.isPending}
         canDownloadHtml={canDownloadHtml}
+        canDownloadPdf={canDownloadHtml}
         onArchive={handleArchive}
         onRestore={handleRestore}
         onDuplicate={handleDuplicate}
         onDownloadHtml={handleDownloadHtml}
+        onDownloadPdf={handleDownloadPdf}
         onDownloadJson={handleDownloadJson}
         onCopyId={() => void handleCopyId()}
         onBackToDocuments={handleBackToDocuments}
@@ -605,8 +704,8 @@ function DocumentEditorWorkspace({
         onToggleFullscreen={() => setIsFullscreen((value) => !value)}
       />
 
-      <div className="grid grid-cols-1 gap-5 xl:grid-cols-12">
-        <div className={isFocusMode ? "xl:col-span-12" : "xl:col-span-8"}>
+      <div className="grid min-w-0 grid-cols-1 gap-5 xl:grid-cols-12">
+        <div className={`min-w-0 ${isFocusMode ? "xl:col-span-12" : "xl:col-span-8"}`}>
           {mode === "editing" && editor && (
             <DocumentEditorToolbar
               editor={editor}
@@ -635,8 +734,10 @@ function DocumentEditorWorkspace({
               canDuplicate={canDuplicate && !updateMutation.isPending}
               isDuplicating={createMutation.isPending}
               canDownloadHtml={canDownloadHtml}
+              canDownloadPdf={canDownloadHtml}
               onDuplicate={handleDuplicate}
               onDownloadHtml={handleDownloadHtml}
+              onDownloadPdf={handleDownloadPdf}
               onDownloadJson={handleDownloadJson}
               onCopyId={() => void handleCopyId()}
               onRefresh={() => void handleRefresh()}
@@ -676,7 +777,7 @@ function DocumentEditorWorkspace({
         canSave={canPersistDraft}
         errorMessage={saveError}
         onStay={unsavedGuard.cancelNavigation}
-        onDiscardAndLeave={unsavedGuard.confirmDiscardAndLeave}
+        onDiscardAndLeave={handleDiscardAndLeave}
         onSaveAndLeave={() => persistSave(() => unsavedGuard.navigateToPendingAfterSave())}
       />
 

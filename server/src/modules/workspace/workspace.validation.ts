@@ -62,12 +62,6 @@ export const updateWorkspaceSchema = z
             )
             .optional(),
 
-        avatar: z
-            .string()
-            .url(
-                "Invalid avatar URL."
-            )
-            .optional(),
 
         timezone: z
             .string()

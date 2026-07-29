@@ -75,7 +75,7 @@ export function DiscussionReplyItem({ projectId, discussionId, reply, canEdit, c
 
   if (reply.isDeleted) {
     return (
-      <div className="flex gap-3 py-3 opacity-60">
+      <div id={`reply-${reply._id}`} className="flex scroll-mt-24 gap-3 py-3 opacity-60">
         <Avatar name="Deleted" size="sm" />
         <div className="min-w-0 flex-1">
           <p className="text-sm italic text-muted">This reply was deleted.</p>
@@ -91,7 +91,7 @@ export function DiscussionReplyItem({ projectId, discussionId, reply, canEdit, c
     Math.abs(new Date(reply.updatedAt).getTime() - new Date(reply.createdAt).getTime()) > 1000;
 
   return (
-    <div className="flex gap-3 py-3">
+    <div id={`reply-${reply._id}`} className="flex scroll-mt-24 gap-3 py-3">
       <Avatar src={reply.author?.avatar} name={reply.author?.name ?? "Former member"} size="sm" />
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center justify-between gap-2">

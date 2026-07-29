@@ -1,121 +1,89 @@
-import { useForm, Controller } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Mail } from "lucide-react";
-import { AuthLayout } from "@/layouts/AuthLayout";
-import { OtpInput } from "../components/OtpInput";
-import { Button } from "@/components/ui/button";
-import { useResendTimer } from "../hooks/useResendTimer";
-import { useVerifyOtpMutation, useResendOtpMutation } from "../hooks/useAuthMutations";
-import { otpSchema, type OtpFormValues } from "../schemas/auth.schemas";
-import { type VerifyOtpResponse } from "../types/auth.types";
+import {
+  OtpVerificationForm,
+} from "../components/OtpVerificationForm";
+
+import {
+  useResendOtpMutation,
+  useVerifyOtpMutation,
+} from "../hooks/useAuthMutations";
+
+import type {
+  VerifyOtpResponse,
+} from "../types/auth.types";
 
 interface OtpVerificationPageProps {
   email: string;
-  onSuccess?: (data: VerifyOtpResponse) => void;
+  onSuccess: (
+    data: VerifyOtpResponse
+  ) => void;
+  onChangeEmail?: () => void;
 }
-export function OtpVerificationPage({ email, onSuccess }: OtpVerificationPageProps) {
-  const verifyOtpMutation = useVerifyOtpMutation();
-  const resendOtpMutation = useResendOtpMutation();
-  const { canResend, formatted, reset:resetTimer } = useResendTimer(45);
 
-  const {
-    control,
-    handleSubmit,
-    // watch,
-    reset,
-    clearErrors,
-    formState: { errors },
-    
-  } = useForm<OtpFormValues>({
-    resolver: zodResolver(otpSchema),
-    defaultValues: { otp: "" },
-  });
+export function OtpVerificationPage({
+  email,
+  onSuccess,
+  onChangeEmail,
+}: OtpVerificationPageProps) {
+  const verifyOtpMutation =
+    useVerifyOtpMutation();
 
-  // const otp = watch("otp");
-
-  const onSubmit = (values: OtpFormValues) => {
-    verifyOtpMutation.mutate(
-  { email, otp: values.otp },
-  {
-    onSuccess: (data) => {
-      onSuccess?.(data);
-    },
-  }
-);
-  };
-
-  const handleResend = () => {
-    if (!canResend) return;
-    
-    resendOtpMutation.mutate(email, { onSuccess: () =>{reset({otp:""}); resetTimer();} });
-
-  };
-
-  
+  const resendOtpMutation =
+    useResendOtpMutation();
 
   return (
-    <AuthLayout>
-      <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
-        <Mail className="w-5 h-5 text-primary" />
-      </div>
-      <h1 className="text-2xl font-semibold">
-    Verify your email
-</h1>
+    <OtpVerificationForm
+      title="Verify reset code"
+      description="Enter the six-digit code we sent to continue resetting your password."
+      email={email}
+      verifyLabel="Verify code"
+      errorMessage={
+        verifyOtpMutation.error
+          ?.message ??
+        resendOtpMutation.error
+          ?.message
+      }
+      isVerifying={
+        verifyOtpMutation.isPending
+      }
+      isResending={
+        resendOtpMutation.isPending
+      }
+      onCodeChange={() => {
+        verifyOtpMutation.reset();
+        resendOtpMutation.reset();
+      }}
+      onVerify={
+        async (
+          otp
+        ) => {
+          resendOtpMutation.reset();
+          const result =
+            await verifyOtpMutation.mutateAsync({
+              email,
+              otp,
+            });
 
-<p className="text-sm text-muted-foreground">
-    Enter the six-digit verification code sent to
-    your email address.
-</p>
+          onSuccess(
+            result
+          );
+        }
+      }
+      onResend={
+        async () => {
+          verifyOtpMutation.reset();
 
-      {verifyOtpMutation.isError && (
-        <div className="mb-4 rounded-md border border-danger/30 bg-danger/10 px-3 py-2 text-xs text-danger">
-          {verifyOtpMutation.error?.message ?? "Invalid code. Please try again."}
-        </div>
-      )}
+          await resendOtpMutation.mutateAsync(
+            email
+          );
 
-      <form onSubmit={handleSubmit(onSubmit)} noValidate>
-        <div className="mb-6">
-          <Controller
-            name="otp"
-            control={control}
-            render={({ field }) => (
-              <OtpInput value={field.value} onChange={(value) => {clearErrors("otp"); field.onChange(value);}} error={errors.otp?.message}/>
-            )}
-          />
-        </div>
-
-        <Button
-    type="submit"
-    disabled={
-        verifyOtpMutation
-            .isPending
-    }
->
-    {
-        verifyOtpMutation
-            .isPending
-            ? "Verifying..."
-            : "Verify code"
-    }
-</Button>
-      </form>
-
-      <p className="text-center text-caption mt-6">
-        Didn&apos;t get a code?{" "}
-        <button
-          type="button"
-          onClick={handleResend}
-          
-          disabled={!canResend || resendOtpMutation.isPending}
-          className="text-primary hover:text-primary/80 font-medium transition-colors duration-150 disabled:text-muted disabled:cursor-not-allowed"
-        >
-          {resendOtpMutation.isPending
-  ? "Sending..."
-  : canResend
-  ? "Resend code"
-  : `Resend in ${formatted}`}
-        </button>
-      </p>
-    </AuthLayout>
+          return 60;
+        }
+      }
+      onChangeEmail={
+        onChangeEmail
+      }
+      changeEmailLabel="Use another email"
+      initialCooldownSeconds={60}
+    />
   );
 }

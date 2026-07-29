@@ -15,7 +15,8 @@ export interface AuthSession {
   user: AuthUser;
 }
 
-export type LoginPayload = LoginFormValues;
+export type LoginPayload =
+  LoginFormValues;
 
 export interface RegisterPayload {
   name: string;
@@ -24,29 +25,35 @@ export interface RegisterPayload {
   password: string;
 }
 
-export type SignupPayload = RegisterPayload;
+export type SignupPayload =
+  RegisterPayload;
 
+export interface PendingRegistrationResponse {
+  email: string;
+  expiresInSeconds: number;
+  resendAvailableInSeconds: number;
+}
 
-export type ForgotPasswordPayload = ForgotPasswordFormValues;
+export interface VerifyEmailResponse {
+  user: AuthUser;
+}
+
+export type ForgotPasswordPayload =
+  ForgotPasswordFormValues;
 
 export interface VerifyOtpPayload {
   email: string;
   otp: string;
 }
 
-export interface forgotPasswordResponse {
-  email: string;
-}
-
 export interface VerifyOtpResponse {
-    email: string;
-    resetToken: string;
+  email: string;
+  resetToken: string;
 }
 
 export interface ResetPasswordPayload {
-    email: string;
-    resetToken: string;
-    newPassword: string;
-    confirmPassword: string;
+  email: string;
+  resetToken: string;
+  newPassword: string;
+  confirmPassword: string;
 }
-

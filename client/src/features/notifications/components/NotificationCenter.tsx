@@ -10,6 +10,7 @@ import {
   useMarkAllNotificationsAsReadMutation,
   useMarkNotificationAsReadMutation,
 } from "../hooks/useNotificationMutations";
+import { getNotificationDestination } from "../notification.navigation";
 
 export function NotificationCenter() {
   const navigate = useNavigate();
@@ -116,7 +117,13 @@ export function NotificationCenter() {
                   key={notification._id}
                   type="button"
                   onClick={() => {
-                    if (!notification.isRead) markOneReadMutation.mutate(notification._id);
+                    if (!notification.isRead) {
+                      markOneReadMutation.mutate(notification._id);
+                    }
+
+                    const destination = getNotificationDestination(notification);
+                    setOpen(false);
+                    navigate(destination?.path ?? "/notifications");
                   }}
                   className={cn(
                     "flex w-full gap-3 border-b border-border/60 px-4 py-3 text-left transition-colors last:border-b-0 hover:bg-border/20",

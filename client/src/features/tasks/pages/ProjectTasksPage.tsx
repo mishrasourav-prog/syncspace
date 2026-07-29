@@ -131,14 +131,20 @@ export function ProjectTasksPage() {
     }
 
     socket.on("task:created", handleTaskChanged);
+    socket.on("task:updated", handleTaskChanged);
     socket.on("task:status-changed", handleTaskChanged);
     socket.on("task:assigned", handleTaskChanged);
+    socket.on("task:unassigned", handleTaskChanged);
+    socket.on("task:assignment-request-accepted", handleTaskChanged);
     socket.on("tasks:reordered", handleTaskChanged);
 
     return () => {
       socket.off("task:created", handleTaskChanged);
+      socket.off("task:updated", handleTaskChanged);
       socket.off("task:status-changed", handleTaskChanged);
       socket.off("task:assigned", handleTaskChanged);
+      socket.off("task:unassigned", handleTaskChanged);
+      socket.off("task:assignment-request-accepted", handleTaskChanged);
       socket.off("tasks:reordered", handleTaskChanged);
       socket.emit("project:leave", projectId, () => undefined);
     };

@@ -168,7 +168,7 @@ function ProjectDocumentsSkeleton() {
         }
       </div>
 
-      <div className="grid grid-cols-1 gap-5 xl:grid-cols-12">
+      <div className="grid min-w-0 grid-cols-1 gap-5 xl:grid-cols-12">
         <div className="space-y-2 xl:col-span-9">
           {
             Array.from({
@@ -1173,7 +1173,7 @@ export function ProjectDocumentsPage() {
             : "No documents yet.";
 
   return (
-    <main className="space-y-5">
+    <main className="min-w-0 space-y-5 overflow-x-hidden">
       <ProjectReadOnlyBanner
         project={
           project
@@ -1186,13 +1186,13 @@ export function ProjectDocumentsPage() {
         }
       />
 
-      <header className="flex flex-wrap items-start justify-between gap-3">
-        <div className="flex items-start gap-3">
+      <header className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div className="flex min-w-0 items-start gap-3">
           <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/15 text-primary">
             <FileText className="h-5 w-5" />
           </span>
 
-          <div>
+          <div className="min-w-0">
             <h1 className="text-h1 text-foreground">
               Documents
             </h1>
@@ -1213,6 +1213,7 @@ export function ProjectDocumentsPage() {
           disabled={
             !canCreate
           }
+          className="w-full sm:w-auto"
           title={
             !canCreate
               ? readOnlyReason ??
@@ -1259,7 +1260,7 @@ export function ProjectDocumentsPage() {
         }
       />
 
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="flex min-w-0 flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <DocumentFilterToolbar
           search={
             filters.q
@@ -1281,14 +1282,16 @@ export function ProjectDocumentsPage() {
           }
         />
 
-        <DocumentViewSwitcher
+        <div className="self-start lg:self-auto">
+          <DocumentViewSwitcher
           view={
             filters.view
           }
           onChange={
             setView
           }
-        />
+          />
+        </div>
       </div>
 
       <div className="grid grid-cols-1 gap-5 xl:grid-cols-12">
@@ -1551,7 +1554,7 @@ export function ProjectDocumentsPage() {
           }
         </section>
 
-        <aside className="space-y-4 xl:sticky xl:top-[5.5rem] xl:col-span-3 xl:self-start">
+        <aside className="min-w-0 space-y-4 xl:sticky xl:top-[5.5rem] xl:col-span-3 xl:self-start">
           <DocumentFiltersRail
             filters={
               filters

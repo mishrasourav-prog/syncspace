@@ -1,10 +1,12 @@
-import type { ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 import { Navigate, Route, Routes, useLocation, useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 import { ForgotPasswordPage } from "@/features/auth/pages/ForgotPasswordPage";
 import { LoginPage } from "@/features/auth/pages/LoginPage";
 import { OtpVerificationPage } from "@/features/auth/pages/OtpVerificationPage";
 import { LandingPage as LandingPageComponent } from "@/features/landing/pages/LandingPage";
 import { SignupPage } from "@/features/auth/pages/SignupPage";
+import { VerifyEmailPage } from "@/features/auth/pages/VerifyEmailPage";
 import { ResetPasswordPage } from "@/features/auth/pages/ResetPasswordPage";
 import { AppShell } from "@/layouts/AppShell";
 import { WorkspaceDashboardPage } from "@/features/workspaces/pages/WorkspaceDashboardPage";
@@ -18,6 +20,11 @@ import { DocumentEditorPage } from "@/features/documents/pages/DocumentEditorPag
 import { NotificationsPage } from "@/features/notifications/pages/NotificationsPage";
 import { ProfilePage } from "@/features/profile/pages/ProfilePage";
 import { MemberProfilePage } from "@/features/profile/pages/MemberProfilePage";
+import {
+  clearPendingRegistrationEmail,
+  readPendingRegistrationEmail,
+  savePendingRegistrationEmail,
+} from "@/features/auth/session/pendingRegistration";
 import { useAuthStore } from "./store";
 
 function useIsAuthenticated() {
@@ -58,8 +65,52 @@ function SignupRoute() {
 
   return (
     <SignupPage
-      onSuccess={() => navigate("/login")}
+      onSuccess={(result) => {
+        savePendingRegistrationEmail(result.email);
+
+        navigate("/verify-email", {
+          state: {
+            email: result.email,
+          },
+        });
+      }}
       onNavigateToLogin={() => navigate("/login")}
+    />
+  );
+}
+
+function VerifyEmailRoute() {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const stateEmail =
+    (location.state as { email?: string } | null)?.email;
+
+  const email =
+    stateEmail ?? readPendingRegistrationEmail();
+
+  useEffect(() => {
+    if (email) {
+      savePendingRegistrationEmail(email);
+    }
+  }, [email]);
+
+  if (!email) {
+    return <Navigate to="/signup" replace />;
+  }
+
+  return (
+    <VerifyEmailPage
+      email={email}
+      onSuccess={() => {
+        clearPendingRegistrationEmail();
+        toast.success("Email verified. Your account is ready — please log in.");
+        navigate("/login", { replace: true });
+      }}
+      onChangeEmail={() => {
+        clearPendingRegistrationEmail();
+        navigate("/signup", { replace: true });
+      }}
     />
   );
 }
@@ -90,6 +141,7 @@ function OtpVerificationRoute() {
           },
         })
       }
+      onChangeEmail={() => navigate("/forgot-password", { replace: true })}
     />
   );
 }
@@ -124,6 +176,15 @@ export function AppRouter() {
           </PublicOnlyRoute>
         }
       />
+      <Route
+        path="/verify-email"
+        element={
+          <PublicOnlyRoute>
+            <VerifyEmailRoute />
+          </PublicOnlyRoute>
+        }
+      />
+
       <Route
         path="/forgot-password"
         element={

@@ -1,361 +1,3 @@
-// import bcrypt from "bcryptjs";
-// import jwt, { JwtPayload } from "jsonwebtoken";
-// import { IJwtPayload, IUser } from "../../interfaces/user.interface";
-// import ApiError from "../../utils/ApiError";
-// import { LoginUser , RegisterUser , LoginResponse , currentUser , ResetResponse} from "../../interfaces/user.interface";
-// import { User } from "./auth.model";
-// import { IUserDocument } from "./auth.model";
-// import OtpService from "../otp/otp.service";
-// import  MailService  from "../mail/mail.service";
-// import { Otp } from "../otp/otp.model";
-// import { OtpPurpose } from "../otp/otp.model";
-
-
-
-// export class AuthService {
-
-
-//   private readonly ACCESS_EXPIRES = "15m";
-//   private readonly REFRESH_EXPIRES = "7d";
-
-
-//   async hashPassword(password: string): Promise<string> {
-//     const salt = await bcrypt.genSalt(12);
-//     return bcrypt.hash(password, salt);
-//   }
-
-//   async comparePassword(
-//     plainPassword: string,
-//     hashedPassword: string
-//   ): Promise<boolean> {
-//     return bcrypt.compare(plainPassword, hashedPassword);
-//   }
-//   generateAccessToken(payload: IJwtPayload): string {
-//     return jwt.sign(payload, process.env.ACCESS_TOKEN_SECRET!, {
-//       expiresIn: this.ACCESS_EXPIRES,
-//     });
-//   }
-
-
-//   generateRefreshToken(payload: IJwtPayload): string {
-//     return jwt.sign(
-//       payload,
-//       process.env.REFRESH_TOKEN_SECRET!,
-//       { expiresIn: this.REFRESH_EXPIRES }
-//     );
-//   }
-
-//   verifyAccessToken(token: string): JwtPayload | IJwtPayload {
-//     try {
-//       return jwt.verify(token, process.env.ACCESS_TOKEN_SECRET!) as JwtPayload | IJwtPayload;
-//     } catch {
-//       throw new ApiError(401, "Invalid or expired access token.");
-//     }
-//   }
-
-//   verifyRefreshToken(token: string): JwtPayload | IJwtPayload {
-//     try {
-//       return jwt.verify(token, process.env.REFRESH_TOKEN_SECRET!) as JwtPayload | IJwtPayload;
-//     } catch {
-//       throw new ApiError(401, "Invalid or expired refresh token.");
-//     }
-//   }
-
-
-
-//   async registerUser(data:RegisterUser) : Promise<IUser>{
-//     const { name, username, email, password } = data;
-
-//     const existingEmail = await User.findOne({ email });
-
-//     if (existingEmail) {
-//       throw new ApiError(409, "Email is already registered.");
-//     }
-
-
-//     const existingUsername = await User.findOne({ username });
-
-//     if (existingUsername) {
-//       throw new ApiError(409, "Username is already taken.");
-//     }
-
-//     const hashedPassword = await this.hashPassword(password);
-
-  
-//     const user: IUserDocument = await User.create({
-//       name,
-//       username,
-//       email,
-//       password: hashedPassword,
-//       provider:"email"
-//     });
-
-//     return {
-//       _id: user._id.toString(),
-//       name: user.name,
-//       username: user.username,
-//       email: user.email,
-//       avatar: user.avatar,
-//     };
-//   }
-
-
-// async loginUser(data: LoginUser): Promise<LoginResponse> {
-  
-
-//   const { email, password } = data;
-
-//   const user = await User.findOne({ email }).select("+password +refreshToken");
-  
-
-//   if (!user) {
-//     throw new ApiError(404, "User does not exist");
-//   }
-
-//   const isValidPassword = await this.comparePassword(password, user.password);
-  
-
-//   if (!isValidPassword) {
-//     throw new ApiError(401, "Invalid email or password");
-//   }
-
-//   const payload: IJwtPayload = {
-//     _id: user._id.toString(),
-//     email: user.email,
-//     username: user.username,
-//   };
-  
-
-//   const accessToken = this.generateAccessToken(payload);
-  
-
-//   const refreshToken = this.generateRefreshToken(payload);
-
-
-//   user.refreshToken = refreshToken;
-//   user.lastLoginAt = new Date();
-
-//   await user.save({ validateBeforeSave: false });
-
-
-//   return {
-//     user: {
-//       _id: user._id.toString(),
-//       name: user.name,
-//       username: user.username,
-//       email: user.email,
-//       avatar: user.avatar,
-//     },
-//     accessToken,
-//     refreshToken,
-//   };
-// }
-
-// async logoutUser(userId: string): Promise<void> {
-//   const user = await User.findById(userId).select("+refreshToken");
-
-//   if (!user) {
-//     throw new ApiError(404, "User not found.");
-//   }
-
-//   user.refreshToken = undefined;
-
-//   await user.save({ validateBeforeSave: false });
-// }
-
-
-// async refreshAccessToken(refreshToken: string): Promise<string> {
-//   const payload = this.verifyRefreshToken(refreshToken) as IJwtPayload;
-
-//   const user = await User.findById(payload._id).select("+refreshToken");
-
-//   if (!user) {
-//     throw new ApiError(401, "User not found.");
-//   }
-
-  
-//   if (user.refreshToken !== refreshToken) {
-//     throw new ApiError(401, "Invalid refresh token.");
-//   }
-
-//   const accessToken = this.generateAccessToken({
-//     _id: user._id.toString(),
-//     email: user.email,
-//     username: user.username,
-//   });
-
-//   return accessToken;
-// }
-
-// async getCurrentUser(userID:string) : Promise<currentUser>{
-//   const user = await User.findById(userID).select("-password");
-//   if (!user) {
-//     throw new ApiError(404, "User not found");
-//   }
-
-//   return{
-//     user:{
-//       _id: user._id.toString(),
-//       name: user.name,
-//       username: user.username,
-//       email: user.email,
-//       avatar: user.avatar,
-//     }
-    
-//   }
-// }
-// async forgotPassword(email:string) : Promise<void>{
-//   const user = await User.findOne({email});
-//   if(!user){
-//     return;
-//   }
-//   const otp = await OtpService.createOtp(email);
-//   await MailService.sendOtpEmail(email, otp);
-// }
-
-// async verifyOtpResetPassword(email: string, otp: string): Promise<ResetResponse> {
-
-//     const otpRecord = await Otp.findOne({
-//         email,
-//         purpose: OtpPurpose.PASSWORD_RESET,
-//     });
-
-//     if (!otpRecord) {
-//         throw new ApiError(404, "OTP not found or expired");
-//     }
-  
-//     if (otpRecord.attempts >= 5) {
-//     await otpRecord.deleteOne();
-
-//     throw new ApiError(
-//         429,
-//         "Too many attempts. Please request a new OTP."
-//     );
-// }
-
-//     if (otpRecord.expiresAt < new Date()) {
-//         throw new ApiError(401, "OTP has expired");
-//     }
-
-//     const isValidOtp = await OtpService.verifyOtp(
-//         otp,
-//         otpRecord.otpHash
-//     );
-
-//     if (!isValidOtp) {
-//         otpRecord.attempts += 1;
-
-//         if (otpRecord.attempts >= 5) {
-//             await otpRecord.deleteOne();
-
-//             throw new ApiError(
-//                 429,
-//                 "Too many attempts. Please request a new OTP."
-//             );
-//         }
-
-//         await otpRecord.save();
-
-//         throw new ApiError(401, "Invalid OTP");
-//     }
-
-//     otpRecord.attempts = 0;
-//     otpRecord.isVerified = true;
-    
-//     await otpRecord.save();
-
-//     const resetToken = OtpService.generateResetToken(email);
-
-//     return {
-//     email,
-//     resetToken,
-// };
-// }
-
-// async resetPassword(
-//     email: string,
-//     resetToken: string,
-//     newPassword: string
-//   ): Promise<void> {
-//     try {
-//       const payload = OtpService.verifyResetToken(resetToken);
-  
-//       if (payload.email !== email) {
-//     throw new ApiError(401, "Invalid or expired reset token");
-// }
-//       const otpRecord = await Otp.findOne({
-//         email,
-//         purpose: OtpPurpose.PASSWORD_RESET,
-//         isVerified: true,
-//       });
-
-//       if (!otpRecord) {
-//     throw new ApiError(
-//         401,
-//         "Reset session expired. Please request a new OTP."
-//     );
-// }
-  
-//       if (otpRecord.expiresAt < new Date()) {
-//     await otpRecord.deleteOne();
-
-//     throw new ApiError(
-//         401,
-//         "Reset session expired. Please request a new OTP."
-//     );
-// }
-  
-//       const user = await User.findOne({ email }).select("+password");
-  
-//       if (!user) {
-//         throw new ApiError(404, "User not found");
-//       }
-
-//       const samePassword = await this.comparePassword(
-//     newPassword,
-//     user.password
-// );
-
-// if (samePassword) {
-//     throw new ApiError(
-//         400,
-//         "New password cannot be the same as the old password."
-//     );
-// }
-  
-//       const hashedPassword = await this.hashPassword(newPassword);
-  
-//       user.password = hashedPassword;
-  
-//       await user.save({ validateBeforeSave: false });
-
-//       await otpRecord!.deleteOne();
-  
-//     } catch (error: any) {
-//       if (error.name === "JsonWebTokenError") {
-//         throw new ApiError(401, "Invalid or expired reset token");
-//       }
-//       throw error;
-//     }
-//   } 
-
-//   async resendResetOtp(email: string): Promise<void> {
-//     const user = await User.findOne({ email });
-
-//     if (!user) {
-//         return;
-//     }
-
-//     const otp = await OtpService.createOtp(email);
-
-//     await MailService.sendOtpEmail(email, otp);
-// }
-
-// }
-
-
-// export default new AuthService();
-
 import bcrypt from "bcryptjs";
 
 import jwt, {
@@ -373,6 +15,7 @@ import type {
   IUser,
   LoginResponse,
   LoginUser,
+  PendingRegistrationResponse,
   RegisterUser,
   ResetResponse,
   currentUser,
@@ -393,6 +36,11 @@ import {
   User,
   type IUserDocument,
 } from "./auth.model";
+
+import {
+  PendingRegistration,
+  type IPendingRegistrationDocument,
+} from "./pending-registration.model";
 
 interface MongoDuplicateKeyError {
   code: number;
@@ -663,13 +311,28 @@ export class AuthService {
 
   /*
   |--------------------------------------------------------------------------
-  | Registration
+  | Registration Email Verification
   |--------------------------------------------------------------------------
   */
 
+  private readonly EMAIL_OTP_EXPIRY_SECONDS =
+    10 * 60;
+
+  private readonly PENDING_REGISTRATION_EXPIRY_MS =
+    30 * 60 * 1000;
+
+  private readonly VERIFICATION_RESEND_COOLDOWN_MS =
+    60 * 1000;
+
+  private readonly VERIFICATION_WINDOW_MS =
+    60 * 60 * 1000;
+
+  private readonly MAX_VERIFICATION_EMAILS_PER_WINDOW =
+    5;
+
   async registerUser(
     data: RegisterUser
-  ): Promise<IUser> {
+  ): Promise<PendingRegistrationResponse> {
     const name =
       data.name.trim();
 
@@ -681,117 +344,724 @@ export class AuthService {
         .trim()
         .toLowerCase();
 
+    const now =
+      new Date();
+
+    await PendingRegistration.deleteMany({
+      expiresAt: {
+        $lte: now,
+      },
+      $or: [
+        { email },
+        { username },
+      ],
+    });
+
     const [
       existingEmail,
       existingUsername,
+      pendingUsername,
+      existingPending,
     ] =
       await Promise.all([
         User.exists({
           email,
-          deletedAt:
-            null,
+          deletedAt: null,
         }),
 
         User.exists({
           username,
-          deletedAt:
-            null,
+          deletedAt: null,
         }),
+
+        PendingRegistration.exists({
+          username,
+          email: {
+            $ne: email,
+          },
+          expiresAt: {
+            $gt: now,
+          },
+        }),
+
+        PendingRegistration.findOne({
+          email,
+          expiresAt: {
+            $gt: now,
+          },
+        }).select(
+          "+passwordHash"
+        ),
       ]);
 
-    if (
-      existingEmail
-    ) {
+    if (existingEmail) {
       throw new ApiError(
         409,
         "Email is already registered."
       );
     }
 
-    if (
-      existingUsername
-    ) {
+    if (existingUsername) {
       throw new ApiError(
         409,
         "Username is already taken."
       );
     }
 
-    const hashedPassword =
+    if (pendingUsername) {
+      throw new ApiError(
+        409,
+        "Username is currently reserved by another pending registration."
+      );
+    }
+
+    const passwordHash =
       await this.hashPassword(
         data.password
       );
 
-    try {
-      const user =
-        await User.create({
+    const claim =
+      await this.claimVerificationEmail({
+        pending: existingPending,
+        registration: {
           name,
           username,
           email,
+          passwordHash,
+        },
+        now,
+      });
 
-          password:
-            hashedPassword,
+    try {
+      const otp =
+        await OtpService.createOtp(
+          email,
+          OtpPurpose.EMAIL_VERIFICATION
+        );
 
-          provider:
-            "email",
+      await MailService.sendEmailVerificationOtp(
+        email,
+        otp
+      );
+    } catch (error) {
+      await OtpService.deleteExistingOtp(
+        email,
+        OtpPurpose.EMAIL_VERIFICATION
+      );
 
-          sessionVersion:
-            0,
-        });
+      await this.rollbackVerificationClaim(
+        claim
+      );
 
-      return {
-        _id:
-          user._id.toString(),
+      throw new ApiError(
+        503,
+        "Verification email could not be sent. Please try again shortly."
+      );
+    }
 
-        name:
-          user.name,
+    return {
+      email,
+      expiresInSeconds:
+        this.EMAIL_OTP_EXPIRY_SECONDS,
+      resendAvailableInSeconds:
+        Math.floor(
+          this.VERIFICATION_RESEND_COOLDOWN_MS /
+            1000
+        ),
+    };
+  }
 
-        username:
-          user.username,
+  async verifyEmailRegistration(
+    emailInput: string,
+    otp: string
+  ): Promise<IUser> {
+    const email =
+      emailInput
+        .trim()
+        .toLowerCase();
 
-        email:
-          user.email,
+    const pending =
+      await PendingRegistration.findOne({
+        email,
+      }).select(
+        "+passwordHash"
+      );
 
-        avatar:
-          user.avatar ??
-          undefined,
-      };
-    } catch (
-      error
+    if (!pending) {
+      throw new ApiError(
+        410,
+        "Registration session expired. Please sign up again."
+      );
+    }
+
+    if (
+      pending.expiresAt <=
+      new Date()
     ) {
+      await Promise.all([
+        pending.deleteOne(),
+        OtpService.deleteExistingOtp(
+          email,
+          OtpPurpose.EMAIL_VERIFICATION
+        ),
+      ]);
+
+      throw new ApiError(
+        410,
+        "Registration session expired. Please sign up again."
+      );
+    }
+
+    const otpRecord =
+      await Otp.findOne({
+        email,
+        purpose:
+          OtpPurpose.EMAIL_VERIFICATION,
+      });
+
+    if (!otpRecord) {
+      throw new ApiError(
+        404,
+        "Verification code was not found or has expired."
+      );
+    }
+
+    if (otpRecord.isVerified) {
+      throw new ApiError(
+        409,
+        "This verification code is already being processed."
+      );
+    }
+
+    if (otpRecord.attempts >= 5) {
+      await otpRecord.deleteOne();
+
+      throw new ApiError(
+        429,
+        "Too many attempts. Please request a new verification code."
+      );
+    }
+
+    if (
+      otpRecord.expiresAt <=
+      new Date()
+    ) {
+      await otpRecord.deleteOne();
+
+      throw new ApiError(
+        401,
+        "Verification code has expired."
+      );
+    }
+
+    const isValidOtp =
+      await OtpService.verifyOtp(
+        otp,
+        otpRecord.otpHash
+      );
+
+    if (!isValidOtp) {
+      otpRecord.attempts += 1;
+
+      if (otpRecord.attempts >= 5) {
+        await otpRecord.deleteOne();
+
+        throw new ApiError(
+          429,
+          "Too many attempts. Please request a new verification code."
+        );
+      }
+
+      await otpRecord.save();
+
+      const remainingAttempts =
+        5 -
+        otpRecord.attempts;
+
+      throw new ApiError(
+        401,
+        `Invalid verification code. ${remainingAttempts} attempt${remainingAttempts === 1 ? "" : "s"} remaining.`
+      );
+    }
+
+    const claimedOtp =
+      await Otp.findOneAndUpdate(
+        {
+          _id: otpRecord._id,
+          isVerified: false,
+          expiresAt: {
+            $gt: new Date(),
+          },
+        },
+        {
+          $set: {
+            isVerified: true,
+          },
+        },
+        {
+          new: true,
+        }
+      );
+
+    if (!claimedOtp) {
+      throw new ApiError(
+        409,
+        "This verification request is already being processed."
+      );
+    }
+
+    const [
+      existingEmail,
+      existingUsername,
+    ] =
+      await Promise.all([
+        User.exists({
+          email: pending.email,
+          deletedAt: null,
+        }),
+        User.exists({
+          username:
+            pending.username,
+          deletedAt: null,
+        }),
+      ]);
+
+    if (
+      existingEmail ||
+      existingUsername
+    ) {
+      await Promise.all([
+        PendingRegistration.deleteOne({
+          _id: pending._id,
+        }),
+        Otp.deleteOne({
+          _id: claimedOtp._id,
+        }),
+      ]);
+
+      throw new ApiError(
+        409,
+        existingEmail
+          ? "This email has already been verified. Please sign in."
+          : "Username is no longer available. Please sign up again with another username."
+      );
+    }
+
+    let user: IUserDocument;
+
+    try {
+      user =
+        await User.create({
+          name: pending.name,
+          username:
+            pending.username,
+          email: pending.email,
+          password:
+            pending.passwordHash,
+          provider: "email",
+          sessionVersion: 0,
+        });
+    } catch (error) {
       if (
         this.isMongoDuplicateKeyError(
           error
         )
       ) {
-        if (
-          error.keyPattern
-            ?.email
-        ) {
-          throw new ApiError(
-            409,
-            "Email is already registered."
-          );
-        }
-
-        if (
-          error.keyPattern
-            ?.username
-        ) {
-          throw new ApiError(
-            409,
-            "Username is already taken."
-          );
-        }
+        await Promise.all([
+          PendingRegistration.deleteOne({
+            _id: pending._id,
+          }),
+          Otp.deleteOne({
+            _id: claimedOtp._id,
+          }),
+        ]);
 
         throw new ApiError(
           409,
-          "An account with those details already exists."
+          "Account details are no longer available. Please sign in or register again."
+        );
+      }
+
+      await Otp.updateOne(
+        {
+          _id: claimedOtp._id,
+        },
+        {
+          $set: {
+            isVerified: false,
+          },
+        }
+      );
+
+      throw error;
+    }
+
+    await Promise.allSettled([
+      PendingRegistration.deleteOne({
+        _id: pending._id,
+      }),
+      Otp.deleteOne({
+        _id: claimedOtp._id,
+      }),
+    ]);
+
+    return {
+      _id: user._id.toString(),
+      name: user.name,
+      username: user.username,
+      email: user.email,
+      avatar:
+        user.avatar ??
+        undefined,
+    };
+  }
+
+  async resendEmailVerificationOtp(
+    emailInput: string
+  ): Promise<PendingRegistrationResponse> {
+    const email =
+      emailInput
+        .trim()
+        .toLowerCase();
+
+    const now =
+      new Date();
+
+    const pending =
+      await PendingRegistration.findOne({
+        email,
+      }).select(
+        "+passwordHash"
+      );
+
+    if (
+      !pending ||
+      pending.expiresAt <= now
+    ) {
+      await Promise.all([
+        PendingRegistration.deleteOne({
+          email,
+        }),
+        OtpService.deleteExistingOtp(
+          email,
+          OtpPurpose.EMAIL_VERIFICATION
+        ),
+      ]);
+
+      throw new ApiError(
+        410,
+        "Registration session expired. Please sign up again."
+      );
+    }
+
+    const claim =
+      await this.claimVerificationEmail({
+        pending,
+        now,
+      });
+
+    try {
+      const otp =
+        await OtpService.createOtp(
+          email,
+          OtpPurpose.EMAIL_VERIFICATION
+        );
+
+      await MailService.sendEmailVerificationOtp(
+        email,
+        otp
+      );
+    } catch (error) {
+      await OtpService.deleteExistingOtp(
+        email,
+        OtpPurpose.EMAIL_VERIFICATION
+      );
+
+      await this.rollbackVerificationClaim(
+        claim
+      );
+
+      throw new ApiError(
+        503,
+        "Verification email could not be sent. Please try again shortly."
+      );
+    }
+
+    return {
+      email,
+      expiresInSeconds:
+        this.EMAIL_OTP_EXPIRY_SECONDS,
+      resendAvailableInSeconds:
+        Math.floor(
+          this.VERIFICATION_RESEND_COOLDOWN_MS /
+            1000
+        ),
+    };
+  }
+
+  private async claimVerificationEmail(options: {
+    pending:
+      IPendingRegistrationDocument |
+      null;
+    registration?: {
+      name: string;
+      username: string;
+      email: string;
+      passwordHash: string;
+    };
+    now: Date;
+  }): Promise<{
+    pendingId: string;
+    claimedAt: Date;
+    wasCreated: boolean;
+    previous?: {
+      name: string;
+      username: string;
+      email: string;
+      passwordHash: string;
+      expiresAt: Date;
+      verificationSentAt: Date;
+      resendWindowStartedAt: Date;
+      resendCount: number;
+    };
+  }> {
+    const {
+      pending,
+      registration,
+      now,
+    } = options;
+
+    if (!pending) {
+      if (!registration) {
+        throw new ApiError(
+          410,
+          "Registration session expired. Please sign up again."
+        );
+      }
+
+      try {
+        const created =
+          await PendingRegistration.create({
+            ...registration,
+            expiresAt:
+              new Date(
+                now.getTime() +
+                  this.PENDING_REGISTRATION_EXPIRY_MS
+              ),
+            verificationSentAt: now,
+            resendWindowStartedAt: now,
+            resendCount: 1,
+          });
+
+        return {
+          pendingId:
+            created._id.toString(),
+          claimedAt: now,
+          wasCreated: true,
+        };
+      } catch (error) {
+        if (
+          this.isMongoDuplicateKeyError(
+            error
+          )
+        ) {
+          throw new ApiError(
+            409,
+            "A verification request with this email or username is already active."
+          );
+        }
+
+        throw error;
+      }
+    }
+
+    const millisecondsSinceLastSend =
+      now.getTime() -
+      pending.verificationSentAt.getTime();
+
+    if (
+      millisecondsSinceLastSend <
+      this.VERIFICATION_RESEND_COOLDOWN_MS
+    ) {
+      const secondsRemaining =
+        Math.ceil(
+          (this.VERIFICATION_RESEND_COOLDOWN_MS -
+            millisecondsSinceLastSend) /
+            1000
+        );
+
+      throw new ApiError(
+        429,
+        `Please wait ${secondsRemaining} second${secondsRemaining === 1 ? "" : "s"} before requesting another code.`
+      );
+    }
+
+    const windowExpired =
+      now.getTime() -
+        pending.resendWindowStartedAt.getTime() >=
+      this.VERIFICATION_WINDOW_MS;
+
+    if (
+      !windowExpired &&
+      pending.resendCount >=
+        this.MAX_VERIFICATION_EMAILS_PER_WINDOW
+    ) {
+      throw new ApiError(
+        429,
+        "Too many verification emails were requested. Please try again later."
+      );
+    }
+
+    const previous = {
+      name: pending.name,
+      username: pending.username,
+      email: pending.email,
+      passwordHash:
+        pending.passwordHash,
+      expiresAt:
+        pending.expiresAt,
+      verificationSentAt:
+        pending.verificationSentAt,
+      resendWindowStartedAt:
+        pending.resendWindowStartedAt,
+      resendCount:
+        pending.resendCount,
+    };
+
+    const nextWindowStartedAt =
+      windowExpired
+        ? now
+        : pending.resendWindowStartedAt;
+
+    const nextResendCount =
+      windowExpired
+        ? 1
+        : pending.resendCount + 1;
+
+    const update: Record<
+      string,
+      unknown
+    > = {
+      verificationSentAt: now,
+      resendWindowStartedAt:
+        nextWindowStartedAt,
+      resendCount:
+        nextResendCount,
+      expiresAt:
+        new Date(
+          now.getTime() +
+            this.PENDING_REGISTRATION_EXPIRY_MS
+        ),
+    };
+
+    if (registration) {
+      update.name =
+        registration.name;
+      update.username =
+        registration.username;
+      update.email =
+        registration.email;
+      update.passwordHash =
+        registration.passwordHash;
+    }
+
+    let claimed:
+      IPendingRegistrationDocument |
+      null;
+
+    try {
+      claimed =
+        await PendingRegistration.findOneAndUpdate(
+          {
+            _id: pending._id,
+            verificationSentAt:
+              pending.verificationSentAt,
+            resendCount:
+              pending.resendCount,
+            resendWindowStartedAt:
+              pending.resendWindowStartedAt,
+          },
+          {
+            $set: update,
+          },
+          {
+            new: true,
+          }
+        ).select(
+          "+passwordHash"
+        );
+    } catch (error) {
+      if (
+        this.isMongoDuplicateKeyError(
+          error
+        )
+      ) {
+        throw new ApiError(
+          409,
+          "Username is currently reserved by another pending registration."
         );
       }
 
       throw error;
     }
+
+    if (!claimed) {
+      throw new ApiError(
+        429,
+        "Another verification request is already in progress. Please wait before trying again."
+      );
+    }
+
+    return {
+      pendingId:
+        claimed._id.toString(),
+      claimedAt: now,
+      wasCreated: false,
+      previous,
+    };
+  }
+
+  private async rollbackVerificationClaim(
+    claim: {
+      pendingId: string;
+      claimedAt: Date;
+      wasCreated: boolean;
+      previous?: {
+        name: string;
+        username: string;
+        email: string;
+        passwordHash: string;
+        expiresAt: Date;
+        verificationSentAt: Date;
+        resendWindowStartedAt: Date;
+        resendCount: number;
+      };
+    }
+  ): Promise<void> {
+    if (claim.wasCreated) {
+      await PendingRegistration.deleteOne({
+        _id: claim.pendingId,
+        verificationSentAt:
+          claim.claimedAt,
+      });
+
+      return;
+    }
+
+    if (!claim.previous) {
+      return;
+    }
+
+    await PendingRegistration.updateOne(
+      {
+        _id: claim.pendingId,
+        verificationSentAt:
+          claim.claimedAt,
+      },
+      {
+        $set: claim.previous,
+      }
+    );
   }
 
   /*
@@ -1146,11 +1416,12 @@ export class AuthService {
     const otp =
       await OtpService
         .createOtp(
-          email
+          email,
+          OtpPurpose.PASSWORD_RESET
         );
 
     await MailService
-      .sendOtpEmail(
+      .sendPasswordResetOtp(
         email,
         otp
       );
@@ -1489,11 +1760,12 @@ export class AuthService {
     const otp =
       await OtpService
         .createOtp(
-          email
+          email,
+          OtpPurpose.PASSWORD_RESET
         );
 
     await MailService
-      .sendOtpEmail(
+      .sendPasswordResetOtp(
         email,
         otp
       );

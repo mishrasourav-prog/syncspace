@@ -8,6 +8,8 @@ export function useWorkspaceMembersQuery(workspaceId: string | undefined) {
   return useQuery<WorkspaceMember[], ApiErrorShape>({
     queryKey: workspaceMemberQueryKeys.list(workspaceId ?? ""),
     queryFn: () => getWorkspaceMembersRequest(workspaceId!),
+    refetchOnWindowFocus: true,
+    refetchInterval: 30_000,
     enabled: Boolean(workspaceId),
   });
 }

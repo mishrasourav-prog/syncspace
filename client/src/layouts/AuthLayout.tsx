@@ -8,7 +8,7 @@ interface AuthLayoutProps {
 
 /**
  * Shared shell for /login, /signup, /forgot-password, /otp-verification.
- * Centered card on an ambient purple glow, dark theme throughout.
+ * Centered card on an ambient steel-blue glow, dark theme throughout.
  */
 export function AuthLayout({ children }: AuthLayoutProps) {
   return (

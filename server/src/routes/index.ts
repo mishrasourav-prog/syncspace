@@ -19,6 +19,8 @@ import taskAssigneeRoutes from "../modules/taskAssignee/taskAssignee.routes";
 
 import taskCommentRoutes from "../modules/taskComment/taskComment.routes";
 
+import taskAssignmentRequestRoutes from "../modules/taskAssignmentRequest/taskAssignmentRequest.routes";
+
 import activityRouter from "../modules/activity/activity.routes";
 
 import notificationRouter from "../modules/notifications/notification.routes";
@@ -63,6 +65,8 @@ router.use(
 router.use("/", taskAssigneeRoutes);
 
 router.use("/", taskCommentRoutes);
+
+router.use("/", taskAssignmentRequestRoutes);
 
 router.use(
     "/",

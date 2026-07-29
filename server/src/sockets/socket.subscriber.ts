@@ -828,6 +828,18 @@ export const registerSocketSubscribers =
 
     eventBus.subscribe(
       DomainEventName
+        .TASK_UPDATED,
+      async (event) => {
+        const io = getSocketServer();
+        io.to(getProjectRoom(event.payload.projectId)).emit(
+          "task:updated",
+          event.payload
+        );
+      }
+    );
+
+    eventBus.subscribe(
+      DomainEventName
         .TASK_STATUS_CHANGED,
       async (
         event
@@ -894,6 +906,68 @@ export const registerSocketSubscribers =
           }
         );
       }
+    );
+
+    eventBus.subscribe(
+      DomainEventName
+        .TASK_UNASSIGNED,
+      async (event) => {
+        const io = getSocketServer();
+        io.to(getProjectRoom(event.payload.projectId)).emit(
+          "task:unassigned",
+          event.payload
+        );
+      }
+    );
+
+    eventBus.subscribe(
+      DomainEventName
+        .TASK_ASSIGNMENT_REQUESTED,
+      async (event) => {
+        const io = getSocketServer();
+        io.to(getProjectRoom(event.payload.projectId)).emit(
+          "task:assignment-requested",
+          event.payload
+        );
+      }
+    );
+
+    eventBus.subscribe(
+      DomainEventName
+        .TASK_ASSIGNMENT_REQUEST_ACCEPTED,
+      async (event) => {
+        const io = getSocketServer();
+        io.to(getProjectRoom(event.payload.projectId)).emit(
+          "task:assignment-request-accepted",
+          event.payload
+        );
+      }
+    );
+
+    const emitTaskCommentChange = (
+      event: { payload: { workspaceId: string; projectId: string; taskId: string; commentId: string; actorId: string } },
+      change: "created" | "updated" | "deleted"
+    ) => {
+      const io = getSocketServer();
+      io.to(getProjectRoom(event.payload.projectId)).emit(
+        "task:comment-changed",
+        { ...event.payload, change }
+      );
+    };
+
+    eventBus.subscribe(
+      DomainEventName.TASK_COMMENT_CREATED,
+      async (event) => emitTaskCommentChange(event, "created")
+    );
+
+    eventBus.subscribe(
+      DomainEventName.TASK_COMMENT_UPDATED,
+      async (event) => emitTaskCommentChange(event, "updated")
+    );
+
+    eventBus.subscribe(
+      DomainEventName.TASK_COMMENT_DELETED,
+      async (event) => emitTaskCommentChange(event, "deleted")
     );
 
     eventBus.subscribe(
@@ -1211,6 +1285,56 @@ export const registerSocketSubscribers =
           event.payload,
           "deleted"
         );
+      }
+    );
+
+    /*
+    |--------------------------------------------------------------------------
+    | Membership Added and Role Changed
+    |--------------------------------------------------------------------------
+    */
+
+    eventBus.subscribe(
+      DomainEventName.WORKSPACE_MEMBER_ADDED,
+      async (event) => {
+        const io = getSocketServer();
+        const userRoom = getUserRoom(event.payload.affectedUserId);
+        const workspaceRoom = getWorkspaceRoom(event.payload.workspaceId);
+
+        io.in(userRoom).socketsJoin(workspaceRoom);
+        io.to(workspaceRoom).emit("workspace:member-added", event.payload);
+      }
+    );
+
+    eventBus.subscribe(
+      DomainEventName.PROJECT_MEMBER_ADDED,
+      async (event) => {
+        const io = getSocketServer();
+        const userRoom = getUserRoom(event.payload.affectedUserId);
+        const projectRoom = getProjectRoom(event.payload.projectId);
+
+        io.in(userRoom).socketsJoin(projectRoom);
+        io.to(projectRoom).emit("project:member-added", event.payload);
+      }
+    );
+
+    eventBus.subscribe(
+      DomainEventName.WORKSPACE_MEMBER_ROLE_CHANGED,
+      async (event) => {
+        const io = getSocketServer();
+        io.to(getWorkspaceRoom(event.payload.workspaceId))
+          .to(getUserRoom(event.payload.affectedUserId))
+          .emit("workspace:member-role-changed", event.payload);
+      }
+    );
+
+    eventBus.subscribe(
+      DomainEventName.PROJECT_MEMBER_ROLE_CHANGED,
+      async (event) => {
+        const io = getSocketServer();
+        io.to(getProjectRoom(event.payload.projectId))
+          .to(getUserRoom(event.payload.affectedUserId))
+          .emit("project:member-role-changed", event.payload);
       }
     );
 

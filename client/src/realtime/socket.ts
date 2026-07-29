@@ -15,6 +15,19 @@ export interface ProjectAccessRevokedPayload {
   reason: "removed" | "left";
 }
 
+
+export interface WorkspaceMemberChangedPayload {
+  workspaceId: string;
+  memberId: string;
+  affectedUserId: string;
+  actorId: string;
+  role?: string;
+}
+
+export interface ProjectMemberChangedPayload extends WorkspaceMemberChangedPayload {
+  projectId: string;
+}
+
 export interface SocketActionResponse {
   success: boolean;
   message: string;
@@ -53,6 +66,10 @@ interface ServerToClientEvents {
   "notification:new": (payload: { notificationId: string }) => void;
   "access:workspace-revoked": (payload: WorkspaceAccessRevokedPayload) => void;
   "access:project-revoked": (payload: ProjectAccessRevokedPayload) => void;
+  "workspace:member-added": (payload: WorkspaceMemberChangedPayload) => void;
+  "workspace:member-role-changed": (payload: WorkspaceMemberChangedPayload) => void;
+  "project:member-added": (payload: ProjectMemberChangedPayload) => void;
+  "project:member-role-changed": (payload: ProjectMemberChangedPayload) => void;
   "activity:new": (payload: { activityId: string; workspaceId: string; projectId: string }) => void;
   "task:created": (payload: {
     workspaceId: string;
@@ -61,6 +78,14 @@ interface ServerToClientEvents {
     actorId: string;
     title: string;
     status: TaskStatus;
+    taskType: TaskType;
+  }) => void;
+  "task:updated": (payload: {
+    workspaceId: string;
+    projectId: string;
+    taskId: string;
+    actorId: string;
+    title: string;
     taskType: TaskType;
   }) => void;
   "task:status-changed": (payload: {
@@ -79,6 +104,44 @@ interface ServerToClientEvents {
     taskId: string;
     actorId: string;
     assigneeId: string;
+    title: string;
+    taskType: TaskType;
+  }) => void;
+  "task:unassigned": (payload: {
+    workspaceId: string;
+    projectId: string;
+    taskId: string;
+    actorId: string;
+    assigneeId: string;
+    title: string;
+    taskType: TaskType;
+  }) => void;
+  "task:comment-changed": (payload: {
+    workspaceId: string;
+    projectId: string;
+    taskId: string;
+    commentId: string;
+    actorId: string;
+    change: "created" | "updated" | "deleted";
+  }) => void;
+  "task:assignment-requested": (payload: {
+    workspaceId: string;
+    projectId: string;
+    taskId: string;
+    requestId: string;
+    actorId: string;
+    requesterId: string;
+    title: string;
+    taskType: TaskType;
+  }) => void;
+  "task:assignment-request-accepted": (payload: {
+    workspaceId: string;
+    projectId: string;
+    taskId: string;
+    requestId: string;
+    actorId: string;
+    requesterId: string;
+    acceptedById: string;
     title: string;
     taskType: TaskType;
   }) => void;

@@ -54,6 +54,8 @@ interface PendingRequest {
 const PUBLIC_AUTH_PATHS = [
     "/auth/login",
     "/auth/register",
+    "/auth/verify-email",
+    "/auth/resend-verification-otp",
     "/auth/forgot-password",
     "/auth/verify-reset-otp",
     "/auth/reset-password",

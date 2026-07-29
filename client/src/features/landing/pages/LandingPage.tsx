@@ -18,10 +18,10 @@ export function LandingPage({ onGetStarted, onLogin }: LandingPageProps) {
     <div className="min-h-screen overflow-x-clip bg-background">
       <Navbar onGetStarted={onGetStarted} onLogin={onLogin} />
       <main>
-        <Hero onGetStarted={onGetStarted} />
+        <Hero onGetStarted={onGetStarted} onLogin={onLogin} />
         <Features />
-        <HowItWorks />
         <ProductShowcase />
+        <HowItWorks />
         <SecuritySection />
         <FAQ />
         <CTASection onGetStarted={onGetStarted} onLogin={onLogin} />

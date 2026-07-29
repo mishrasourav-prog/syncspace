@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const createProjectSchema = z.object({
+const projectTextFields = {
   name: z
     .string()
     .trim()
@@ -12,6 +12,12 @@ export const createProjectSchema = z.object({
     .max(500, "Description cannot exceed 500 characters.")
     .optional()
     .or(z.literal("")),
+};
+
+export const createProjectSchema = z.object(projectTextFields);
+
+export const editProjectSchema = z.object({
+  ...projectTextFields,
   icon: z
     .string()
     .trim()
@@ -21,3 +27,4 @@ export const createProjectSchema = z.object({
 });
 
 export type CreateProjectFormValues = z.infer<typeof createProjectSchema>;
+export type EditProjectFormValues = z.infer<typeof editProjectSchema>;

@@ -9,7 +9,9 @@ export interface IWorkspaceDocument extends Document {
 
   description?: string;
 
-  avatar?:string;
+  avatar?: string;
+
+  avatarPublicId?: string | null;
 
   owner: Types.ObjectId;
 
@@ -58,6 +60,12 @@ const workspaceSchema = new Schema<IWorkspaceDocument>(
     avatar: {
       type: String,
       default: "",
+    },
+
+    avatarPublicId: {
+      type: String,
+      default: null,
+      select: false,
     },
 
     owner: {

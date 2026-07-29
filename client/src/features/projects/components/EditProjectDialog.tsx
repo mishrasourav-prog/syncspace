@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { useUpdateProjectMutation } from "../hooks/useProjectMutations";
-import { createProjectSchema, type CreateProjectFormValues } from "../schemas/project.schemas";
+import { editProjectSchema, type EditProjectFormValues } from "../schemas/project.schemas";
 import type { Project } from "../types/project.types";
 
 interface EditProjectDialogProps {
@@ -25,8 +25,8 @@ export function EditProjectDialog({ project, workspaceId, onClose }: EditProject
     handleSubmit,
     reset,
     formState: { errors },
-  } = useForm<CreateProjectFormValues>({
-    resolver: zodResolver(createProjectSchema),
+  } = useForm<EditProjectFormValues>({
+    resolver: zodResolver(editProjectSchema),
     defaultValues: { name: "", description: "", icon: "" },
   });
 
@@ -43,7 +43,7 @@ export function EditProjectDialog({ project, workspaceId, onClose }: EditProject
     onClose();
   }
 
-  const onSubmit = (values: CreateProjectFormValues) => {
+  const onSubmit = (values: EditProjectFormValues) => {
     updateProjectMutation.mutate(
       { name: values.name, description: values.description ?? "", icon: values.icon || undefined },
       {

@@ -1,6 +1,25 @@
-export type NotificationType = "task_assigned" | "task_status_changed" | "discussion.reply";
+export type NotificationType =
+  | "task_assigned"
+  | "task_status_changed"
+  | "task_created"
+  | "task.assignment_requested"
+  | "task.assignment_request_accepted"
+  | "discussion.created"
+  | "discussion.reply"
+  | "workspace.invitation"
+  | "project.invitation"
+  | "workspace.role_changed"
+  | "project.role_changed"
+  | "workspace.member_joined"
+  | "project.member_joined";
 
-export type NotificationEntityType = "task" | "discussion";
+export type NotificationEntityType =
+  | "task"
+  | "discussion"
+  | "workspace"
+  | "project"
+  | "workspace_invitation"
+  | "project_invitation";
 
 export interface NotificationActor {
   _id: string;
@@ -27,9 +46,7 @@ export interface NotificationItem {
 }
 
 export type NotificationFilter = "all" | "unread" | "tasks" | "discussions" | "read";
-
 export type NotificationSort = "newest" | "oldest";
-
 export type TaskStatus = "TODO" | "IN_PROGRESS" | "IN_REVIEW" | "DONE";
 
 export interface TaskAssignedMetadata {
@@ -46,4 +63,13 @@ export interface TaskStatusChangedMetadata {
 export interface DiscussionReplyMetadata {
   discussionTitle?: string;
   replyId?: string;
+}
+
+export interface CollaborationNotificationMetadata {
+  invitationId?: string;
+  workspaceName?: string;
+  projectName?: string;
+  role?: string;
+  memberId?: string;
+  joinedUserId?: string;
 }

@@ -17,39 +17,39 @@
 
 :root {
     /*
-    Neutral dark background system
+    Neutral graphite background system
     */
 
     --background:
-        240 10% 4%;
+        210 18% 7%;
 
     --surface:
-        240 8% 8%;
+        210 19% 10%;
 
     --border:
-        240 6% 18%;
+        210 16% 19%;
 
     --foreground:
-        240 20% 97%;
+        42 31% 94%;
 
     --muted:
-        240 5% 58%;
+        206 9% 64%;
 
     --muted-foreground:
-        240 5% 68%;
+        206 9% 74%;
 
     /*
-    Purple primary and blue secondary accents
+    Steel blue primary and warm bronze secondary accents
     */
 
     --primary:
-        258 90% 66%;
+        202 45% 38%;
 
     --primary-foreground:
         0 0% 100%;
 
     --secondary:
-        217 91% 60%;
+        33 28% 42%;
 
     --secondary-foreground:
         0 0% 100%;
@@ -59,13 +59,13 @@
     */
 
     --success:
-        152 69% 45%;
+        142 71% 45%;
 
     --warning:
-        38 92% 55%;
+        38 92% 50%;
 
     --danger:
-        0 84% 63%;
+        0 84% 60%;
 }
 
 /*
@@ -195,12 +195,23 @@ select {
         inherit;
 }
 
-button {
+a[href],
+button:not(:disabled),
+[role="button"]:not([aria-disabled="true"]),
+summary,
+select:not(:disabled),
+label[for],
+input[type="checkbox"]:not(:disabled),
+input[type="radio"]:not(:disabled) {
     cursor:
         pointer;
 }
 
-button:disabled {
+button:disabled,
+select:disabled,
+[role="button"][aria-disabled="true"],
+input[type="checkbox"]:disabled,
+input[type="radio"]:disabled {
     cursor:
         not-allowed;
 }

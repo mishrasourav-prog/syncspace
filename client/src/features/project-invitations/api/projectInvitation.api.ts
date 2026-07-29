@@ -16,10 +16,26 @@ export async function inviteProjectMemberRequest(
     .then((res) => res.data.data);
 }
 
-export async function getPendingProjectInvitationsRequest(projectId: string): Promise<ProjectInvitation[]> {
+export async function getPendingProjectInvitationsRequest(
+  projectId: string
+): Promise<ProjectInvitation[]> {
   return axiosClient
     .get<ApiResponse<{ invitations: ProjectInvitation[] }>>(`/projects/${projectId}/invitations`)
     .then((res) => res.data.data.invitations);
+}
+
+export async function getMyProjectInvitationsRequest(): Promise<ProjectInvitation[]> {
+  return axiosClient
+    .get<ApiResponse<{ invitations: ProjectInvitation[] }>>("/project-invitations")
+    .then((res) => res.data.data.invitations);
+}
+
+export async function acceptProjectInvitationRequest(invitationId: string): Promise<void> {
+  await axiosClient.post<ApiResponse<void>>(`/project-invitations/${invitationId}/accept`);
+}
+
+export async function rejectProjectInvitationRequest(invitationId: string): Promise<void> {
+  await axiosClient.post<ApiResponse<void>>(`/project-invitations/${invitationId}/reject`);
 }
 
 export async function cancelProjectInvitationRequest(invitationId: string): Promise<void> {

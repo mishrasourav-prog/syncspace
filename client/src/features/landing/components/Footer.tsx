@@ -1,4 +1,3 @@
-import { Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface FooterProps {
@@ -19,8 +18,8 @@ export function Footer({ onGetStarted, onLogin }: FooterProps) {
         <div className="flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
           <div className="max-w-md">
             <div className="flex items-center gap-2">
-              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-secondary">
-                <Sparkles className="h-4 w-4 text-white" />
+              <span className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-sm font-semibold text-primary-foreground">
+                S
               </span>
               <span className="font-semibold tracking-tight text-foreground">SyncSpace</span>
             </div>
@@ -30,7 +29,7 @@ export function Footer({ onGetStarted, onLogin }: FooterProps) {
           </div>
 
           <nav className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:items-center" aria-label="Footer navigation">
-            <Button variant="ghost" size="sm" onClick={() => scrollToSection("features")}>Features</Button>
+            <Button variant="ghost" size="sm" onClick={() => scrollToSection("product")}>Product</Button>
             <Button variant="ghost" size="sm" onClick={() => scrollToSection("security")}>Security</Button>
             <Button variant="ghost" size="sm" onClick={onLogin}>Log in</Button>
             <Button variant="secondary" size="sm" onClick={onGetStarted}>Get Started</Button>

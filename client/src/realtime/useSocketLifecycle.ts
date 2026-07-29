@@ -22,7 +22,9 @@ import { workspaceQueryKeys } from "@/features/workspaces/workspace.queryKeys";
 import {
   socket,
   type ProjectAccessRevokedPayload,
+  type ProjectMemberChangedPayload,
   type WorkspaceAccessRevokedPayload,
+  type WorkspaceMemberChangedPayload,
 } from "./socket";
 
 /*
@@ -54,8 +56,23 @@ export function useSocketLifecycle() {
 
   useEffect(() => {
     function handleNotificationNew() {
-      void queryClient.invalidateQueries({ queryKey: notificationQueryKeys.list() });
-      void queryClient.invalidateQueries({ queryKey: notificationQueryKeys.unreadCount() });
+      void queryClient.invalidateQueries({ queryKey: notificationQueryKeys.all });
+      void queryClient.invalidateQueries({ queryKey: workspaceInvitationQueryKeys.list() });
+      void queryClient.invalidateQueries({ queryKey: projectInvitationQueryKeys.my() });
+    }
+
+    function refreshWorkspaceMembership(payload: WorkspaceMemberChangedPayload) {
+      void queryClient.invalidateQueries({ queryKey: workspaceMemberQueryKeys.list(payload.workspaceId) });
+      void queryClient.invalidateQueries({ queryKey: workspaceQueryKeys.detail(payload.workspaceId) });
+      void queryClient.invalidateQueries({ queryKey: workspaceQueryKeys.list() });
+      void queryClient.invalidateQueries({ queryKey: activityQueryKeys.workspace(payload.workspaceId) });
+    }
+
+    function refreshProjectMembership(payload: ProjectMemberChangedPayload) {
+      void queryClient.invalidateQueries({ queryKey: projectMemberQueryKeys.list(payload.projectId) });
+      void queryClient.invalidateQueries({ queryKey: projectQueryKeys.detail(payload.projectId) });
+      void queryClient.invalidateQueries({ queryKey: projectQueryKeys.workspaceList(payload.workspaceId) });
+      void queryClient.invalidateQueries({ queryKey: activityQueryKeys.project(payload.projectId) });
     }
 
     function handleWorkspaceRevoked(payload: WorkspaceAccessRevokedPayload) {
@@ -105,12 +122,20 @@ export function useSocketLifecycle() {
     }
 
     socket.on("notification:new", handleNotificationNew);
+    socket.on("workspace:member-added", refreshWorkspaceMembership);
+    socket.on("workspace:member-role-changed", refreshWorkspaceMembership);
+    socket.on("project:member-added", refreshProjectMembership);
+    socket.on("project:member-role-changed", refreshProjectMembership);
     socket.on("access:workspace-revoked", handleWorkspaceRevoked);
     socket.on("access:project-revoked", handleProjectRevoked);
     socket.on("account:session-revoked", handleAccountSessionRevoked);
 
     return () => {
       socket.off("notification:new", handleNotificationNew);
+      socket.off("workspace:member-added", refreshWorkspaceMembership);
+      socket.off("workspace:member-role-changed", refreshWorkspaceMembership);
+      socket.off("project:member-added", refreshProjectMembership);
+      socket.off("project:member-role-changed", refreshProjectMembership);
       socket.off("access:workspace-revoked", handleWorkspaceRevoked);
       socket.off("access:project-revoked", handleProjectRevoked);
       socket.off("account:session-revoked", handleAccountSessionRevoked);

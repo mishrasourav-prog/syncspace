@@ -41,7 +41,10 @@ export async function signupRequest(
       ApiResponse<PendingRegistrationResponse>
     >(
       "/auth/register",
-      payload
+      payload,
+      {
+    timeout: 50_000,
+  }
     )
     .then(
       (response) =>
@@ -57,7 +60,10 @@ export async function verifyEmailRequest(
       ApiResponse<VerifyEmailResponse>
     >(
       "/auth/verify-email",
-      payload
+      payload,
+         {
+    timeout: 50_000,
+  }
     )
     .then(
       (response) =>
@@ -75,7 +81,10 @@ export async function resendEmailVerificationRequest(
       "/auth/resend-verification-otp",
       {
         email,
-      }
+      },
+         {
+    timeout: 50_000,
+  }
     )
     .then(
       (response) =>
@@ -89,7 +98,10 @@ export async function forgotPasswordRequest(
   return axiosClient
     .post<ApiResponse<void>>(
       "/auth/forgot-password",
-      payload
+      payload,
+         {
+    timeout: 50_000,
+  }
     )
     .then(
       (response) =>
@@ -105,7 +117,10 @@ export async function verifyOtpRequest(
       ApiResponse<VerifyOtpResponse>
     >(
       "/auth/verify-reset-otp",
-      payload
+      payload,
+         {
+    timeout: 50_000,
+  }
     )
     .then(
       (response) =>
@@ -119,7 +134,10 @@ export async function resetPasswordRequest(
   return axiosClient
     .post<ApiResponse<void>>(
       "/auth/reset-password",
-      payload
+      payload,
+         {
+    timeout: 50_000,
+  }
     )
     .then(
       (response) =>
@@ -135,7 +153,10 @@ export async function resendOtpRequest(
       "/auth/resend-reset-otp",
       {
         email,
-      }
+      },
+         {
+    timeout: 50_000,
+  }
     )
     .then(
       (response) =>

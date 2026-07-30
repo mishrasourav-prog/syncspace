@@ -227,11 +227,23 @@ axiosClient.interceptors.response.use(
                 refreshError
             );
 
-            useAuthStore
-                .getState()
-                .clearSession();
+            const authState =
+    useAuthStore.getState();
 
-            queryClient.clear();
+const wasAuthInitialized =
+    authState.isAuthInitialized;
+
+authState.clearSession();
+
+/*
+Do not clear React Query while the initial /auth/me
+bootstrap request is still settling. Clearing it here
+can prevent the auth query from reaching its error state,
+leaving the application on the loading screen forever.
+*/
+if (wasAuthInitialized) {
+    queryClient.clear();
+}
 
             return Promise.reject({
                 message:

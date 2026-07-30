@@ -62,6 +62,7 @@ export const useAuthStore =
                     set({
                         user:
                             null,
+                            isAuthInitialized: true,
                     });
                 },
         })

@@ -120,14 +120,19 @@ export function TaskCard({
         `${task.type === "issue" ? "Issue" : "Task"}: ${task.title}`
       }
       className={
-        cn(
-          "flex w-full flex-col gap-2.5 rounded-lg border border-border bg-background/60 p-3 text-left shadow-soft transition-colors hover:border-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50",
-          isDragging &&
-            "opacity-40",
-          isOverlay &&
-            "cursor-grabbing border-primary/40 shadow-elevated"
-        )
-      }
+  cn(
+    "flex w-full flex-col gap-2.5 rounded-lg border border-border bg-background/60 p-3 text-left shadow-soft transition-colors hover:border-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50",
+
+    dragHandleProps &&
+      "touch-manipulation select-none cursor-grab active:cursor-grabbing",
+
+    isDragging &&
+      "opacity-40",
+
+    isOverlay &&
+      "cursor-grabbing border-primary/40 shadow-elevated"
+  )
+}
     >
       <div className="flex items-center justify-between gap-2">
         <Badge

@@ -6,7 +6,8 @@ import {
   DndContext,
   DragOverlay,
   KeyboardSensor,
-  PointerSensor,
+  MouseSensor,
+TouchSensor,
   closestCorners,
   useSensor,
   useSensors,
@@ -86,24 +87,34 @@ export function TaskBoard({
     );
 
   const sensors =
-    useSensors(
-      useSensor(
-        PointerSensor,
-        {
-          activationConstraint: {
-            distance:
-              8,
-          },
-        }
-      ),
-      useSensor(
-        KeyboardSensor,
-        {
-          coordinateGetter:
-            sortableKeyboardCoordinates,
-        }
-      )
-    );
+  useSensors(
+    useSensor(
+      MouseSensor,
+      {
+        activationConstraint: {
+          distance: 8,
+        },
+      }
+    ),
+
+    useSensor(
+      TouchSensor,
+      {
+        activationConstraint: {
+          delay: 250,
+          tolerance: 8,
+        },
+      }
+    ),
+
+    useSensor(
+      KeyboardSensor,
+      {
+        coordinateGetter:
+          sortableKeyboardCoordinates,
+      }
+    )
+  );
 
   function findColumnOf(
     taskId:

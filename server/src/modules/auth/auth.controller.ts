@@ -42,7 +42,7 @@ const baseAuthCookieOptions:
     secure:
       isProduction,
     sameSite:
-      "strict",
+      isProduction ? "none" : "strict",
     path:
       "/",
   };

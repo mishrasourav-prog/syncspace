@@ -6,7 +6,10 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { createProjectSchema, type CreateProjectFormValues } from "../schemas/project.schemas";
+import {
+  createProjectSchema,
+  type CreateProjectFormValues,
+} from "../schemas/project.schemas";
 import { useCreateProjectMutation } from "../hooks/useProjectMutations";
 
 interface CreateProjectDialogProps {
@@ -15,7 +18,11 @@ interface CreateProjectDialogProps {
   onClose: () => void;
 }
 
-export function CreateProjectDialog({ workspaceId, open, onClose }: CreateProjectDialogProps) {
+export function CreateProjectDialog({
+  workspaceId,
+  open,
+  onClose,
+}: CreateProjectDialogProps) {
   const createProjectMutation = useCreateProjectMutation(workspaceId);
 
   const {
@@ -47,7 +54,7 @@ export function CreateProjectDialog({ workspaceId, open, onClose }: CreateProjec
           reset();
           onClose();
         },
-      }
+      },
     );
   };
 
@@ -73,7 +80,9 @@ export function CreateProjectDialog({ workspaceId, open, onClose }: CreateProjec
             error={errors.name?.message}
             {...register("name")}
           />
-          <p className="mt-1 text-xs text-muted">A default project icon is assigned automatically.</p>
+          <p className="mt-1 text-xs text-muted">
+            A default project icon is assigned automatically.
+          </p>
         </div>
 
         <div>
@@ -90,7 +99,12 @@ export function CreateProjectDialog({ workspaceId, open, onClose }: CreateProjec
         </div>
 
         <DialogFooter>
-          <Button type="button" variant="secondary" onClick={handleClose} disabled={createProjectMutation.isPending}>
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={handleClose}
+            disabled={createProjectMutation.isPending}
+          >
             Cancel
           </Button>
           <Button type="submit" disabled={createProjectMutation.isPending}>

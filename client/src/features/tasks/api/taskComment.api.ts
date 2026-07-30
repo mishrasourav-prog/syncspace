@@ -14,7 +14,7 @@ export interface GetTaskCommentsParams {
 
 export async function getTaskCommentsRequest(
   taskId: string,
-  params: GetTaskCommentsParams = {}
+  params: GetTaskCommentsParams = {},
 ): Promise<TaskCommentsPage> {
   return axiosClient
     .get<ApiResponse<TaskCommentsPage>>(`/tasks/${taskId}/comments`, {
@@ -25,7 +25,7 @@ export async function getTaskCommentsRequest(
 
 export async function createTaskCommentRequest(
   taskId: string,
-  payload: CreateTaskCommentPayload
+  payload: CreateTaskCommentPayload,
 ): Promise<TaskComment> {
   return axiosClient
     .post<ApiResponse<TaskComment>>(`/tasks/${taskId}/comments`, payload)
@@ -34,13 +34,17 @@ export async function createTaskCommentRequest(
 
 export async function updateTaskCommentRequest(
   commentId: string,
-  payload: UpdateTaskCommentPayload
+  payload: UpdateTaskCommentPayload,
 ): Promise<TaskComment> {
   return axiosClient
     .patch<ApiResponse<TaskComment>>(`/comments/${commentId}`, payload)
     .then((res) => res.data.data);
 }
 
-export async function deleteTaskCommentRequest(commentId: string): Promise<TaskComment> {
-  return axiosClient.delete<ApiResponse<TaskComment>>(`/comments/${commentId}`).then((res) => res.data.data);
+export async function deleteTaskCommentRequest(
+  commentId: string,
+): Promise<TaskComment> {
+  return axiosClient
+    .delete<ApiResponse<TaskComment>>(`/comments/${commentId}`)
+    .then((res) => res.data.data);
 }

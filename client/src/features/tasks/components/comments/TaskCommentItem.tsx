@@ -5,9 +5,17 @@ import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { formatDateTime, formatRelativeTime } from "@/lib/date";
-import { useDeleteTaskCommentMutation, useUpdateTaskCommentMutation } from "../../hooks/useTaskCommentMutations";
+import {
+  useDeleteTaskCommentMutation,
+  useUpdateTaskCommentMutation,
+} from "../../hooks/useTaskCommentMutations";
 import type { TaskComment } from "../../types/taskComment.types";
 
 interface TaskCommentItemProps {
@@ -18,7 +26,13 @@ interface TaskCommentItemProps {
   canDelete: boolean;
 }
 
-export function TaskCommentItem({ projectId, taskId, comment, canEdit, canDelete }: TaskCommentItemProps) {
+export function TaskCommentItem({
+  projectId,
+  taskId,
+  comment,
+  canEdit,
+  canDelete,
+}: TaskCommentItemProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [draft, setDraft] = useState(comment.body);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
@@ -42,8 +56,9 @@ export function TaskCommentItem({ projectId, taskId, comment, canEdit, canDelete
           setIsEditing(false);
           toast.success("Comment updated.");
         },
-        onError: (error) => toast.error(error.message ?? "Unable to update comment."),
-      }
+        onError: (error) =>
+          toast.error(error.message ?? "Unable to update comment."),
+      },
     );
   }
 
@@ -53,7 +68,8 @@ export function TaskCommentItem({ projectId, taskId, comment, canEdit, canDelete
         setConfirmingDelete(false);
         toast.success("Comment deleted.");
       },
-      onError: (error) => toast.error(error.message ?? "Unable to delete comment."),
+      onError: (error) =>
+        toast.error(error.message ?? "Unable to delete comment."),
     });
   }
 
@@ -63,7 +79,9 @@ export function TaskCommentItem({ projectId, taskId, comment, canEdit, canDelete
         <Avatar name="Deleted" size="sm" />
         <div className="min-w-0 flex-1">
           <p className="text-sm italic text-muted">{comment.body}</p>
-          <p className="mt-0.5 text-[11px] text-muted/70">{formatRelativeTime(comment.createdAt)}</p>
+          <p className="mt-0.5 text-[11px] text-muted/70">
+            {formatRelativeTime(comment.createdAt)}
+          </p>
         </div>
       </div>
     );
@@ -71,15 +89,26 @@ export function TaskCommentItem({ projectId, taskId, comment, canEdit, canDelete
 
   return (
     <div className="flex gap-3 py-3">
-      <Avatar src={comment.author?.avatar} name={comment.author?.name ?? "Unavailable member"} size="sm" />
+      <Avatar
+        src={comment.author?.avatar}
+        name={comment.author?.name ?? "Unavailable member"}
+        size="sm"
+      />
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2">
-            <span className="text-sm font-medium text-foreground">{comment.author?.name ?? "Unavailable member"}</span>
-            <span className="text-[11px] text-muted" title={formatDateTime(comment.createdAt)}>
+            <span className="text-sm font-medium text-foreground">
+              {comment.author?.name ?? "Unavailable member"}
+            </span>
+            <span
+              className="text-[11px] text-muted"
+              title={formatDateTime(comment.createdAt)}
+            >
               {formatRelativeTime(comment.createdAt)}
             </span>
-            {comment.isEdited && <span className="text-[11px] text-muted/70">(edited)</span>}
+            {comment.isEdited && (
+              <span className="text-[11px] text-muted/70">(edited)</span>
+            )}
           </div>
 
           {(canEdit || canDelete) && !isEditing && (
@@ -88,9 +117,16 @@ export function TaskCommentItem({ projectId, taskId, comment, canEdit, canDelete
                 <MoreHorizontal className="h-3.5 w-3.5" />
               </DropdownMenuTrigger>
               <DropdownMenuContent>
-                {canEdit && <DropdownMenuItem onClick={startEditing}>Edit</DropdownMenuItem>}
+                {canEdit && (
+                  <DropdownMenuItem onClick={startEditing}>
+                    Edit
+                  </DropdownMenuItem>
+                )}
                 {canDelete && (
-                  <DropdownMenuItem variant="danger" onClick={() => setConfirmingDelete(true)}>
+                  <DropdownMenuItem
+                    variant="danger"
+                    onClick={() => setConfirmingDelete(true)}
+                  >
                     Delete comment
                   </DropdownMenuItem>
                 )}
@@ -109,16 +145,31 @@ export function TaskCommentItem({ projectId, taskId, comment, canEdit, canDelete
               autoFocus
             />
             <div className="mt-2 flex justify-end gap-2">
-              <Button size="sm" variant="secondary" onClick={() => setIsEditing(false)} disabled={updateMutation.isPending}>
+              <Button
+                size="sm"
+                variant="secondary"
+                onClick={() => setIsEditing(false)}
+                disabled={updateMutation.isPending}
+              >
                 Cancel
               </Button>
-              <Button size="sm" onClick={handleSaveEdit} disabled={updateMutation.isPending || !draft.trim() || draft.trim() === comment.body}>
+              <Button
+                size="sm"
+                onClick={handleSaveEdit}
+                disabled={
+                  updateMutation.isPending ||
+                  !draft.trim() ||
+                  draft.trim() === comment.body
+                }
+              >
                 {updateMutation.isPending ? "Saving..." : "Save"}
               </Button>
             </div>
           </div>
         ) : (
-          <p className="mt-1 whitespace-pre-wrap break-words text-sm text-foreground/90">{comment.body}</p>
+          <p className="mt-1 whitespace-pre-wrap break-words text-sm text-foreground/90">
+            {comment.body}
+          </p>
         )}
       </div>
 

@@ -1,37 +1,35 @@
-
-
-export enum ProjectRole{
-    ADMIN = "admin",
-    MEMBER = "member"
+export enum ProjectRole {
+  ADMIN = "admin",
+  MEMBER = "member",
 }
 
 export interface IAddProjectMember {
-    userId: string;
-    role?: ProjectRole;
+  userId: string;
+  role?: ProjectRole;
 }
 
 export interface IUpdateProjectMemberRole {
-    role: ProjectRole;
+  role: ProjectRole;
 }
 
 export interface IProjectMemberResponse {
+  _id: string;
+
+  project: string;
+
+  user: {
     _id: string;
+    name: string;
+    username: string;
+    email: string;
+    avatar: string;
+  };
 
-    project: string;
+  role: ProjectRole;
 
-    user: {
-        _id: string;
-        name: string;
-        username: string;
-        email: string;
-        avatar: string;
-    };
-
-    role: ProjectRole;
-
-    joinedAt: Date;
+  joinedAt: Date;
 }
 
 export interface IProjectMembersResponse {
-    members: IProjectMemberResponse[];
+  members: IProjectMemberResponse[];
 }

@@ -1,8 +1,19 @@
 import { Link } from "react-router-dom";
-import { Archive, ArchiveRestore, FileText, MoreHorizontal, Pencil } from "lucide-react";
+import {
+  Archive,
+  ArchiveRestore,
+  FileText,
+  MoreHorizontal,
+  Pencil,
+} from "lucide-react";
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { formatDateTime, formatRelativeTime } from "@/lib/date";
 import type { ProjectDocument } from "../types/document.types";
 
@@ -44,16 +55,22 @@ export function DocumentListRow({
         <span
           className={
             "flex h-9 w-9 shrink-0 items-center justify-center rounded-lg " +
-            (document.isArchived ? "bg-border/40 text-muted" : "bg-primary/15 text-primary")
+            (document.isArchived
+              ? "bg-border/40 text-muted"
+              : "bg-primary/15 text-primary")
           }
         >
           <FileText className="h-4 w-4" />
         </span>
 
         <div className="min-w-0">
-          <p className="truncate text-sm font-medium text-foreground">{document.title}</p>
+          <p className="truncate text-sm font-medium text-foreground">
+            {document.title}
+          </p>
 
-          <p className="mt-0.5 truncate text-caption">Created by {document.createdBy?.name ?? "Unavailable member"}</p>
+          <p className="mt-0.5 truncate text-caption">
+            Created by {document.createdBy?.name ?? "Unavailable member"}
+          </p>
 
           <div className="mt-1 flex flex-wrap items-center gap-1.5 sm:hidden">
             <Badge variant="neutral">rev {document.revision}</Badge>
@@ -68,16 +85,29 @@ export function DocumentListRow({
         className="pointer-events-none relative z-[1] hidden min-w-0 text-caption sm:block"
         title={formatDateTime(document.updatedAt)}
       >
-        <p className="text-foreground">{formatRelativeTime(document.updatedAt)}</p>
-        <p className="truncate text-[11px] text-muted">{formatDateTime(document.updatedAt)}</p>
+        <p className="text-foreground">
+          {formatRelativeTime(document.updatedAt)}
+        </p>
+        <p className="truncate text-[11px] text-muted">
+          {formatDateTime(document.updatedAt)}
+        </p>
       </div>
 
       <div className="pointer-events-none relative z-[1] hidden min-w-0 items-center gap-2 sm:flex">
-        <Avatar src={document.updatedBy?.avatar} name={document.updatedBy?.name ?? "Unavailable member"} size="sm" />
-        <span className="truncate text-caption">{document.updatedBy?.name ?? "Unavailable member"}</span>
+        <Avatar
+          src={document.updatedBy?.avatar}
+          name={document.updatedBy?.name ?? "Unavailable member"}
+          size="sm"
+        />
+        <span className="truncate text-caption">
+          {document.updatedBy?.name ?? "Unavailable member"}
+        </span>
       </div>
 
-      <Badge variant="neutral" className="pointer-events-none relative z-[1] hidden shrink-0 sm:inline-flex">
+      <Badge
+        variant="neutral"
+        className="pointer-events-none relative z-[1] hidden shrink-0 sm:inline-flex"
+      >
         v{document.revision}
       </Badge>
 

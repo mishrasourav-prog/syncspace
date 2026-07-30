@@ -1,275 +1,189 @@
-import {
-    model,
-    Schema,
-    Types,
-} from "mongoose";
+import { model, Schema, Types } from "mongoose";
 
-import type {
-    Document,
-} from "mongoose";
+import type { Document } from "mongoose";
 
 export enum NotificationType {
-    TASK_CREATED =
-        "task_created",
+  TASK_CREATED = "task_created",
 
-    TASK_ASSIGNED =
-        "task_assigned",
+  TASK_ASSIGNED = "task_assigned",
 
-    TASK_STATUS_CHANGED =
-        "task_status_changed",
+  TASK_STATUS_CHANGED = "task_status_changed",
 
-    TASK_ASSIGNMENT_REQUESTED =
-        "task.assignment_requested",
+  TASK_ASSIGNMENT_REQUESTED = "task.assignment_requested",
 
-    TASK_ASSIGNMENT_REQUEST_ACCEPTED =
-        "task.assignment_request_accepted",
+  TASK_ASSIGNMENT_REQUEST_ACCEPTED = "task.assignment_request_accepted",
 
-    DISCUSSION_CREATED =
-        "discussion.created",
+  DISCUSSION_CREATED = "discussion.created",
 
-    DISCUSSION_REPLY =
-        "discussion.reply",
+  DISCUSSION_REPLY = "discussion.reply",
 
-    WORKSPACE_INVITATION =
-        "workspace.invitation",
+  WORKSPACE_INVITATION = "workspace.invitation",
 
-    PROJECT_INVITATION =
-        "project.invitation",
+  PROJECT_INVITATION = "project.invitation",
 
-    WORKSPACE_ROLE_CHANGED =
-        "workspace.role_changed",
+  WORKSPACE_ROLE_CHANGED = "workspace.role_changed",
 
-    PROJECT_ROLE_CHANGED =
-        "project.role_changed",
+  PROJECT_ROLE_CHANGED = "project.role_changed",
 
-    WORKSPACE_MEMBER_JOINED =
-        "workspace.member_joined",
+  WORKSPACE_MEMBER_JOINED = "workspace.member_joined",
 
-    PROJECT_MEMBER_JOINED =
-        "project.member_joined",
+  PROJECT_MEMBER_JOINED = "project.member_joined",
 }
 
 export enum NotificationEntityType {
-    TASK =
-        "task",
+  TASK = "task",
 
-    DISCUSSION =
-        "discussion",
+  DISCUSSION = "discussion",
 
-    WORKSPACE =
-        "workspace",
+  WORKSPACE = "workspace",
 
-    PROJECT =
-        "project",
+  PROJECT = "project",
 
-    WORKSPACE_INVITATION =
-        "workspace_invitation",
+  WORKSPACE_INVITATION = "workspace_invitation",
 
-    PROJECT_INVITATION =
-        "project_invitation",
+  PROJECT_INVITATION = "project_invitation",
 }
 
-export interface INotificationDocument
-    extends Document {
-    _id:
-        Types.ObjectId;
+export interface INotificationDocument extends Document {
+  _id: Types.ObjectId;
 
-    recipient:
-        Types.ObjectId;
+  recipient: Types.ObjectId;
 
-    actor?:
-        Types.ObjectId;
+  actor?: Types.ObjectId;
 
-    type:
-        NotificationType;
+  type: NotificationType;
 
-    title:
-        string;
+  title: string;
 
-    message:
-        string;
+  message: string;
 
-    workspace?:
-        Types.ObjectId;
+  workspace?: Types.ObjectId;
 
-    project?:
-        Types.ObjectId;
+  project?: Types.ObjectId;
 
-    entityType?:
-        NotificationEntityType;
+  entityType?: NotificationEntityType;
 
-    entityId?:
-        Types.ObjectId;
+  entityId?: Types.ObjectId;
 
-    metadata:
-        Record<
-            string,
-            unknown
-        >;
+  metadata: Record<string, unknown>;
 
-    isRead:
-        boolean;
+  isRead: boolean;
 
-    readAt?:
-        Date;
+  readAt?: Date;
 
-    createdAt:
-        Date;
+  createdAt: Date;
 
-    updatedAt:
-        Date;
+  updatedAt: Date;
 }
 
-const notificationSchema =
-    new Schema<INotificationDocument>(
-        {
-            recipient: {
-                type:
-                    Schema.Types.ObjectId,
+const notificationSchema = new Schema<INotificationDocument>(
+  {
+    recipient: {
+      type: Schema.Types.ObjectId,
 
-                ref:
-                    "User",
+      ref: "User",
 
-                required:
-                    true,
+      required: true,
 
-                index:
-                    true,
-            },
+      index: true,
+    },
 
-            actor: {
-                type:
-                    Schema.Types.ObjectId,
+    actor: {
+      type: Schema.Types.ObjectId,
 
-                ref:
-                    "User",
-            },
+      ref: "User",
+    },
 
-            type: {
-                type:
-                    String,
+    type: {
+      type: String,
 
-                enum:
-                    Object.values(
-                        NotificationType
-                    ),
+      enum: Object.values(NotificationType),
 
-                required:
-                    true,
-            },
+      required: true,
+    },
 
-            title: {
-                type:
-                    String,
+    title: {
+      type: String,
 
-                required:
-                    true,
+      required: true,
 
-                trim:
-                    true,
-            },
+      trim: true,
+    },
 
-            message: {
-                type:
-                    String,
+    message: {
+      type: String,
 
-                required:
-                    true,
+      required: true,
 
-                trim:
-                    true,
-            },
+      trim: true,
+    },
 
-            workspace: {
-                type:
-                    Schema.Types.ObjectId,
+    workspace: {
+      type: Schema.Types.ObjectId,
 
-                ref:
-                    "Workspace",
-            },
+      ref: "Workspace",
+    },
 
-            project: {
-                type:
-                    Schema.Types.ObjectId,
+    project: {
+      type: Schema.Types.ObjectId,
 
-                ref:
-                    "Project",
-            },
+      ref: "Project",
+    },
 
-            entityType: {
-                type:
-                    String,
+    entityType: {
+      type: String,
 
-                enum:
-                    Object.values(
-                        NotificationEntityType
-                    ),
-            },
+      enum: Object.values(NotificationEntityType),
+    },
 
-            entityId: {
-                type:
-                    Schema.Types.ObjectId,
-            },
+    entityId: {
+      type: Schema.Types.ObjectId,
+    },
 
-            metadata: {
-                type:
-                    Schema.Types.Mixed,
+    metadata: {
+      type: Schema.Types.Mixed,
 
-                default:
-                    {},
-            },
+      default: {},
+    },
 
-            isRead: {
-                type:
-                    Boolean,
+    isRead: {
+      type: Boolean,
 
-                default:
-                    false,
+      default: false,
 
-                index:
-                    true,
-            },
+      index: true,
+    },
 
-            readAt: {
-                type:
-                    Date,
-            },
-        },
-        {
-            timestamps:
-                true,
+    readAt: {
+      type: Date,
+    },
+  },
+  {
+    timestamps: true,
 
-            versionKey:
-                false,
-        }
-    );
+    versionKey: false,
+  },
+);
 
 notificationSchema.index({
-    recipient:
-        1,
+  recipient: 1,
 
-    createdAt:
-        -1,
+  createdAt: -1,
 
-    _id:
-        -1,
+  _id: -1,
 });
 
 notificationSchema.index({
-    recipient:
-        1,
+  recipient: 1,
 
-    isRead:
-        1,
+  isRead: 1,
 
-    createdAt:
-        -1,
+  createdAt: -1,
 });
 
-const Notification =
-    model<INotificationDocument>(
-        "Notification",
-        notificationSchema
-    );
+const Notification = model<INotificationDocument>(
+  "Notification",
+  notificationSchema,
+);
 
 export default Notification;

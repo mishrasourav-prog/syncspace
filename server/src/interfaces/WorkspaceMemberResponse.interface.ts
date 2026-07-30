@@ -2,21 +2,19 @@ import { WorkspaceRole } from "../modules/workspace-member/workspace-member.mode
 import { IUser } from "./user.interface";
 
 export interface WorkspaceMemberResponse {
+  _id: string;
 
-    _id: string;
+  user: IUser;
 
-    user: IUser;
+  role: WorkspaceRole;
 
-    role: WorkspaceRole;
+  joinedAt: Date;
 
-    joinedAt: Date;
+  createdAt: Date;
 
-    createdAt: Date;
-
-    updatedAt: Date;
+  updatedAt: Date;
 }
 
 export interface WorkspaceMembersResponse {
-
-    members: WorkspaceMemberResponse[];
+  members: WorkspaceMemberResponse[];
 }

@@ -9,7 +9,11 @@ interface RemoveWorkspaceMemberDialogProps {
   onClose: () => void;
 }
 
-export function RemoveWorkspaceMemberDialog({ workspaceId, member, onClose }: RemoveWorkspaceMemberDialogProps) {
+export function RemoveWorkspaceMemberDialog({
+  workspaceId,
+  member,
+  onClose,
+}: RemoveWorkspaceMemberDialogProps) {
   const removeMutation = useRemoveWorkspaceMemberMutation(workspaceId);
 
   function handleClose() {

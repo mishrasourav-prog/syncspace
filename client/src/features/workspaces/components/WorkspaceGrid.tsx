@@ -9,7 +9,13 @@ interface WorkspaceGridProps {
   onLeave: (workspace: WorkspaceSummary) => void;
 }
 
-export function WorkspaceGrid({ workspaces, onEdit, onArchive, onRestore, onLeave }: WorkspaceGridProps) {
+export function WorkspaceGrid({
+  workspaces,
+  onEdit,
+  onArchive,
+  onRestore,
+  onLeave,
+}: WorkspaceGridProps) {
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
       {workspaces.map((workspace) => (

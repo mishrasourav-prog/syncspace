@@ -1,4 +1,13 @@
-import { Archive, ArchiveRestore, ArrowLeft, Copy, Download, FileJson, FileText, RefreshCw } from "lucide-react";
+import {
+  Archive,
+  ArchiveRestore,
+  ArrowLeft,
+  Copy,
+  Download,
+  FileJson,
+  FileText,
+  RefreshCw,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface DocumentActionsPanelProps {
@@ -79,12 +88,24 @@ export function DocumentActionsPanel({
           Download HTML
         </Button>
 
-        <Button type="button" variant="secondary" size="sm" onClick={onDownloadJson} className="w-full justify-start">
+        <Button
+          type="button"
+          variant="secondary"
+          size="sm"
+          onClick={onDownloadJson}
+          className="w-full justify-start"
+        >
           <FileJson className="h-3.5 w-3.5" />
           Download JSON
         </Button>
 
-        <Button type="button" variant="secondary" size="sm" onClick={onCopyId} className="w-full justify-start">
+        <Button
+          type="button"
+          variant="secondary"
+          size="sm"
+          onClick={onCopyId}
+          className="w-full justify-start"
+        >
           <Copy className="h-3.5 w-3.5" />
           Copy document ID
         </Button>
@@ -97,25 +118,44 @@ export function DocumentActionsPanel({
           disabled={isRefreshing}
           className="w-full justify-start"
         >
-          <RefreshCw className={`h-3.5 w-3.5 ${isRefreshing ? "animate-spin" : ""}`} />
+          <RefreshCw
+            className={`h-3.5 w-3.5 ${isRefreshing ? "animate-spin" : ""}`}
+          />
           Refresh document
         </Button>
 
         {canArchive && (
-          <Button type="button" variant="secondary" size="sm" onClick={onArchive} className="w-full justify-start">
+          <Button
+            type="button"
+            variant="secondary"
+            size="sm"
+            onClick={onArchive}
+            className="w-full justify-start"
+          >
             <Archive className="h-3.5 w-3.5" />
             Archive document
           </Button>
         )}
 
         {canRestore && (
-          <Button type="button" size="sm" onClick={onRestore} className="w-full justify-start">
+          <Button
+            type="button"
+            size="sm"
+            onClick={onRestore}
+            className="w-full justify-start"
+          >
             <ArchiveRestore className="h-3.5 w-3.5" />
             Restore document
           </Button>
         )}
 
-        <Button type="button" variant="ghost" size="sm" onClick={onBackToDocuments} className="w-full justify-start">
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={onBackToDocuments}
+          className="w-full justify-start"
+        >
           <ArrowLeft className="h-3.5 w-3.5" />
           Back to Documents
         </Button>

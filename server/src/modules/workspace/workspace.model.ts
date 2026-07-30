@@ -21,7 +21,7 @@ export interface IWorkspaceDocument extends Document {
     allowGuestInvites: boolean;
     defaultRole: "member" | "guest";
     allowPublicProjects: boolean;
-    allowMemberInvites:boolean;
+    allowMemberInvites: boolean;
   };
 
   isArchived: boolean;
@@ -96,11 +96,10 @@ const workspaceSchema = new Schema<IWorkspaceDocument>(
         type: Boolean,
         default: false,
       },
-       allowMemberInvites: {
+      allowMemberInvites: {
         type: Boolean,
         default: true,
       },
-
     },
 
     isArchived: {
@@ -111,7 +110,7 @@ const workspaceSchema = new Schema<IWorkspaceDocument>(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 workspaceSchema.index({
@@ -121,5 +120,5 @@ workspaceSchema.index({
 
 export const Workspace = mongoose.model<IWorkspaceDocument>(
   "Workspace",
-  workspaceSchema
+  workspaceSchema,
 );

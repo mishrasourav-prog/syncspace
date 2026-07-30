@@ -51,7 +51,10 @@ export function DashboardNotificationFeed() {
           Notifications
         </h2>
         <div className="flex flex-wrap items-center gap-3">
-          <Link to="/notifications" className="text-xs font-medium text-primary transition-colors hover:text-primary/80">
+          <Link
+            to="/notifications"
+            className="text-xs font-medium text-primary transition-colors hover:text-primary/80"
+          >
             View all
           </Link>
           {unreadCount > 0 && (
@@ -81,15 +84,22 @@ export function DashboardNotificationFeed() {
           <div className="p-4">
             <DashboardSectionError
               compact
-              message={notificationsQuery.error?.message ?? "Unable to load notifications."}
+              message={
+                notificationsQuery.error?.message ??
+                "Unable to load notifications."
+              }
               onRetry={() => notificationsQuery.refetch()}
             />
           </div>
         )}
 
-        {!notificationsQuery.isLoading && !notificationsQuery.isError && notifications.length === 0 && (
-          <div className="px-4 py-10 text-center text-caption">You&apos;re all caught up.</div>
-        )}
+        {!notificationsQuery.isLoading &&
+          !notificationsQuery.isError &&
+          notifications.length === 0 && (
+            <div className="px-4 py-10 text-center text-caption">
+              You&apos;re all caught up.
+            </div>
+          )}
 
         {notifications.map((notification) => {
           const destination = getNotificationDestination(notification);
@@ -107,21 +117,36 @@ export function DashboardNotificationFeed() {
               }}
               className={cn(
                 "flex w-full gap-3 border-b border-border/60 px-4 py-3 text-left transition-colors last:border-b-0 hover:bg-border/20",
-                !notification.isRead && "bg-primary/5"
+                !notification.isRead && "bg-primary/5",
               )}
             >
               {notification.actor ? (
-                <Avatar src={notification.actor.avatar} name={notification.actor.name} size="sm" />
+                <Avatar
+                  src={notification.actor.avatar}
+                  name={notification.actor.name}
+                  size="sm"
+                />
               ) : (
-                <NotificationTypeIcon type={notification.type} className="h-8 w-8" />
+                <NotificationTypeIcon
+                  type={notification.type}
+                  className="h-8 w-8"
+                />
               )}
               <div className="min-w-0 flex-1">
                 <div className="flex items-start justify-between gap-2">
-                  <p className="truncate text-sm font-medium text-foreground">{notification.title}</p>
-                  {!notification.isRead && <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-primary" />}
+                  <p className="truncate text-sm font-medium text-foreground">
+                    {notification.title}
+                  </p>
+                  {!notification.isRead && (
+                    <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-primary" />
+                  )}
                 </div>
-                <p className="mt-0.5 line-clamp-2 text-xs text-muted">{notification.message}</p>
-                <p className="mt-1 text-[11px] text-muted/70">{formatRelativeTime(notification.createdAt)}</p>
+                <p className="mt-0.5 line-clamp-2 text-xs text-muted">
+                  {notification.message}
+                </p>
+                <p className="mt-1 text-[11px] text-muted/70">
+                  {formatRelativeTime(notification.createdAt)}
+                </p>
               </div>
             </button>
           );

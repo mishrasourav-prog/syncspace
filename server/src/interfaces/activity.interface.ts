@@ -1,56 +1,38 @@
 import type {
-    ActivityAction,
-    ActivityEntityType,
+  ActivityAction,
+  ActivityEntityType,
 } from "../modules/activity/activity.model";
 
 export interface IActivityActor {
-    _id:
-        string;
+  _id: string;
 
-    name:
-        string;
+  name: string;
 
-    username:
-        string;
+  username: string;
 
-    avatar?:
-        string;
+  avatar?: string;
 }
 
 export interface IActivityResponse {
-    _id:
-        string;
+  _id: string;
 
-    workspace:
-        string;
+  workspace: string;
 
-    project:
-        string;
+  project: string;
 
-    actor:
-        IActivityActor |
-        null;
+  actor: IActivityActor | null;
 
-    action:
-        ActivityAction;
+  action: ActivityAction;
 
-    entityType:
-        ActivityEntityType;
+  entityType: ActivityEntityType;
 
-    entityId:
-        string;
+  entityId: string;
 
-    metadata:
-        Record<
-            string,
-            unknown
-        >;
+  metadata: Record<string, unknown>;
 
-    createdAt:
-        Date;
+  createdAt: Date;
 }
 
 export interface IActivitiesResponse {
-    activities:
-        IActivityResponse[];
+  activities: IActivityResponse[];
 }

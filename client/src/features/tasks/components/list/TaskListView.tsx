@@ -9,7 +9,12 @@ interface TaskListViewProps {
   emptyMessage: string;
 }
 
-export function TaskListView({ tasks, now, onTaskClick, emptyMessage }: TaskListViewProps) {
+export function TaskListView({
+  tasks,
+  now,
+  onTaskClick,
+  emptyMessage,
+}: TaskListViewProps) {
   if (tasks.length === 0) {
     return (
       <div className="rounded-xl border border-dashed border-border bg-background/40 px-4 py-10 text-center">
@@ -22,7 +27,12 @@ export function TaskListView({ tasks, now, onTaskClick, emptyMessage }: TaskList
   return (
     <div className="space-y-2">
       {tasks.map((task) => (
-        <TaskListRow key={task._id} task={task} now={now} onClick={() => onTaskClick(task)} />
+        <TaskListRow
+          key={task._id}
+          task={task}
+          now={now}
+          onClick={() => onTaskClick(task)}
+        />
       ))}
     </div>
   );

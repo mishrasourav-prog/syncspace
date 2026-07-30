@@ -1,181 +1,139 @@
-import {
-    model,
-    Schema,
-    Types,
-} from "mongoose";
+import { model, Schema, Types } from "mongoose";
 
 export interface IDiscussion {
-    workspace: Types.ObjectId;
+  workspace: Types.ObjectId;
 
-    project: Types.ObjectId;
+  project: Types.ObjectId;
 
-    title: string;
+  title: string;
 
-    body: string;
+  body: string;
 
-    author: Types.ObjectId;
+  author: Types.ObjectId;
 
-    isPinned: boolean;
+  isPinned: boolean;
 
-    isLocked: boolean;
+  isLocked: boolean;
 
-    isDeleted: boolean;
+  isDeleted: boolean;
 
-    deletedAt?: Date | null;
+  deletedAt?: Date | null;
 
-    deletedBy?: Types.ObjectId | null;
+  deletedBy?: Types.ObjectId | null;
 
-    createdAt: Date;
+  createdAt: Date;
 
-    updatedAt: Date;
+  updatedAt: Date;
 }
 
-const discussionSchema =
-    new Schema<IDiscussion>(
-        {
-            workspace: {
-                type:
-                    Schema.Types.ObjectId,
+const discussionSchema = new Schema<IDiscussion>(
+  {
+    workspace: {
+      type: Schema.Types.ObjectId,
 
-                ref:
-                    "Workspace",
+      ref: "Workspace",
 
-                required:
-                    true,
-            },
+      required: true,
+    },
 
-            project: {
-                type:
-                    Schema.Types.ObjectId,
+    project: {
+      type: Schema.Types.ObjectId,
 
-                ref:
-                    "Project",
+      ref: "Project",
 
-                required:
-                    true,
-            },
+      required: true,
+    },
 
-            title: {
-                type:
-                    String,
+    title: {
+      type: String,
 
-                required:
-                    true,
+      required: true,
 
-                trim:
-                    true,
+      trim: true,
 
-                maxlength:
-                    200,
-            },
+      maxlength: 200,
+    },
 
-            body: {
-                type:
-                    String,
+    body: {
+      type: String,
 
-                required:
-                    true,
+      required: true,
 
-                trim:
-                    true,
+      trim: true,
 
-                maxlength:
-                    10_000,
-            },
+      maxlength: 10_000,
+    },
 
-            author: {
-                type:
-                    Schema.Types.ObjectId,
+    author: {
+      type: Schema.Types.ObjectId,
 
-                ref:
-                    "User",
+      ref: "User",
 
-                required:
-                    true,
-            },
+      required: true,
+    },
 
-            isPinned: {
-                type:
-                    Boolean,
+    isPinned: {
+      type: Boolean,
 
-                default:
-                    false,
+      default: false,
 
-                required:
-                    true,
-            },
+      required: true,
+    },
 
-            isLocked: {
-                type:
-                    Boolean,
+    isLocked: {
+      type: Boolean,
 
-                default:
-                    false,
+      default: false,
 
-                required:
-                    true,
-            },
+      required: true,
+    },
 
-            isDeleted: {
-                type:
-                    Boolean,
+    isDeleted: {
+      type: Boolean,
 
-                default:
-                    false,
+      default: false,
 
-                required:
-                    true,
-            },
+      required: true,
+    },
 
-            deletedAt: {
-                type:
-                    Date,
+    deletedAt: {
+      type: Date,
 
-                default:
-                    null,
-            },
+      default: null,
+    },
 
-            deletedBy: {
-                type:
-                    Schema.Types.ObjectId,
+    deletedBy: {
+      type: Schema.Types.ObjectId,
 
-                ref:
-                    "User",
+      ref: "User",
 
-                default:
-                    null,
-            },
-        },
-        {
-            timestamps:
-                true,
+      default: null,
+    },
+  },
+  {
+    timestamps: true,
 
-            versionKey:
-                false,
-        }
-    );
+    versionKey: false,
+  },
+);
 
 discussionSchema.index({
-    project: 1,
-    isDeleted: 1,
-    _id: -1,
+  project: 1,
+  isDeleted: 1,
+  _id: -1,
 });
 
 discussionSchema.index({
-    project: 1,
-    isPinned: 1,
-    updatedAt: -1,
+  project: 1,
+  isPinned: 1,
+  updatedAt: -1,
 });
 
 discussionSchema.index({
-    author: 1,
-    createdAt: -1,
+  author: 1,
+  createdAt: -1,
 });
 
-const Discussion =
-    model<IDiscussion>(
-        "Discussion",
-        discussionSchema
-    );
+const Discussion = model<IDiscussion>("Discussion", discussionSchema);
 
 export default Discussion;

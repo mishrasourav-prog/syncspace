@@ -47,7 +47,7 @@ export interface UseNotificationPageStateResult {
 
 export function useNotificationPageState(
   notifications: NotificationItem[],
-  isDesktopMasterDetail: boolean
+  isDesktopMasterDetail: boolean,
 ): UseNotificationPageStateResult {
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -60,7 +60,7 @@ export function useNotificationPageState(
     const filtered = notifications.filter(
       (notification) =>
         matchesNotificationFilter(notification, filter) &&
-        matchesNotificationSearch(notification, q)
+        matchesNotificationSearch(notification, q),
     );
 
     return [...filtered].sort((a, b) => {
@@ -74,9 +74,11 @@ export function useNotificationPageState(
   const selectedNotification = useMemo(
     () =>
       selectedId
-        ? notifications.find((notification) => notification._id === selectedId) ?? null
+        ? (notifications.find(
+            (notification) => notification._id === selectedId,
+          ) ?? null)
         : null,
-    [notifications, selectedId]
+    [notifications, selectedId],
   );
 
   const updateParams = useCallback(
@@ -85,7 +87,7 @@ export function useNotificationPageState(
       mutate(next);
       setSearchParams(next, { replace: true });
     },
-    [searchParams, setSearchParams]
+    [searchParams, setSearchParams],
   );
 
   const setQuery = useCallback(
@@ -96,7 +98,7 @@ export function useNotificationPageState(
         else next.delete("q");
       });
     },
-    [updateParams]
+    [updateParams],
   );
 
   const setFilter = useCallback(
@@ -106,7 +108,7 @@ export function useNotificationPageState(
         else next.set("filter", value);
       });
     },
-    [updateParams]
+    [updateParams],
   );
 
   const setSort = useCallback(
@@ -116,7 +118,7 @@ export function useNotificationPageState(
         else next.set("sort", value);
       });
     },
-    [updateParams]
+    [updateParams],
   );
 
   const selectNotification = useCallback(
@@ -126,7 +128,7 @@ export function useNotificationPageState(
         else next.delete("selected");
       });
     },
-    [updateParams]
+    [updateParams],
   );
 
   const clearSelection = useCallback(() => {
@@ -148,7 +150,9 @@ export function useNotificationPageState(
     if (!isDesktopMasterDetail) return;
 
     const selectedIsVisible = selectedId
-      ? visibleNotifications.some((notification) => notification._id === selectedId)
+      ? visibleNotifications.some(
+          (notification) => notification._id === selectedId,
+        )
       : false;
 
     if (selectedIsVisible) return;

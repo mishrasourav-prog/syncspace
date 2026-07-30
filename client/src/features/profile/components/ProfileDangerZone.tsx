@@ -24,7 +24,8 @@ export function ProfileDangerZone({ profile }: ProfileDangerZoneProps) {
         Danger Zone
       </h2>
       <p className="mt-1 text-caption">
-        Security and irreversible account actions require additional confirmation.
+        Security and irreversible account actions require additional
+        confirmation.
       </p>
 
       <div className="mt-4 grid gap-3 sm:grid-cols-2">
@@ -37,7 +38,9 @@ export function ProfileDangerZone({ profile }: ProfileDangerZoneProps) {
             <KeyRound className="h-4.5 w-4.5" aria-hidden />
           </span>
           <span className="min-w-0 flex-1">
-            <span className="block text-sm font-semibold text-foreground">Change Password</span>
+            <span className="block text-sm font-semibold text-foreground">
+              Change Password
+            </span>
             <span className="mt-1 block text-caption">
               {profile.canChangePassword
                 ? "Update your password and sign out every active session."
@@ -56,9 +59,12 @@ export function ProfileDangerZone({ profile }: ProfileDangerZoneProps) {
             <Trash2 className="h-4.5 w-4.5" aria-hidden />
           </span>
           <span className="min-w-0 flex-1">
-            <span className="block text-sm font-semibold text-foreground">Delete Account</span>
+            <span className="block text-sm font-semibold text-foreground">
+              Delete Account
+            </span>
             <span className="mt-1 block text-caption">
-              Remove current access and anonymize your personal account identity permanently.
+              Remove current access and anonymize your personal account identity
+              permanently.
             </span>
           </span>
           <ChevronRight className="h-4 w-4 shrink-0 text-muted" aria-hidden />

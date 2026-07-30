@@ -76,12 +76,21 @@ export function ProductShowcase() {
                 </div>
               </Reveal>
 
-              <Reveal delay={80} className={imageFirst ? "lg:order-2" : "lg:order-1"}>
+              <Reveal
+                delay={80}
+                className={imageFirst ? "lg:order-2" : "lg:order-1"}
+              >
                 <h2 className="text-h1 text-foreground">{item.heading}</h2>
                 <ul className="mt-6 flex flex-col gap-3">
                   {item.points.map((point) => (
-                    <li key={point} className="flex items-start gap-3 text-sm leading-relaxed text-muted sm:text-base">
-                      <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" aria-hidden="true" />
+                    <li
+                      key={point}
+                      className="flex items-start gap-3 text-sm leading-relaxed text-muted sm:text-base"
+                    >
+                      <span
+                        className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-primary"
+                        aria-hidden="true"
+                      />
                       {point}
                     </li>
                   ))}

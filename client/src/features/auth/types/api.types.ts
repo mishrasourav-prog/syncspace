@@ -1,20 +1,13 @@
 export type ApiResponse<T = void> = {
-    success:
-        boolean;
+  success: boolean;
 
-    statusCode:
-        number;
+  statusCode: number;
 
-    message:
-        string;
-} & (
-    [T] extends [void]
-        ? {
-            data?:
-                never;
-        }
-        : {
-            data:
-                T;
-        }
-);
+  message: string;
+} & ([T] extends [void]
+  ? {
+      data?: never;
+    }
+  : {
+      data: T;
+    });

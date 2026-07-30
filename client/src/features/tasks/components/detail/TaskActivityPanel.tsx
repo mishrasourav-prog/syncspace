@@ -13,15 +13,21 @@ interface TaskActivityPanelProps {
   taskId: string;
 }
 
-const SUPPORTED_TASK_ACTIVITY = new Set(["task.created", "task.status_changed"]);
+const SUPPORTED_TASK_ACTIVITY = new Set([
+  "task.created",
+  "task.status_changed",
+]);
 
-export function TaskActivityPanel({ projectId, taskId }: TaskActivityPanelProps) {
+export function TaskActivityPanel({
+  projectId,
+  taskId,
+}: TaskActivityPanelProps) {
   const activitiesQuery = useProjectActivitiesQuery(projectId);
   const taskActivities = (activitiesQuery.data ?? []).filter(
     (activity) =>
       activity.entityType === "task" &&
       activity.entityId === taskId &&
-      SUPPORTED_TASK_ACTIVITY.has(activity.action)
+      SUPPORTED_TASK_ACTIVITY.has(activity.action),
   );
 
   return (
@@ -58,40 +64,61 @@ export function TaskActivityPanel({ projectId, taskId }: TaskActivityPanelProps)
         </div>
       )}
 
-      {!activitiesQuery.isLoading && !activitiesQuery.isError && taskActivities.length === 0 && (
-        <p className="text-sm text-muted">No recent activity is available for this task.</p>
-      )}
+      {!activitiesQuery.isLoading &&
+        !activitiesQuery.isError &&
+        taskActivities.length === 0 && (
+          <p className="text-sm text-muted">
+            No recent activity is available for this task.
+          </p>
+        )}
 
-      {!activitiesQuery.isLoading && !activitiesQuery.isError && taskActivities.length > 0 && (
-        <ul className="space-y-3">
-          {taskActivities.map((activity) => {
-            const Icon = getActivityActionIcon(activity.action);
-            const statusChange = getActivityStatusChange(activity);
+      {!activitiesQuery.isLoading &&
+        !activitiesQuery.isError &&
+        taskActivities.length > 0 && (
+          <ul className="space-y-3">
+            {taskActivities.map((activity) => {
+              const Icon = getActivityActionIcon(activity.action);
+              const statusChange = getActivityStatusChange(activity);
 
-            return (
-              <li key={activity._id} className="flex gap-2.5">
-                {activity.actor ? (
-                  <Avatar src={activity.actor.avatar} name={activity.actor.name} size="sm" />
-                ) : (
-                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-border/50 text-muted">
-                    <Icon className="h-3.5 w-3.5" />
-                  </span>
-                )}
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm text-foreground">
-                    <span className="font-medium">{activity.actor?.name ?? "System"}</span>{" "}
-                    <span className="text-muted">{getActivityActionCopy(activity.action)}</span>
-                  </p>
-                  {statusChange && <p className="mt-0.5 text-xs text-muted">{statusChange}</p>}
-                  <p className="mt-0.5 text-[11px] text-muted/70" title={formatDateTime(activity.createdAt)}>
-                    {formatRelativeTime(activity.createdAt)}
-                  </p>
-                </div>
-              </li>
-            );
-          })}
-        </ul>
-      )}
+              return (
+                <li key={activity._id} className="flex gap-2.5">
+                  {activity.actor ? (
+                    <Avatar
+                      src={activity.actor.avatar}
+                      name={activity.actor.name}
+                      size="sm"
+                    />
+                  ) : (
+                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-border/50 text-muted">
+                      <Icon className="h-3.5 w-3.5" />
+                    </span>
+                  )}
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm text-foreground">
+                      <span className="font-medium">
+                        {activity.actor?.name ?? "System"}
+                      </span>{" "}
+                      <span className="text-muted">
+                        {getActivityActionCopy(activity.action)}
+                      </span>
+                    </p>
+                    {statusChange && (
+                      <p className="mt-0.5 text-xs text-muted">
+                        {statusChange}
+                      </p>
+                    )}
+                    <p
+                      className="mt-0.5 text-[11px] text-muted/70"
+                      title={formatDateTime(activity.createdAt)}
+                    >
+                      {formatRelativeTime(activity.createdAt)}
+                    </p>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        )}
     </section>
   );
 }

@@ -18,7 +18,10 @@ import {
   profileFormSchema,
   toUpdateSelfProfilePayload,
 } from "../schemas/profile.schemas";
-import type { SelfProfile, UpdateSelfProfilePayload } from "../types/profile.types";
+import type {
+  SelfProfile,
+  UpdateSelfProfilePayload,
+} from "../types/profile.types";
 
 interface PersonalInformationCardProps {
   profile: SelfProfile;
@@ -39,7 +42,7 @@ function toDefaultValues(profile: SelfProfile): ProfileFormValues {
 
 function buildChangedPayload(
   values: ProfileFormValues,
-  profile: SelfProfile
+  profile: SelfProfile,
 ): UpdateSelfProfilePayload {
   const normalized = toUpdateSelfProfilePayload(values);
   const payload: UpdateSelfProfilePayload = {};
@@ -158,7 +161,10 @@ export function PersonalInformationCard({
         aria-labelledby="personal-information-heading"
         className="rounded-xl border border-border bg-surface/60 p-4 shadow-soft sm:p-6"
       >
-        <h2 id="personal-information-heading" className="text-h3 text-foreground">
+        <h2
+          id="personal-information-heading"
+          className="text-h3 text-foreground"
+        >
           Personal Information
         </h2>
 
@@ -169,11 +175,15 @@ export function PersonalInformationCard({
           </div>
           <div>
             <dt className="text-caption">Username</dt>
-            <dd className="mt-1 text-sm text-foreground">@{profile.username}</dd>
+            <dd className="mt-1 text-sm text-foreground">
+              @{profile.username}
+            </dd>
           </div>
           <div className="sm:col-span-2">
             <dt className="text-caption">Email Address</dt>
-            <dd className="mt-1 break-all text-sm text-foreground">{profile.email}</dd>
+            <dd className="mt-1 break-all text-sm text-foreground">
+              {profile.email}
+            </dd>
           </div>
           <div>
             <dt className="text-caption">Headline</dt>
@@ -206,10 +216,15 @@ export function PersonalInformationCard({
       noValidate
     >
       <div>
-        <h2 id="personal-information-heading" className="text-h3 text-foreground">
+        <h2
+          id="personal-information-heading"
+          className="text-h3 text-foreground"
+        >
           Personal Information
         </h2>
-        <p className="mt-1 text-caption">Update the public details your teammates see.</p>
+        <p className="mt-1 text-caption">
+          Update the public details your teammates see.
+        </p>
       </div>
 
       <div className="mt-5 grid grid-cols-1 gap-x-4 sm:grid-cols-2">
@@ -241,7 +256,8 @@ export function PersonalInformationCard({
             className="cursor-not-allowed opacity-70"
           />
           <p id="profile-email-help" className="mt-1.5 text-xs text-muted">
-            Email changes require a verified email-change workflow and are not available in this version.
+            Email changes require a verified email-change workflow and are not
+            available in this version.
           </p>
         </div>
 

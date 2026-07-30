@@ -1,39 +1,11 @@
-/*
-|--------------------------------------------------------------------------
-| Shared Profile Contracts
-|--------------------------------------------------------------------------
-|
-| These types mirror the backend Profile API contracts exactly.
-|
-| Keep password/session/internal account fields out of all profile responses.
-|
-*/
+import type { WorkspaceRole } from "@/features/workspaces/types/workspace.types";
 
-import type {
-  WorkspaceRole,
-} from "@/features/workspaces/types/workspace.types";
+import type { ProjectRole } from "@/features/project-members/types/projectMember.types";
 
-import type {
-  ProjectRole,
-} from "@/features/project-members/types/projectMember.types";
-
-export type {
-  ProjectRole,
-  WorkspaceRole,
-};
+export type { ProjectRole, WorkspaceRole };
 
 export type AuthProvider =
-  | "email"
-  | "google"
-  | "facebook"
-  | "twitter"
-  | "github";
-
-/*
-|--------------------------------------------------------------------------
-| Authenticated User Profile
-|--------------------------------------------------------------------------
-*/
+  "email" | "google" | "facebook" | "twitter" | "github";
 
 export interface UserProfileStats {
   workspaces: number;
@@ -50,78 +22,42 @@ export interface SelfProfile {
 
   email: string;
 
-  avatar:
-    string |
-    null;
+  avatar: string | null;
 
-  headline:
-    string |
-    null;
+  headline: string | null;
 
-  bio:
-    string |
-    null;
+  bio: string | null;
 
-  location:
-    string |
-    null;
+  location: string | null;
 
-  provider:
-    AuthProvider;
+  provider: AuthProvider;
 
   createdAt: string;
 
   updatedAt: string;
 
-  lastLoginAt:
-    string |
-    null;
+  lastLoginAt: string | null;
 
   canChangePassword: boolean;
 
-  stats:
-    UserProfileStats;
+  stats: UserProfileStats;
 }
-
-/*
-|--------------------------------------------------------------------------
-| Update Profile
-|--------------------------------------------------------------------------
-*/
 
 export interface UpdateSelfProfilePayload {
   name?: string;
 
   username?: string;
 
-  headline?:
-    string |
-    null;
+  headline?: string | null;
 
-  bio?:
-    string |
-    null;
+  bio?: string | null;
 
-  location?:
-    string |
-    null;
+  location?: string | null;
 }
-
-/*
-|--------------------------------------------------------------------------
-| Avatar
-|--------------------------------------------------------------------------
-*/
 
 export interface ReplaceAvatarPayload {
   file: File;
 }
-
-/*
-|--------------------------------------------------------------------------
-| Change Password
-|--------------------------------------------------------------------------
-*/
 
 export interface ChangePasswordPayload {
   currentPassword: string;
@@ -130,12 +66,6 @@ export interface ChangePasswordPayload {
 
   confirmPassword: string;
 }
-
-/*
-|--------------------------------------------------------------------------
-| Account Deletion Readiness
-|--------------------------------------------------------------------------
-*/
 
 export interface OwnedWorkspaceDeletionBlocker {
   _id: string;
@@ -154,54 +84,35 @@ export interface LastAdminProjectDeletionBlocker {
 
   name: string;
 
-  workspace:
-    LastAdminProjectWorkspace;
+  workspace: LastAdminProjectWorkspace;
 }
 
 export interface AccountDeletionBlockers {
-  ownedWorkspaces:
-    OwnedWorkspaceDeletionBlocker[];
+  ownedWorkspaces: OwnedWorkspaceDeletionBlocker[];
 
-  lastAdminProjects:
-    LastAdminProjectDeletionBlocker[];
+  lastAdminProjects: LastAdminProjectDeletionBlocker[];
 }
 
 export interface AccountDeletionReadiness {
   canDelete: boolean;
 
-  blockers:
-    AccountDeletionBlockers;
+  blockers: AccountDeletionBlockers;
 }
 
-/*
-|--------------------------------------------------------------------------
-| Delete Account
-|--------------------------------------------------------------------------
-*/
-
 export interface DeleteAccountPayload {
-  confirmation:
-    "DELETE";
+  confirmation: "DELETE";
 
   username: string;
 
-  currentPassword?:
-    string;
+  currentPassword?: string;
 }
-
-/*
-|--------------------------------------------------------------------------
-| Read-Only Member Profile
-|--------------------------------------------------------------------------
-*/
 
 export interface MemberWorkspaceContext {
   _id: string;
 
   name: string;
 
-  role:
-    WorkspaceRole;
+  role: WorkspaceRole;
 
   joinedAt: string;
 }
@@ -211,20 +122,15 @@ export interface MemberProjectContext {
 
   name: string;
 
-  role:
-    ProjectRole;
+  role: ProjectRole;
 
   joinedAt: string;
 }
 
 export interface MemberProfileContext {
-  workspace:
-    MemberWorkspaceContext |
-    null;
+  workspace: MemberWorkspaceContext | null;
 
-  project:
-    MemberProjectContext |
-    null;
+  project: MemberProjectContext | null;
 }
 
 export interface MemberProfile {
@@ -234,34 +140,23 @@ export interface MemberProfile {
 
   username: string;
 
-  avatar:
-    string |
-    null;
+  avatar: string | null;
 
-  headline:
-    string |
-    null;
+  headline: string | null;
 
-  bio:
-    string |
-    null;
+  bio: string | null;
 
-  location:
-    string |
-    null;
+  location: string | null;
 
   createdAt: string;
 
-  context:
-    MemberProfileContext;
+  context: MemberProfileContext;
 }
 
 export interface MemberProfileQuery {
-  workspaceId?:
-    string;
+  workspaceId?: string;
 
-  projectId?:
-    string;
+  projectId?: string;
 }
 
 export type {

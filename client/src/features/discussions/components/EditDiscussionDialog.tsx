@@ -29,7 +29,7 @@ export function EditDiscussionDialog({
 }: EditDiscussionDialogProps) {
   const updateMutation = useUpdateDiscussionMutation(
     projectId,
-    discussion?._id ?? ""
+    discussion?._id ?? "",
   );
 
   const {
@@ -90,8 +90,7 @@ export function EditDiscussionDialog({
     >
       {updateMutation.isError && (
         <div className="mb-4 rounded-md border border-danger/30 bg-danger/10 px-3 py-2 text-xs text-danger">
-          {updateMutation.error?.message ??
-            "Unable to update this discussion."}
+          {updateMutation.error?.message ?? "Unable to update this discussion."}
         </div>
       )}
 

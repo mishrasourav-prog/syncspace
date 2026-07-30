@@ -25,7 +25,7 @@ import type {
 
 function patchDiscussionInPages(
   data: InfiniteData<DiscussionListResult> | undefined,
-  updated: Discussion
+  updated: Discussion,
 ): InfiniteData<DiscussionListResult> | undefined {
   if (!data) return data;
 
@@ -34,7 +34,7 @@ function patchDiscussionInPages(
     pages: data.pages.map((page) => ({
       ...page,
       discussions: page.discussions.map((discussion) =>
-        discussion._id === updated._id ? updated : discussion
+        discussion._id === updated._id ? updated : discussion,
       ),
     })),
   };
@@ -42,21 +42,21 @@ function patchDiscussionInPages(
 
 function patchDiscussionInPreview(
   data: DiscussionListResult | undefined,
-  updated: Discussion
+  updated: Discussion,
 ): DiscussionListResult | undefined {
   if (!data) return data;
 
   return {
     ...data,
     discussions: data.discussions.map((discussion) =>
-      discussion._id === updated._id ? updated : discussion
+      discussion._id === updated._id ? updated : discussion,
     ),
   };
 }
 
 function removeDiscussionFromPages(
   data: InfiniteData<DiscussionListResult> | undefined,
-  discussionId: string
+  discussionId: string,
 ): InfiniteData<DiscussionListResult> | undefined {
   if (!data) return data;
 
@@ -65,7 +65,7 @@ function removeDiscussionFromPages(
     pages: data.pages.map((page) => ({
       ...page,
       discussions: page.discussions.filter(
-        (discussion) => discussion._id !== discussionId
+        (discussion) => discussion._id !== discussionId,
       ),
     })),
   };
@@ -73,14 +73,14 @@ function removeDiscussionFromPages(
 
 function removeDiscussionFromPreview(
   data: DiscussionListResult | undefined,
-  discussionId: string
+  discussionId: string,
 ): DiscussionListResult | undefined {
   if (!data) return data;
 
   return {
     ...data,
     discussions: data.discussions.filter(
-      (discussion) => discussion._id !== discussionId
+      (discussion) => discussion._id !== discussionId,
     ),
   };
 }
@@ -88,38 +88,38 @@ function removeDiscussionFromPreview(
 function patchAllCachedLists(
   queryClient: QueryClient,
   projectId: string,
-  updated: Discussion
+  updated: Discussion,
 ): void {
   queryClient.setQueriesData<InfiniteData<DiscussionListResult>>(
     { queryKey: discussionQueryKeys.infinite(projectId) },
-    (previous) => patchDiscussionInPages(previous, updated)
+    (previous) => patchDiscussionInPages(previous, updated),
   );
 
   queryClient.setQueriesData<DiscussionListResult>(
     { queryKey: discussionQueryKeys.projectListAll(projectId) },
-    (previous) => patchDiscussionInPreview(previous, updated)
+    (previous) => patchDiscussionInPreview(previous, updated),
   );
 }
 
 function removeFromAllCachedLists(
   queryClient: QueryClient,
   projectId: string,
-  discussionId: string
+  discussionId: string,
 ): void {
   queryClient.setQueriesData<InfiniteData<DiscussionListResult>>(
     { queryKey: discussionQueryKeys.infinite(projectId) },
-    (previous) => removeDiscussionFromPages(previous, discussionId)
+    (previous) => removeDiscussionFromPages(previous, discussionId),
   );
 
   queryClient.setQueriesData<DiscussionListResult>(
     { queryKey: discussionQueryKeys.projectListAll(projectId) },
-    (previous) => removeDiscussionFromPreview(previous, discussionId)
+    (previous) => removeDiscussionFromPreview(previous, discussionId),
   );
 }
 
 function invalidateDiscussionData(
   queryClient: QueryClient,
-  projectId: string
+  projectId: string,
 ): void {
   void queryClient.invalidateQueries({
     queryKey: discussionQueryKeys.infinite(projectId),
@@ -140,7 +140,7 @@ export function useCreateDiscussionMutation(projectId: string) {
     onSuccess: (createdDiscussion) => {
       queryClient.setQueryData<Discussion>(
         discussionQueryKeys.detail(projectId, createdDiscussion._id),
-        createdDiscussion
+        createdDiscussion,
       );
       invalidateDiscussionData(queryClient, projectId);
     },
@@ -149,7 +149,7 @@ export function useCreateDiscussionMutation(projectId: string) {
 
 export function useUpdateDiscussionMutation(
   projectId: string,
-  discussionId: string
+  discussionId: string,
 ) {
   const queryClient = useQueryClient();
 
@@ -158,7 +158,7 @@ export function useUpdateDiscussionMutation(
     onSuccess: (updatedDiscussion) => {
       queryClient.setQueryData<Discussion>(
         discussionQueryKeys.detail(projectId, discussionId),
-        updatedDiscussion
+        updatedDiscussion,
       );
       patchAllCachedLists(queryClient, projectId, updatedDiscussion);
       invalidateDiscussionData(queryClient, projectId);
@@ -168,7 +168,7 @@ export function useUpdateDiscussionMutation(
 
 export function useDeleteDiscussionMutation(
   projectId: string,
-  discussionId: string
+  discussionId: string,
 ) {
   const queryClient = useQueryClient();
 
@@ -202,7 +202,7 @@ const MODERATION_REQUESTS: Record<
 function useDiscussionModerationMutation(
   projectId: string,
   discussionId: string,
-  action: ModerationAction
+  action: ModerationAction,
 ) {
   const queryClient = useQueryClient();
 
@@ -211,7 +211,7 @@ function useDiscussionModerationMutation(
     onSuccess: (updatedDiscussion) => {
       queryClient.setQueryData<Discussion>(
         discussionQueryKeys.detail(projectId, discussionId),
-        updatedDiscussion
+        updatedDiscussion,
       );
       patchAllCachedLists(queryClient, projectId, updatedDiscussion);
       invalidateDiscussionData(queryClient, projectId);
@@ -221,44 +221,28 @@ function useDiscussionModerationMutation(
 
 export function usePinDiscussionMutation(
   projectId: string,
-  discussionId: string
+  discussionId: string,
 ) {
-  return useDiscussionModerationMutation(
-    projectId,
-    discussionId,
-    "pin"
-  );
+  return useDiscussionModerationMutation(projectId, discussionId, "pin");
 }
 
 export function useUnpinDiscussionMutation(
   projectId: string,
-  discussionId: string
+  discussionId: string,
 ) {
-  return useDiscussionModerationMutation(
-    projectId,
-    discussionId,
-    "unpin"
-  );
+  return useDiscussionModerationMutation(projectId, discussionId, "unpin");
 }
 
 export function useLockDiscussionMutation(
   projectId: string,
-  discussionId: string
+  discussionId: string,
 ) {
-  return useDiscussionModerationMutation(
-    projectId,
-    discussionId,
-    "lock"
-  );
+  return useDiscussionModerationMutation(projectId, discussionId, "lock");
 }
 
 export function useUnlockDiscussionMutation(
   projectId: string,
-  discussionId: string
+  discussionId: string,
 ) {
-  return useDiscussionModerationMutation(
-    projectId,
-    discussionId,
-    "unlock"
-  );
+  return useDiscussionModerationMutation(projectId, discussionId, "unlock");
 }

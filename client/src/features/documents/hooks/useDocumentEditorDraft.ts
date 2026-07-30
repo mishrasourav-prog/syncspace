@@ -19,15 +19,10 @@ export interface UseDocumentEditorDraftResult {
   acceptSavedSnapshot: (document: ProjectDocument, content: unknown) => void;
 }
 
-/**
- * The accepted snapshot always represents server state. An optional restored
- * title may be shown as the current local draft, while dirty checks still
- * compare it with the authoritative server title/content.
- */
 export function useDocumentEditorDraft(
   initialDocument: ProjectDocument,
   serverContent: unknown,
-  restoredTitle?: string
+  restoredTitle?: string,
 ): UseDocumentEditorDraftResult {
   const [snapshot, setSnapshot] = useState<DocumentSnapshot>(() => ({
     revision: initialDocument.revision,
@@ -36,37 +31,44 @@ export function useDocumentEditorDraft(
   }));
 
   const [draftTitle, setDraftTitle] = useState<string>(
-    () => restoredTitle ?? initialDocument.title
+    () => restoredTitle ?? initialDocument.title,
   );
 
   const isTitleDirty = draftTitle.trim() !== snapshot.title;
 
   const isContentDirty = useCallback(
-    (liveContent: unknown) => !areDocumentContentsEqual(liveContent, snapshot.content),
-    [snapshot.content]
+    (liveContent: unknown) =>
+      !areDocumentContentsEqual(liveContent, snapshot.content),
+    [snapshot.content],
   );
 
   const isDirty = useCallback(
     (liveContent: unknown) => isTitleDirty || isContentDirty(liveContent),
-    [isTitleDirty, isContentDirty]
+    [isTitleDirty, isContentDirty],
   );
 
-  const acceptSavedSnapshot = useCallback((document: ProjectDocument, content: unknown) => {
-    setSnapshot({
-      revision: document.revision,
-      title: document.title,
-      content,
-    });
-  }, []);
+  const acceptSavedSnapshot = useCallback(
+    (document: ProjectDocument, content: unknown) => {
+      setSnapshot({
+        revision: document.revision,
+        title: document.title,
+        content,
+      });
+    },
+    [],
+  );
 
-  const acceptServerDocument = useCallback((document: ProjectDocument, content: unknown) => {
-    setSnapshot({
-      revision: document.revision,
-      title: document.title,
-      content,
-    });
-    setDraftTitle(document.title);
-  }, []);
+  const acceptServerDocument = useCallback(
+    (document: ProjectDocument, content: unknown) => {
+      setSnapshot({
+        revision: document.revision,
+        title: document.title,
+        content,
+      });
+      setDraftTitle(document.title);
+    },
+    [],
+  );
 
   return {
     snapshot,

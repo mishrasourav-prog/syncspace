@@ -32,7 +32,8 @@ export function TaskCommentsPanel({
 }: TaskCommentsPanelProps) {
   const commentsQuery = useTaskCommentsQuery(projectId, task._id);
 
-  const comments = commentsQuery.data?.pages.flatMap((page) => page.comments) ?? [];
+  const comments =
+    commentsQuery.data?.pages.flatMap((page) => page.comments) ?? [];
   const loadedCount = comments.length;
   const hasMore = commentsQuery.hasNextPage ?? false;
 
@@ -79,7 +80,9 @@ export function TaskCommentsPanel({
 
       {commentsQuery.isError && (
         <div className="flex items-center gap-2 text-sm text-muted">
-          <span>{commentsQuery.error?.message ?? "Unable to load comments."}</span>
+          <span>
+            {commentsQuery.error?.message ?? "Unable to load comments."}
+          </span>
           <button
             type="button"
             onClick={() => void commentsQuery.refetch()}
@@ -90,9 +93,13 @@ export function TaskCommentsPanel({
         </div>
       )}
 
-      {!commentsQuery.isLoading && !commentsQuery.isError && comments.length === 0 && (
-        <p className="text-sm text-muted">No comments yet. Start the conversation.</p>
-      )}
+      {!commentsQuery.isLoading &&
+        !commentsQuery.isError &&
+        comments.length === 0 && (
+          <p className="text-sm text-muted">
+            No comments yet. Start the conversation.
+          </p>
+        )}
 
       {!commentsQuery.isError && comments.length > 0 && (
         <div className="divide-y divide-border/60">
@@ -102,14 +109,20 @@ export function TaskCommentsPanel({
               projectId={projectId}
               taskId={task._id}
               comment={comment}
-              canEdit={canEditComment(comment, task, project, workspace, currentUserId)}
+              canEdit={canEditComment(
+                comment,
+                task,
+                project,
+                workspace,
+                currentUserId,
+              )}
               canDelete={canDeleteComment(
                 comment,
                 task,
                 project,
                 workspace,
                 role,
-                currentUserId
+                currentUserId,
               )}
             />
           ))}
@@ -124,7 +137,9 @@ export function TaskCommentsPanel({
             onClick={() => void commentsQuery.fetchNextPage()}
             disabled={commentsQuery.isFetchingNextPage}
           >
-            {commentsQuery.isFetchingNextPage ? "Loading..." : "Load more comments"}
+            {commentsQuery.isFetchingNextPage
+              ? "Loading..."
+              : "Load more comments"}
           </Button>
         </div>
       )}

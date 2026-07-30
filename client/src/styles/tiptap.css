@@ -1,15 +1,3 @@
-/*
-|--------------------------------------------------------------------------
-| Document Editor prose styles
-|--------------------------------------------------------------------------
-|
-| Scoped under .tiptap-prose so they only apply inside the Document Editor's
-| content pane (editing surface and read-only preview render the same
-| markup). Reuses the app's existing color/spacing tokens rather than
-| pulling in @tailwindcss/typography.
-|
-*/
-
 .tiptap-prose .ProseMirror {
   outline: none;
   min-height: 40vh;
@@ -145,7 +133,6 @@
   pointer-events: none;
 }
 
-/* Responsive safety for user-generated document content. */
 .tiptap-prose,
 .tiptap-prose .ProseMirror {
   min-width: 0;

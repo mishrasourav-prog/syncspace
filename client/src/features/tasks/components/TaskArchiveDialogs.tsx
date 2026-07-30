@@ -1,6 +1,9 @@
 import { toast } from "sonner";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
-import { useArchiveTaskMutation, useRestoreTaskMutation } from "../hooks/useTaskMutations";
+import {
+  useArchiveTaskMutation,
+  useRestoreTaskMutation,
+} from "../hooks/useTaskMutations";
 import type { Task } from "../types/task.types";
 
 export type TaskActionType = "archive" | "restore";
@@ -16,11 +19,16 @@ interface TaskArchiveDialogsProps {
   onClose: () => void;
 }
 
-export function TaskArchiveDialogs({ target, projectId, onClose }: TaskArchiveDialogsProps) {
+export function TaskArchiveDialogs({
+  target,
+  projectId,
+  onClose,
+}: TaskArchiveDialogsProps) {
   const archiveMutation = useArchiveTaskMutation(projectId);
   const restoreMutation = useRestoreTaskMutation(projectId);
 
-  const activeMutation = target?.type === "archive" ? archiveMutation : restoreMutation;
+  const activeMutation =
+    target?.type === "archive" ? archiveMutation : restoreMutation;
 
   function handleClose() {
     if (activeMutation.isPending) return;
@@ -38,7 +46,8 @@ export function TaskArchiveDialogs({ target, projectId, onClose }: TaskArchiveDi
           toast.success(`"${target.task.title}" was archived.`);
           onClose();
         },
-        onError: (error) => toast.error(error.message ?? "Unable to archive this item."),
+        onError: (error) =>
+          toast.error(error.message ?? "Unable to archive this item."),
       });
     } else {
       restoreMutation.mutate(target.task._id, {
@@ -46,7 +55,8 @@ export function TaskArchiveDialogs({ target, projectId, onClose }: TaskArchiveDi
           toast.success(`"${target.task.title}" was restored.`);
           onClose();
         },
-        onError: (error) => toast.error(error.message ?? "Unable to restore this item."),
+        onError: (error) =>
+          toast.error(error.message ?? "Unable to restore this item."),
       });
     }
   }
@@ -61,7 +71,9 @@ export function TaskArchiveDialogs({ target, projectId, onClose }: TaskArchiveDi
       open={Boolean(target)}
       onClose={handleClose}
       onConfirm={handleConfirm}
-      title={isArchive ? `Archive this ${itemLabel}?` : `Restore this ${itemLabel}?`}
+      title={
+        isArchive ? `Archive this ${itemLabel}?` : `Restore this ${itemLabel}?`
+      }
       description={
         isArchive
           ? `"${target.task.title}" will be hidden from the board and marked read-only until it's restored.`

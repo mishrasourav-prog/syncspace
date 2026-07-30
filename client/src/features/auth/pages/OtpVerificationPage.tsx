@@ -1,21 +1,15 @@
-import {
-  OtpVerificationForm,
-} from "../components/OtpVerificationForm";
+import { OtpVerificationForm } from "../components/OtpVerificationForm";
 
 import {
   useResendOtpMutation,
   useVerifyOtpMutation,
 } from "../hooks/useAuthMutations";
 
-import type {
-  VerifyOtpResponse,
-} from "../types/auth.types";
+import type { VerifyOtpResponse } from "../types/auth.types";
 
 interface OtpVerificationPageProps {
   email: string;
-  onSuccess: (
-    data: VerifyOtpResponse
-  ) => void;
+  onSuccess: (data: VerifyOtpResponse) => void;
   onChangeEmail?: () => void;
 }
 
@@ -24,11 +18,9 @@ export function OtpVerificationPage({
   onSuccess,
   onChangeEmail,
 }: OtpVerificationPageProps) {
-  const verifyOtpMutation =
-    useVerifyOtpMutation();
+  const verifyOtpMutation = useVerifyOtpMutation();
 
-  const resendOtpMutation =
-    useResendOtpMutation();
+  const resendOtpMutation = useResendOtpMutation();
 
   return (
     <OtpVerificationForm
@@ -37,51 +29,31 @@ export function OtpVerificationPage({
       email={email}
       verifyLabel="Verify code"
       errorMessage={
-        verifyOtpMutation.error
-          ?.message ??
-        resendOtpMutation.error
-          ?.message
+        verifyOtpMutation.error?.message ?? resendOtpMutation.error?.message
       }
-      isVerifying={
-        verifyOtpMutation.isPending
-      }
-      isResending={
-        resendOtpMutation.isPending
-      }
+      isVerifying={verifyOtpMutation.isPending}
+      isResending={resendOtpMutation.isPending}
       onCodeChange={() => {
         verifyOtpMutation.reset();
         resendOtpMutation.reset();
       }}
-      onVerify={
-        async (
-          otp
-        ) => {
-          resendOtpMutation.reset();
-          const result =
-            await verifyOtpMutation.mutateAsync({
-              email,
-              otp,
-            });
+      onVerify={async (otp) => {
+        resendOtpMutation.reset();
+        const result = await verifyOtpMutation.mutateAsync({
+          email,
+          otp,
+        });
 
-          onSuccess(
-            result
-          );
-        }
-      }
-      onResend={
-        async () => {
-          verifyOtpMutation.reset();
+        onSuccess(result);
+      }}
+      onResend={async () => {
+        verifyOtpMutation.reset();
 
-          await resendOtpMutation.mutateAsync(
-            email
-          );
+        await resendOtpMutation.mutateAsync(email);
 
-          return 60;
-        }
-      }
-      onChangeEmail={
-        onChangeEmail
-      }
+        return 60;
+      }}
+      onChangeEmail={onChangeEmail}
       changeEmailLabel="Use another email"
       initialCooldownSeconds={60}
     />

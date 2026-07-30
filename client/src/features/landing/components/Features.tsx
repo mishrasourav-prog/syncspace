@@ -1,4 +1,10 @@
-import { BellRing, FileText, FolderKanban, KanbanSquare, type LucideIcon } from "lucide-react";
+import {
+  BellRing,
+  FileText,
+  FolderKanban,
+  KanbanSquare,
+  type LucideIcon,
+} from "lucide-react";
 import { Reveal } from "./Reveal";
 
 interface FeatureRow {
@@ -11,28 +17,35 @@ const FEATURE_ROWS: FeatureRow[] = [
   {
     icon: FolderKanban,
     title: "Workspaces and projects",
-    description: "Organize members, roles, invitations, projects, and recent activity.",
+    description:
+      "Organize members, roles, invitations, projects, and recent activity.",
   },
   {
     icon: KanbanSquare,
     title: "Tasks and issues",
-    description: "Track ownership, status, priority, due dates, comments, and realtime changes.",
+    description:
+      "Track ownership, status, priority, due dates, comments, and realtime changes.",
   },
   {
     icon: FileText,
     title: "Documents",
-    description: "Keep project knowledge and working notes beside the rest of the work.",
+    description:
+      "Keep project knowledge and working notes beside the rest of the work.",
   },
   {
     icon: BellRing,
     title: "Discussions and notifications",
-    description: "Make decisions visible and help members follow relevant project activity.",
+    description:
+      "Make decisions visible and help members follow relevant project activity.",
   },
 ];
 
 export function Features() {
   return (
-    <section id="product" className="scroll-mt-20 px-4 py-16 sm:px-6 sm:py-20 lg:py-24">
+    <section
+      id="product"
+      className="scroll-mt-20 px-4 py-16 sm:px-6 sm:py-20 lg:py-24"
+    >
       <div className="mx-auto grid max-w-6xl gap-10 lg:grid-cols-2 lg:items-center lg:gap-16">
         <Reveal>
           <div className="overflow-hidden rounded-lg border border-border bg-surface">
@@ -48,10 +61,12 @@ export function Features() {
         </Reveal>
 
         <Reveal delay={80}>
-          <h2 className="text-h1 text-foreground">Everything your team needs to stay aligned.</h2>
+          <h2 className="text-h1 text-foreground">
+            Everything your team needs to stay aligned.
+          </h2>
           <p className="mt-4 max-w-md text-sm leading-relaxed text-muted sm:text-base">
-            Work stays easier to follow when tasks, knowledge, conversations, and access all live beside the
-            project they belong to.
+            Work stays easier to follow when tasks, knowledge, conversations,
+            and access all live beside the project they belong to.
           </p>
 
           <div className="mt-8 flex flex-col divide-y divide-border border-t border-border">
@@ -61,8 +76,12 @@ export function Features() {
                   <Icon className="h-4 w-4" />
                 </span>
                 <div>
-                  <h3 className="text-sm font-medium text-foreground">{title}</h3>
-                  <p className="mt-1 text-sm leading-relaxed text-muted">{description}</p>
+                  <h3 className="text-sm font-medium text-foreground">
+                    {title}
+                  </h3>
+                  <p className="mt-1 text-sm leading-relaxed text-muted">
+                    {description}
+                  </p>
                 </div>
               </div>
             ))}

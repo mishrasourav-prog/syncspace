@@ -1,115 +1,98 @@
-import mongoose, {
-    Document,
-    Schema,
-    Types,
-} from "mongoose";
+import mongoose, { Document, Schema, Types } from "mongoose";
 
 export interface ITaskCommentDocument extends Document {
+  _id: Types.ObjectId;
 
-    _id: Types.ObjectId;
+  task: Types.ObjectId;
 
-    task: Types.ObjectId;
+  author: Types.ObjectId;
 
-    author: Types.ObjectId;
+  body: string;
 
-    body: string;
+  isEdited: boolean;
 
-    isEdited: boolean;
+  editedAt?: Date;
 
-    editedAt?: Date;
+  isDeleted: boolean;
 
-    isDeleted: boolean;
+  createdAt: Date;
 
-    createdAt: Date;
+  updatedAt: Date;
 
-    updatedAt: Date;
+  deletedAt?: Date;
 
-    deletedAt?: Date;
-
-    deletedBy?: Types.ObjectId;
+  deletedBy?: Types.ObjectId;
 }
 
-const TaskCommentSchema =
-new Schema<ITaskCommentDocument>(
-{
+const TaskCommentSchema = new Schema<ITaskCommentDocument>(
+  {
     task: {
-        type: Schema.Types.ObjectId,
-        ref: "Task",
-        required: true,
-        index: true,
+      type: Schema.Types.ObjectId,
+      ref: "Task",
+      required: true,
+      index: true,
     },
 
     author: {
-        type: Schema.Types.ObjectId,
-        ref: "User",
-        required: true,
-        index: true,
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+      index: true,
     },
 
     body: {
-    type: String,
-    trim: true,
-    maxlength: 10000,
+      type: String,
+      trim: true,
+      maxlength: 10000,
 
-    validate: {
-        validator: function (
-            this: ITaskCommentDocument,
-            value: string
-        ) {
-            return this.isDeleted || value.length > 0;
+      validate: {
+        validator: function (this: ITaskCommentDocument, value: string) {
+          return this.isDeleted || value.length > 0;
         },
 
         message: "Comment body cannot be empty.",
+      },
     },
-},
 
     isEdited: {
-        type: Boolean,
-        default: false,
+      type: Boolean,
+      default: false,
     },
 
     editedAt: {
-        type: Date,
-        default:undefined
+      type: Date,
+      default: undefined,
     },
 
     isDeleted: {
-        type: Boolean,
-        default: false,
+      type: Boolean,
+      default: false,
     },
     deletedAt: {
-        type: Date,
-        default:undefined
+      type: Date,
+      default: undefined,
     },
     deletedBy: {
-        type: Schema.Types.ObjectId,
-        ref: "User",
-        default:undefined
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      default: undefined,
     },
-    
-},
-{
+  },
+  {
     timestamps: true,
-    optimisticConcurrency:true
-}
+    optimisticConcurrency: true,
+  },
 );
 
-/*
-|--------------------------------------------------------------------------
-| Indexes
-|--------------------------------------------------------------------------
-*/
-
 TaskCommentSchema.index({
-    task: 1,
-    createdAt: 1,
-    _id:1
+  task: 1,
+  createdAt: 1,
+  _id: 1,
 });
 
-const TaskComment =
-mongoose.model<ITaskCommentDocument>(
-    "TaskComment",
-    TaskCommentSchema
+const TaskComment = mongoose.model<ITaskCommentDocument>(
+  "TaskComment",
+  TaskCommentSchema,
 );
 
 export default TaskComment;

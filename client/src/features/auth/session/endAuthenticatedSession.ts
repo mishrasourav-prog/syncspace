@@ -23,14 +23,6 @@ interface EndAuthenticatedSessionOptions {
   tone?: "success" | "info";
 }
 
-/**
- * Clears the authenticated client state exactly once.
- *
- * An initiating HTTP mutation and the server's Socket.IO revocation event may
- * arrive in either order. The first path clears the current user; later paths
- * see that no authenticated user remains and become no-ops. This prevents
- * duplicate cache clears, redirects, and toasts.
- */
 export function endAuthenticatedSession({
   navigate,
   reason,

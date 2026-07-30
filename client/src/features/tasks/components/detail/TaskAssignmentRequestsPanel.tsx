@@ -29,8 +29,14 @@ export function TaskAssignmentRequestsPanel({
   canMutate,
 }: TaskAssignmentRequestsPanelProps) {
   const requestsQuery = useTaskAssignmentRequestsQuery(projectId, task._id);
-  const createMutation = useCreateTaskAssignmentRequestMutation(projectId, task._id);
-  const acceptMutation = useAcceptTaskAssignmentRequestMutation(projectId, task._id);
+  const createMutation = useCreateTaskAssignmentRequestMutation(
+    projectId,
+    task._id,
+  );
+  const acceptMutation = useAcceptTaskAssignmentRequestMutation(
+    projectId,
+    task._id,
+  );
 
   const requests = requestsQuery.data ?? [];
   const pendingRequest = requests[0];
@@ -47,7 +53,11 @@ export function TaskAssignmentRequestsPanel({
       <div className="rounded-lg border border-warning/30 bg-warning/5 px-4 py-3 text-sm text-warning">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <span>Admin assignment requests could not be loaded.</span>
-          <Button size="sm" variant="secondary" onClick={() => void requestsQuery.refetch()}>
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={() => void requestsQuery.refetch()}
+          >
             Retry
           </Button>
         </div>
@@ -72,7 +82,8 @@ export function TaskAssignmentRequestsPanel({
                 {pendingRequest.requester.name} requested admin assistance
               </p>
               <p className="text-xs text-muted">
-                @{pendingRequest.requester.username} · {formatRelativeTime(pendingRequest.requestedAt)}
+                @{pendingRequest.requester.username} ·{" "}
+                {formatRelativeTime(pendingRequest.requestedAt)}
               </p>
             </div>
           </div>
@@ -81,15 +92,22 @@ export function TaskAssignmentRequestsPanel({
             size="sm"
             onClick={() =>
               acceptMutation.mutate(pendingRequest._id, {
-                onSuccess: () => toast.success(`Request accepted. You are now assigned to this ${itemLabel}.`),
+                onSuccess: () =>
+                  toast.success(
+                    `Request accepted. You are now assigned to this ${itemLabel}.`,
+                  ),
                 onError: (error) =>
-                  toast.error(error.message ?? "Unable to accept the assignment request."),
+                  toast.error(
+                    error.message ?? "Unable to accept the assignment request.",
+                  ),
               })
             }
             disabled={!canMutate || acceptMutation.isPending}
           >
             <ShieldCheck className="h-4 w-4" />
-            {acceptMutation.isPending ? "Accepting…" : `Accept and take ${itemLabel}`}
+            {acceptMutation.isPending
+              ? "Accepting…"
+              : `Accept and take ${itemLabel}`}
           </Button>
         </div>
       </section>
@@ -104,7 +122,9 @@ export function TaskAssignmentRequestsPanel({
             <HandHelping className="h-4 w-4" />
           </span>
           <div>
-            <p className="text-sm font-medium text-foreground">Need a project admin to take this {itemLabel}?</p>
+            <p className="text-sm font-medium text-foreground">
+              Need a project admin to take this {itemLabel}?
+            </p>
             <p className="mt-0.5 text-xs text-muted">
               {pendingRequest
                 ? `${isOwnRequest ? "Your request" : `${pendingRequest.requester.name}'s request`} was sent to every project admin.`
@@ -123,9 +143,12 @@ export function TaskAssignmentRequestsPanel({
             variant="secondary"
             onClick={() =>
               createMutation.mutate(undefined, {
-                onSuccess: () => toast.success("Request sent to all project admins."),
+                onSuccess: () =>
+                  toast.success("Request sent to all project admins."),
                 onError: (error) =>
-                  toast.error(error.message ?? "Unable to send the assignment request."),
+                  toast.error(
+                    error.message ?? "Unable to send the assignment request.",
+                  ),
               })
             }
             disabled={!canMutate || createMutation.isPending}

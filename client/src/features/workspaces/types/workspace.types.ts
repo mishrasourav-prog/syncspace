@@ -39,10 +39,6 @@ export interface ReplaceWorkspaceAvatarPayload {
   file: File;
 }
 
-/*
-The create endpoint returns the raw workspace model without a membership
-role, since role is implicit (the creator is always the owner).
-*/
 export interface CreatedWorkspace {
   _id: string;
   name: string;

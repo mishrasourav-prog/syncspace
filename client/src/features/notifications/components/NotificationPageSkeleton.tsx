@@ -26,7 +26,10 @@ export function NotificationPageSkeleton() {
             <Skeleton className="h-5 w-32" />
           </div>
           {Array.from({ length: 8 }).map((_, index) => (
-            <div key={index} className="flex gap-3 border-b border-border/60 px-4 py-3 last:border-b-0">
+            <div
+              key={index}
+              className="flex gap-3 border-b border-border/60 px-4 py-3 last:border-b-0"
+            >
               <Skeleton className="h-9 w-9 shrink-0 rounded-lg" />
               <div className="min-w-0 flex-1 space-y-1.5">
                 <Skeleton className="h-3.5 w-2/3" />

@@ -1,55 +1,26 @@
-import {
-  useMemo,
-} from "react";
+import { useMemo } from "react";
 
-import {
-  zodResolver,
-} from "@hookform/resolvers/zod";
-import {
-  AlertTriangle,
-} from "lucide-react";
-import {
-  useForm,
-} from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { AlertTriangle } from "lucide-react";
+import { useForm } from "react-hook-form";
 
-import {
-  Button,
-} from "@/components/ui/button";
-import {
-  Dialog,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import {
-  Input,
-} from "@/components/ui/input";
-import {
-  FormField,
-} from "@/components/ui/label";
-import {
-  Skeleton,
-} from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogFooter } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { FormField } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
 
-import {
-  useDeleteAccountMutation,
-} from "../hooks/useProfileMutations";
-import {
-  useDeletionReadinessQuery,
-} from "../hooks/useProfileQueries";
+import { useDeleteAccountMutation } from "../hooks/useProfileMutations";
+import { useDeletionReadinessQuery } from "../hooks/useProfileQueries";
 import {
   createDeleteAccountFormSchema,
   type DeleteAccountFormValues,
   toDeleteAccountPayload,
 } from "../schemas/profile.schemas";
-import type {
-  SelfProfile,
-} from "../types/profile.types";
+import type { SelfProfile } from "../types/profile.types";
 
-import {
-  DeletionReadinessBlockers,
-} from "./DeletionReadinessBlockers";
-import {
-  ProfileErrorState,
-} from "./ProfileErrorState";
+import { DeletionReadinessBlockers } from "./DeletionReadinessBlockers";
+import { ProfileErrorState } from "./ProfileErrorState";
 
 interface DeleteAccountDialogProps {
   open: boolean;
@@ -57,44 +28,28 @@ interface DeleteAccountDialogProps {
   profile: SelfProfile;
 }
 
-const EMPTY_VALUES:
-  DeleteAccountFormValues = {
-    confirmation:
-      "",
-    username:
-      "",
-    currentPassword:
-      "",
-  };
+const EMPTY_VALUES: DeleteAccountFormValues = {
+  confirmation: "",
+  username: "",
+  currentPassword: "",
+};
 
 export function DeleteAccountDialog({
   open,
   onClose,
   profile,
 }: DeleteAccountDialogProps) {
-  const requireCurrentPassword =
-    profile.canChangePassword;
+  const requireCurrentPassword = profile.canChangePassword;
 
-  const readinessQuery =
-    useDeletionReadinessQuery(
-      open
-    );
+  const readinessQuery = useDeletionReadinessQuery(open);
 
-  const deleteAccountMutation =
-    useDeleteAccountMutation();
+  const deleteAccountMutation = useDeleteAccountMutation();
 
-  const schema =
-    useMemo(
-      () =>
-        createDeleteAccountFormSchema(
-          profile.username,
-          requireCurrentPassword
-        ),
-      [
-        profile.username,
-        requireCurrentPassword,
-      ]
-    );
+  const schema = useMemo(
+    () =>
+      createDeleteAccountFormSchema(profile.username, requireCurrentPassword),
+    [profile.username, requireCurrentPassword],
+  );
 
   const {
     register,
@@ -102,107 +57,65 @@ export function DeleteAccountDialog({
     reset,
     resetField,
     setFocus,
-    formState: {
-      errors,
-    },
+    formState: { errors },
   } = useForm<DeleteAccountFormValues>({
-    resolver:
-      zodResolver(
-        schema
-      ),
+    resolver: zodResolver(schema),
 
-    defaultValues:
-      EMPTY_VALUES,
+    defaultValues: EMPTY_VALUES,
   });
 
+  const handleClose = (): void => {
+    if (deleteAccountMutation.isPending) {
+      return;
+    }
 
-  const handleClose =
-    (): void => {
-      if (
-        deleteAccountMutation.isPending
-      ) {
-        return;
-      }
+    reset(EMPTY_VALUES);
 
-      reset(
-        EMPTY_VALUES
-      );
+    deleteAccountMutation.reset();
 
-      deleteAccountMutation.reset();
+    onClose();
+  };
 
-      onClose();
-    };
+  const onSubmit = (values: DeleteAccountFormValues): void => {
+    if (
+      deleteAccountMutation.isPending ||
+      readinessQuery.data?.canDelete !== true
+    ) {
+      return;
+    }
 
-  const onSubmit =
-    (
-      values:
-        DeleteAccountFormValues
-    ): void => {
-      if (
-        deleteAccountMutation.isPending ||
-        readinessQuery.data
-          ?.canDelete !==
-        true
-      ) {
-        return;
-      }
+    deleteAccountMutation.reset();
 
-      deleteAccountMutation.reset();
+    deleteAccountMutation.mutate(
+      toDeleteAccountPayload(values, requireCurrentPassword),
+      {
+        onError: (error) => {
+          if (error.status === 401 && requireCurrentPassword) {
+            resetField("currentPassword", {
+              defaultValue: "",
+            });
 
-      deleteAccountMutation.mutate(
-        toDeleteAccountPayload(
-          values,
-          requireCurrentPassword
-        ),
-        {
-          onError:
-            (
-              error
-            ) => {
-              if (
-                error.status ===
-                  401 &&
-                requireCurrentPassword
-              ) {
-                resetField(
-                  "currentPassword",
-                  {
-                    defaultValue:
-                      "",
-                  }
-                );
+            setFocus("currentPassword");
+          }
 
-                setFocus(
-                  "currentPassword"
-                );
-              }
-
-              if (
-                error.status ===
-                409
-              ) {
-                void readinessQuery.refetch();
-              }
-            },
-        }
-      );
-    };
+          if (error.status === 409) {
+            void readinessQuery.refetch();
+          }
+        },
+      },
+    );
+  };
 
   const readinessErrorMessage =
-    readinessQuery.error
-      ?.message ??
+    readinessQuery.error?.message ??
     "Unable to check whether this account can be deleted.";
 
   const mutationErrorMessage =
-    deleteAccountMutation.error
-      ?.message ??
+    deleteAccountMutation.error?.message ??
     "Unable to delete the account. Please try again.";
 
   const isBlocked =
-    readinessQuery.isSuccess &&
-    readinessQuery.data
-      .canDelete ===
-      false;
+    readinessQuery.isSuccess && readinessQuery.data.canDelete === false;
 
   return (
     <Dialog
@@ -224,11 +137,7 @@ export function DeleteAccountDialog({
           <Skeleton className="h-10 w-full" />
 
           <DialogFooter>
-            <Button
-              onClick={handleClose}
-              type="button"
-              variant="secondary"
-            >
+            <Button onClick={handleClose} type="button" variant="secondary">
               Cancel
             </Button>
           </DialogFooter>
@@ -247,33 +156,19 @@ export function DeleteAccountDialog({
           />
 
           <DialogFooter>
-            <Button
-              onClick={handleClose}
-              type="button"
-              variant="secondary"
-            >
+            <Button onClick={handleClose} type="button" variant="secondary">
               Cancel
             </Button>
           </DialogFooter>
         </div>
       ) : null}
 
-      {isBlocked &&
-      readinessQuery.data ? (
+      {isBlocked && readinessQuery.data ? (
         <div className="space-y-4">
-          <DeletionReadinessBlockers
-            blockers={
-              readinessQuery.data
-                .blockers
-            }
-          />
+          <DeletionReadinessBlockers blockers={readinessQuery.data.blockers} />
 
           <DialogFooter>
-            <Button
-              onClick={handleClose}
-              type="button"
-              variant="secondary"
-            >
+            <Button onClick={handleClose} type="button" variant="secondary">
               Close
             </Button>
 
@@ -290,17 +185,8 @@ export function DeleteAccountDialog({
         </div>
       ) : null}
 
-      {readinessQuery.isSuccess &&
-      readinessQuery.data
-        .canDelete ? (
-        <form
-          noValidate
-          onSubmit={
-            handleSubmit(
-              onSubmit
-            )
-          }
-        >
+      {readinessQuery.isSuccess && readinessQuery.data.canDelete ? (
+        <form noValidate onSubmit={handleSubmit(onSubmit)}>
           <div className="mb-5 rounded-lg border border-danger/30 bg-danger/10 p-4">
             <div className="flex items-start gap-3">
               <AlertTriangle
@@ -318,17 +204,15 @@ export function DeleteAccountDialog({
                     Your workspace and project memberships will be removed.
                   </li>
                   <li>
-                    Your current task assignments and private operational records will be removed.
+                    Your current task assignments and private operational
+                    records will be removed.
                   </li>
+                  <li>Your personal account identity will be anonymized.</li>
                   <li>
-                    Your personal account identity will be anonymized.
+                    Historical content you authored remains available under
+                    “Deleted user” so shared records stay intact.
                   </li>
-                  <li>
-                    Historical content you authored remains available under “Deleted user” so shared records stay intact.
-                  </li>
-                  <li>
-                    Every active session will be revoked immediately.
-                  </li>
+                  <li>Every active session will be revoked immediately.</li>
                 </ul>
               </div>
             </div>
@@ -340,18 +224,10 @@ export function DeleteAccountDialog({
           >
             <Input
               autoComplete="off"
-              disabled={
-                deleteAccountMutation
-                  .isPending
-              }
-              error={
-                errors.username
-                  ?.message
-              }
+              disabled={deleteAccountMutation.isPending}
+              error={errors.username?.message}
               id="delete-username"
-              {...register(
-                "username"
-              )}
+              {...register("username")}
             />
           </FormField>
 
@@ -362,41 +238,22 @@ export function DeleteAccountDialog({
             <Input
               autoCapitalize="characters"
               autoComplete="off"
-              disabled={
-                deleteAccountMutation
-                  .isPending
-              }
-              error={
-                errors.confirmation
-                  ?.message
-              }
+              disabled={deleteAccountMutation.isPending}
+              error={errors.confirmation?.message}
               id="delete-confirmation"
-              {...register(
-                "confirmation"
-              )}
+              {...register("confirmation")}
             />
           </FormField>
 
           {requireCurrentPassword ? (
-            <FormField
-              htmlFor="delete-password"
-              label="Current Password"
-            >
+            <FormField htmlFor="delete-password" label="Current Password">
               <Input
                 autoComplete="current-password"
-                disabled={
-                  deleteAccountMutation
-                    .isPending
-                }
-                error={
-                  errors.currentPassword
-                    ?.message
-                }
+                disabled={deleteAccountMutation.isPending}
+                error={errors.currentPassword?.message}
                 id="delete-password"
                 type="password"
-                {...register(
-                  "currentPassword"
-                )}
+                {...register("currentPassword")}
               />
             </FormField>
           ) : null}
@@ -412,10 +269,7 @@ export function DeleteAccountDialog({
 
           <DialogFooter>
             <Button
-              disabled={
-                deleteAccountMutation
-                  .isPending
-              }
+              disabled={deleteAccountMutation.isPending}
               onClick={handleClose}
               type="button"
               variant="secondary"
@@ -424,15 +278,11 @@ export function DeleteAccountDialog({
             </Button>
 
             <Button
-              disabled={
-                deleteAccountMutation
-                  .isPending
-              }
+              disabled={deleteAccountMutation.isPending}
               type="submit"
               variant="danger"
             >
-              {deleteAccountMutation
-                .isPending
+              {deleteAccountMutation.isPending
                 ? "Deleting…"
                 : "Permanently Delete Account"}
             </Button>

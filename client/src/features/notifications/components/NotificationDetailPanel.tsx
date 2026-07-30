@@ -31,13 +31,21 @@ export function NotificationDetailPanel({
   isMarkingAsRead,
   onNavigate,
 }: NotificationDetailPanelProps) {
-  const destination = notification ? getNotificationDestination(notification) : null;
-  const shouldVerifyResourceAccess = Boolean(destination?.requiresResourceAccess);
+  const destination = notification
+    ? getNotificationDestination(notification)
+    : null;
+  const shouldVerifyResourceAccess = Boolean(
+    destination?.requiresResourceAccess,
+  );
   const workspaceQuery = useWorkspaceQuery(
-    shouldVerifyResourceAccess ? notification?.workspace ?? undefined : undefined
+    shouldVerifyResourceAccess
+      ? (notification?.workspace ?? undefined)
+      : undefined,
   );
   const projectQuery = useProjectQuery(
-    shouldVerifyResourceAccess ? notification?.project ?? undefined : undefined
+    shouldVerifyResourceAccess
+      ? (notification?.project ?? undefined)
+      : undefined,
   );
 
   if (!notification) {
@@ -54,8 +62,14 @@ export function NotificationDetailPanel({
   const actorName = getNotificationActorName(notification);
   const supplemental = getNotificationSupplementalText(notification);
 
-  const workspaceLoading = shouldVerifyResourceAccess && Boolean(notification.workspace) && workspaceQuery.isLoading;
-  const projectLoading = shouldVerifyResourceAccess && Boolean(notification.project) && projectQuery.isLoading;
+  const workspaceLoading =
+    shouldVerifyResourceAccess &&
+    Boolean(notification.workspace) &&
+    workspaceQuery.isLoading;
+  const projectLoading =
+    shouldVerifyResourceAccess &&
+    Boolean(notification.project) &&
+    projectQuery.isLoading;
   const relatedContextLoading = workspaceLoading || projectLoading;
 
   const workspaceUnavailable =
@@ -69,13 +83,17 @@ export function NotificationDetailPanel({
     projectQuery.isError &&
     isUnavailableStatus(projectQuery.error?.status);
   const workspaceContextFailed =
-    Boolean(notification.workspace) && workspaceQuery.isError && !workspaceUnavailable;
+    Boolean(notification.workspace) &&
+    workspaceQuery.isError &&
+    !workspaceUnavailable;
   const projectContextFailed =
-    Boolean(notification.project) && projectQuery.isError && !projectUnavailable;
+    Boolean(notification.project) &&
+    projectQuery.isError &&
+    !projectUnavailable;
   const projectWorkspaceMismatch = Boolean(
     notification.workspace &&
-      projectQuery.data &&
-      projectQuery.data.workspace !== notification.workspace
+    projectQuery.data &&
+    projectQuery.data.workspace !== notification.workspace,
   );
 
   const relatedResourceUnavailable =
@@ -83,10 +101,10 @@ export function NotificationDetailPanel({
   const relatedContextFailed = workspaceContextFailed || projectContextFailed;
   const canOpenRelated = Boolean(
     destination &&
-      (!destination.requiresResourceAccess ||
-        (!relatedContextLoading &&
-          !relatedResourceUnavailable &&
-          !relatedContextFailed))
+    (!destination.requiresResourceAccess ||
+      (!relatedContextLoading &&
+        !relatedResourceUnavailable &&
+        !relatedContextFailed)),
   );
 
   function handleOpenRelated() {
@@ -114,7 +132,9 @@ export function NotificationDetailPanel({
         )}
         <div className="min-w-0 flex-1">
           <p className="text-h3 text-foreground">{notification.title}</p>
-          <p className="text-caption">{getNotificationTypeLabel(notification)}</p>
+          <p className="text-caption">
+            {getNotificationTypeLabel(notification)}
+          </p>
         </div>
         {!notification.isRead && (
           <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-primary">
@@ -141,7 +161,10 @@ export function NotificationDetailPanel({
           <dd className="text-right text-foreground">
             {notification.isRead ? "Read" : "Unread"}
             {notification.isRead && notification.readAt && (
-              <span className="ml-1 text-caption" title={formatDateTime(notification.readAt)}>
+              <span
+                className="ml-1 text-caption"
+                title={formatDateTime(notification.readAt)}
+              >
                 ({formatRelativeTime(notification.readAt)})
               </span>
             )}
@@ -171,7 +194,9 @@ export function NotificationDetailPanel({
                   Retry
                 </button>
               ) : (
-                <span className="block truncate">{workspaceQuery.data?.name ?? "—"}</span>
+                <span className="block truncate">
+                  {workspaceQuery.data?.name ?? "—"}
+                </span>
               )}
             </dd>
           </div>
@@ -195,7 +220,9 @@ export function NotificationDetailPanel({
                   Retry
                 </button>
               ) : (
-                <span className="block truncate">{projectQuery.data?.name ?? "—"}</span>
+                <span className="block truncate">
+                  {projectQuery.data?.name ?? "—"}
+                </span>
               )}
             </dd>
           </div>
@@ -204,13 +231,17 @@ export function NotificationDetailPanel({
         {supplemental && (
           <div className="flex items-center justify-between gap-2">
             <dt className="text-caption">Details</dt>
-            <dd className="truncate text-right text-foreground">{supplemental}</dd>
+            <dd className="truncate text-right text-foreground">
+              {supplemental}
+            </dd>
           </div>
         )}
       </dl>
 
       {relatedContextLoading && destination && (
-        <p className="text-caption text-muted">Checking access to the related item…</p>
+        <p className="text-caption text-muted">
+          Checking access to the related item…
+        </p>
       )}
 
       {relatedResourceUnavailable && (
@@ -223,7 +254,8 @@ export function NotificationDetailPanel({
       {relatedContextFailed && (
         <p className="flex items-start gap-1.5 text-caption text-muted">
           <AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-          Related project information could not be verified. Retry the failed context above.
+          Related project information could not be verified. Retry the failed
+          context above.
         </p>
       )}
 

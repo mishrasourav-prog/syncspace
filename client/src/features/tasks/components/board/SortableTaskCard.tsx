@@ -1,43 +1,28 @@
-import type {
-  HTMLAttributes,
-} from "react";
+import type { HTMLAttributes } from "react";
 
-import {
-  useSortable,
-} from "@dnd-kit/sortable";
+import { useSortable } from "@dnd-kit/sortable";
 
-import {
-  CSS,
-} from "@dnd-kit/utilities";
+import { CSS } from "@dnd-kit/utilities";
 
-import type {
-  Task,
-} from "../../types/task.types";
+import type { Task } from "../../types/task.types";
 
-import {
-  TaskCard,
-} from "./TaskCard";
+import { TaskCard } from "./TaskCard";
 
 interface SortableTaskCardProps {
-  task:
-    Task;
+  task: Task;
 
-  now:
-    number;
+  now: number;
 
-  onClick:
-    () => void;
+  onClick: () => void;
 
-  disabled?:
-    boolean;
+  disabled?: boolean;
 }
 
 export function SortableTaskCard({
   task,
   now,
   onClick,
-  disabled =
-    false,
+  disabled = false,
 }: SortableTaskCardProps) {
   const {
     attributes,
@@ -46,54 +31,31 @@ export function SortableTaskCard({
     transform,
     transition,
     isDragging,
-  } =
-    useSortable({
-      id:
-        task._id,
-      disabled,
-    });
+  } = useSortable({
+    id: task._id,
+    disabled,
+  });
 
   const style = {
-    transform:
-      CSS.Transform.toString(
-        transform
-      ),
+    transform: CSS.Transform.toString(transform),
     transition,
   };
 
-  const dragHandleProps =
-    disabled
-      ? undefined
-      : {
-          ...attributes,
-          ...listeners,
-        } as HTMLAttributes<HTMLButtonElement>;
+  const dragHandleProps = disabled
+    ? undefined
+    : ({
+        ...attributes,
+        ...listeners,
+      } as HTMLAttributes<HTMLButtonElement>);
 
   return (
-    <div
-      ref={
-        setNodeRef
-      }
-      style={
-        style
-      }
-    >
+    <div ref={setNodeRef} style={style}>
       <TaskCard
-        task={
-          task
-        }
-        now={
-          now
-        }
-        onClick={
-          onClick
-        }
-        isDragging={
-          isDragging
-        }
-        dragHandleProps={
-          dragHandleProps
-        }
+        task={task}
+        now={now}
+        onClick={onClick}
+        isDragging={isDragging}
+        dragHandleProps={dragHandleProps}
       />
     </div>
   );

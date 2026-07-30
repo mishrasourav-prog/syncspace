@@ -1,6 +1,25 @@
-import { useEffect, useRef, type ChangeEvent, type KeyboardEvent as ReactKeyboardEvent } from "react";
-import { Link, useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { ChevronRight, Menu, Plus, Search, X, LogOut, UserCircle } from "lucide-react";
+import {
+  useEffect,
+  useRef,
+  type ChangeEvent,
+  type KeyboardEvent as ReactKeyboardEvent,
+} from "react";
+import {
+  Link,
+  useLocation,
+  useNavigate,
+  useParams,
+  useSearchParams,
+} from "react-router-dom";
+import {
+  ChevronRight,
+  Menu,
+  Plus,
+  Search,
+  X,
+  LogOut,
+  UserCircle,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar } from "@/components/ui/avatar";
@@ -25,7 +44,10 @@ interface AppTopbarProps {
   onCreateWorkspace: () => void;
 }
 
-export function AppTopbar({ onOpenMobileNav, onCreateWorkspace }: AppTopbarProps) {
+export function AppTopbar({
+  onOpenMobileNav,
+  onCreateWorkspace,
+}: AppTopbarProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -41,51 +63,77 @@ export function AppTopbar({ onOpenMobileNav, onCreateWorkspace }: AppTopbarProps
   const isNotificationsRoute = location.pathname === "/notifications";
   const isProfileRoute = location.pathname === "/profile";
   const isMemberProfileRoute = location.pathname.startsWith("/members/");
-  const isProjectContext = Boolean(projectId) && location.pathname.includes("/projects/");
-  const tasksBasePath = projectId && workspaceId ? `/workspaces/${workspaceId}/projects/${projectId}/tasks` : undefined;
+  const isProjectContext =
+    Boolean(projectId) && location.pathname.includes("/projects/");
+  const tasksBasePath =
+    projectId && workspaceId
+      ? `/workspaces/${workspaceId}/projects/${projectId}/tasks`
+      : undefined;
   const isTasksRoute =
     isProjectContext &&
     Boolean(tasksBasePath) &&
-    (location.pathname === tasksBasePath || location.pathname.startsWith(`${tasksBasePath}/`));
+    (location.pathname === tasksBasePath ||
+      location.pathname.startsWith(`${tasksBasePath}/`));
   const isTaskDetailRoute = isTasksRoute && Boolean(taskId);
-  const taskQuery = useTaskQuery(isTaskDetailRoute ? projectId : undefined, isTaskDetailRoute ? taskId : undefined);
+  const taskQuery = useTaskQuery(
+    isTaskDetailRoute ? projectId : undefined,
+    isTaskDetailRoute ? taskId : undefined,
+  );
 
   const documentsBasePath =
-    projectId && workspaceId ? `/workspaces/${workspaceId}/projects/${projectId}/documents` : undefined;
+    projectId && workspaceId
+      ? `/workspaces/${workspaceId}/projects/${projectId}/documents`
+      : undefined;
   const isDocumentsRoute =
     isProjectContext &&
     Boolean(documentsBasePath) &&
-    (location.pathname === documentsBasePath || location.pathname.startsWith(`${documentsBasePath}/`));
+    (location.pathname === documentsBasePath ||
+      location.pathname.startsWith(`${documentsBasePath}/`));
   const isDocumentDetailRoute = isDocumentsRoute && Boolean(documentId);
   const documentQuery = useDocumentQuery(
     isDocumentDetailRoute ? projectId : undefined,
-    isDocumentDetailRoute ? documentId : undefined
+    isDocumentDetailRoute ? documentId : undefined,
   );
 
   const discussionsBasePath =
-    projectId && workspaceId ? `/workspaces/${workspaceId}/projects/${projectId}/discussions` : undefined;
+    projectId && workspaceId
+      ? `/workspaces/${workspaceId}/projects/${projectId}/discussions`
+      : undefined;
   const isDiscussionsRoute =
     isProjectContext &&
     Boolean(discussionsBasePath) &&
-    (location.pathname === discussionsBasePath || location.pathname.startsWith(`${discussionsBasePath}/`));
-  const workspaceQuery = useWorkspaceQuery(isWorkspaceContext ? workspaceId : undefined);
-  const projectQuery = useProjectQuery(isProjectContext ? projectId : undefined);
+    (location.pathname === discussionsBasePath ||
+      location.pathname.startsWith(`${discussionsBasePath}/`));
+  const workspaceQuery = useWorkspaceQuery(
+    isWorkspaceContext ? workspaceId : undefined,
+  );
+  const projectQuery = useProjectQuery(
+    isProjectContext ? projectId : undefined,
+  );
 
   const user = useAuthStore((state) => state.user);
   const { logout, isPending: isLoggingOut } = useLogout();
 
   const isDashboard = location.pathname === "/dashboard";
   const searchValue =
-    isDashboard || isWorkspaceContext || isNotificationsRoute ? searchParams.get("q") ?? "" : "";
+    isDashboard || isWorkspaceContext || isNotificationsRoute
+      ? (searchParams.get("q") ?? "")
+      : "";
   const showSearch = !isProfileRoute && !isMemberProfileRoute;
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
       const target = event.target as HTMLElement | null;
       const isTypingElsewhere =
-        target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable);
+        target &&
+        (target.tagName === "INPUT" ||
+          target.tagName === "TEXTAREA" ||
+          target.isContentEditable);
 
-      if ((event.key === "/" && !isTypingElsewhere) || ((event.metaKey || event.ctrlKey) && event.key === "k")) {
+      if (
+        (event.key === "/" && !isTypingElsewhere) ||
+        ((event.metaKey || event.ctrlKey) && event.key === "k")
+      ) {
         event.preventDefault();
         searchInputRef.current?.focus();
       }
@@ -114,7 +162,11 @@ export function AppTopbar({ onOpenMobileNav, onCreateWorkspace }: AppTopbarProps
     }
 
     if (!isDashboard && !isWorkspaceContext) {
-      navigate(constrainedValue ? `/dashboard?q=${encodeURIComponent(constrainedValue)}` : "/dashboard");
+      navigate(
+        constrainedValue
+          ? `/dashboard?q=${encodeURIComponent(constrainedValue)}`
+          : "/dashboard",
+      );
       return;
     }
 
@@ -154,16 +206,28 @@ export function AppTopbar({ onOpenMobileNav, onCreateWorkspace }: AppTopbarProps
         </button>
 
         {isProjectContext ? (
-          <nav aria-label="Breadcrumb" className="hidden min-w-0 items-center gap-1.5 text-sm lg:flex">
-            <Link to="/dashboard" className="shrink-0 text-muted transition-colors hover:text-foreground">
+          <nav
+            aria-label="Breadcrumb"
+            className="hidden min-w-0 items-center gap-1.5 text-sm lg:flex"
+          >
+            <Link
+              to="/dashboard"
+              className="shrink-0 text-muted transition-colors hover:text-foreground"
+            >
               Dashboard
             </Link>
             <ChevronRight className="h-3.5 w-3.5 shrink-0 text-muted/60" />
-            <Link to={`/workspaces/${workspaceId}`} className="shrink-0 truncate text-muted transition-colors hover:text-foreground">
+            <Link
+              to={`/workspaces/${workspaceId}`}
+              className="shrink-0 truncate text-muted transition-colors hover:text-foreground"
+            >
               {workspaceQuery.data?.name ?? "…"}
             </Link>
             <ChevronRight className="h-3.5 w-3.5 shrink-0 text-muted/60" />
-            <Link to={`/workspaces/${workspaceId}#projects`} className="shrink-0 text-muted transition-colors hover:text-foreground">
+            <Link
+              to={`/workspaces/${workspaceId}#projects`}
+              className="shrink-0 text-muted transition-colors hover:text-foreground"
+            >
               Projects
             </Link>
             <ChevronRight className="h-3.5 w-3.5 shrink-0 text-muted/60" />
@@ -175,7 +239,9 @@ export function AppTopbar({ onOpenMobileNav, onCreateWorkspace }: AppTopbarProps
                 {projectQuery.data?.name ?? "…"}
               </Link>
             ) : (
-              <span className="truncate font-medium text-foreground">{projectQuery.data?.name ?? "…"}</span>
+              <span className="truncate font-medium text-foreground">
+                {projectQuery.data?.name ?? "…"}
+              </span>
             )}
             {isTasksRoute && (
               <>
@@ -188,14 +254,18 @@ export function AppTopbar({ onOpenMobileNav, onCreateWorkspace }: AppTopbarProps
                     Tasks &amp; Issues
                   </Link>
                 ) : (
-                  <span className="truncate font-medium text-foreground">Tasks &amp; Issues</span>
+                  <span className="truncate font-medium text-foreground">
+                    Tasks &amp; Issues
+                  </span>
                 )}
               </>
             )}
             {isTaskDetailRoute && (
               <>
                 <ChevronRight className="h-3.5 w-3.5 shrink-0 text-muted/60" />
-                <span className="truncate font-medium text-foreground">{taskQuery.data?.title ?? "…"}</span>
+                <span className="truncate font-medium text-foreground">
+                  {taskQuery.data?.title ?? "…"}
+                </span>
               </>
             )}
             {isDocumentsRoute && (
@@ -209,39 +279,61 @@ export function AppTopbar({ onOpenMobileNav, onCreateWorkspace }: AppTopbarProps
                     Documents
                   </Link>
                 ) : (
-                  <span className="truncate font-medium text-foreground">Documents</span>
+                  <span className="truncate font-medium text-foreground">
+                    Documents
+                  </span>
                 )}
               </>
             )}
             {isDocumentDetailRoute && (
               <>
                 <ChevronRight className="h-3.5 w-3.5 shrink-0 text-muted/60" />
-                <span className="truncate font-medium text-foreground">{documentQuery.data?.title ?? "…"}</span>
+                <span className="truncate font-medium text-foreground">
+                  {documentQuery.data?.title ?? "…"}
+                </span>
               </>
             )}
             {isDiscussionsRoute && (
               <>
                 <ChevronRight className="h-3.5 w-3.5 shrink-0 text-muted/60" />
-                <span className="truncate font-medium text-foreground">Discussions</span>
+                <span className="truncate font-medium text-foreground">
+                  Discussions
+                </span>
               </>
             )}
           </nav>
         ) : isWorkspaceContext ? (
-          <nav aria-label="Breadcrumb" className="hidden min-w-0 items-center gap-1.5 text-sm lg:flex">
-            <Link to="/dashboard" className="shrink-0 text-muted transition-colors hover:text-foreground">
+          <nav
+            aria-label="Breadcrumb"
+            className="hidden min-w-0 items-center gap-1.5 text-sm lg:flex"
+          >
+            <Link
+              to="/dashboard"
+              className="shrink-0 text-muted transition-colors hover:text-foreground"
+            >
               Workspaces
             </Link>
             <ChevronRight className="h-3.5 w-3.5 shrink-0 text-muted/60" />
-            <span className="truncate font-medium text-foreground">{workspaceQuery.data?.name ?? "…"}</span>
+            <span className="truncate font-medium text-foreground">
+              {workspaceQuery.data?.name ?? "…"}
+            </span>
           </nav>
         ) : isNotificationsRoute ? (
-          <h1 className="hidden shrink-0 text-sm font-medium text-foreground lg:block">Notifications</h1>
+          <h1 className="hidden shrink-0 text-sm font-medium text-foreground lg:block">
+            Notifications
+          </h1>
         ) : isProfileRoute ? (
-          <span className="hidden shrink-0 text-sm font-medium text-foreground lg:block">Profile</span>
+          <span className="hidden shrink-0 text-sm font-medium text-foreground lg:block">
+            Profile
+          </span>
         ) : isMemberProfileRoute ? (
-          <span className="hidden shrink-0 text-sm font-medium text-foreground lg:block">Member Profile</span>
+          <span className="hidden shrink-0 text-sm font-medium text-foreground lg:block">
+            Member Profile
+          </span>
         ) : (
-          <h1 className="hidden shrink-0 text-sm font-medium text-foreground lg:block">Dashboard</h1>
+          <h1 className="hidden shrink-0 text-sm font-medium text-foreground lg:block">
+            Dashboard
+          </h1>
         )}
 
         {showSearch && (
@@ -249,7 +341,9 @@ export function AppTopbar({ onOpenMobileNav, onCreateWorkspace }: AppTopbarProps
             ref={searchInputRef}
             icon={Search}
             value={searchValue}
-            onChange={(event: ChangeEvent<HTMLInputElement>) => handleSearchChange(event.target.value)}
+            onChange={(event: ChangeEvent<HTMLInputElement>) =>
+              handleSearchChange(event.target.value)
+            }
             onKeyDown={(event: ReactKeyboardEvent<HTMLInputElement>) => {
               if (event.key === "Escape") searchInputRef.current?.blur();
             }}
@@ -273,46 +367,61 @@ export function AppTopbar({ onOpenMobileNav, onCreateWorkspace }: AppTopbarProps
       </div>
 
       <div className="flex shrink-0 items-center gap-2">
-        {!isWorkspaceContext && !isNotificationsRoute && !isProfileRoute && !isMemberProfileRoute && (
-          <>
-            <Button size="sm" onClick={onCreateWorkspace} className="hidden sm:inline-flex">
-              <Plus className="h-4 w-4" />
-              New workspace
-            </Button>
-            <Button
-              size="icon"
-              variant="secondary"
-              onClick={onCreateWorkspace}
-              className="sm:hidden"
-              aria-label="New workspace"
-            >
-              <Plus className="h-4 w-4" />
-            </Button>
-          </>
-        )}
+        {!isWorkspaceContext &&
+          !isNotificationsRoute &&
+          !isProfileRoute &&
+          !isMemberProfileRoute && (
+            <>
+              <Button
+                size="sm"
+                onClick={onCreateWorkspace}
+                className="hidden sm:inline-flex"
+              >
+                <Plus className="h-4 w-4" />
+                New workspace
+              </Button>
+              <Button
+                size="icon"
+                variant="secondary"
+                onClick={onCreateWorkspace}
+                className="sm:hidden"
+                aria-label="New workspace"
+              >
+                <Plus className="h-4 w-4" />
+              </Button>
+            </>
+          )}
 
         <NotificationCenter />
 
-        {(isWorkspaceContext || isProfileRoute || isMemberProfileRoute) && user && (
-          <DropdownMenu>
-            <DropdownMenuTrigger aria-label="Account menu" className="!h-9 !w-9 rounded-full p-0">
-              <Avatar src={user.avatar} name={user.name} size="sm" />
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>{user.email}</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => navigate("/profile")}>
-                <UserCircle className="h-3.5 w-3.5" />
-                Profile
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem variant="danger" onClick={logout} disabled={isLoggingOut}>
-                <LogOut className="h-3.5 w-3.5" />
-                {isLoggingOut ? "Logging out..." : "Log out"}
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        )}
+        {(isWorkspaceContext || isProfileRoute || isMemberProfileRoute) &&
+          user && (
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                aria-label="Account menu"
+                className="!h-9 !w-9 rounded-full p-0"
+              >
+                <Avatar src={user.avatar} name={user.name} size="sm" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>{user.email}</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => navigate("/profile")}>
+                  <UserCircle className="h-3.5 w-3.5" />
+                  Profile
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  variant="danger"
+                  onClick={logout}
+                  disabled={isLoggingOut}
+                >
+                  <LogOut className="h-3.5 w-3.5" />
+                  {isLoggingOut ? "Logging out..." : "Log out"}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
       </div>
     </header>
   );

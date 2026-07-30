@@ -31,7 +31,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 
 const HEADING_OPTIONS = [
@@ -78,7 +82,7 @@ function ToolbarButton({
         "flex h-9 w-9 shrink-0 items-center justify-center rounded-md text-muted transition-colors",
         "hover:bg-border/50 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50",
         "disabled:pointer-events-none disabled:opacity-40",
-        active && "bg-primary/15 text-primary"
+        active && "bg-primary/15 text-primary",
       )}
     >
       <Icon className="h-4 w-4" />
@@ -90,7 +94,13 @@ function ToolbarDivider() {
   return <span aria-hidden className="mx-0.5 h-5 w-px shrink-0 bg-border" />;
 }
 
-function LinkPopover({ editor, disabled }: { editor: Editor; disabled: boolean }) {
+function LinkPopover({
+  editor,
+  disabled,
+}: {
+  editor: Editor;
+  disabled: boolean;
+}) {
   const [url, setUrl] = useState("");
   const [open, setOpen] = useState(false);
   const isActive = editor.isActive("link");
@@ -104,7 +114,12 @@ function LinkPopover({ editor, disabled }: { editor: Editor; disabled: boolean }
 
   function applyLink() {
     if (!isSafeUrl(url)) return;
-    editor.chain().focus().extendMarkRange("link").setLink({ href: url.trim() }).run();
+    editor
+      .chain()
+      .focus()
+      .extendMarkRange("link")
+      .setLink({ href: url.trim() })
+      .run();
     setOpen(false);
   }
 
@@ -114,7 +129,14 @@ function LinkPopover({ editor, disabled }: { editor: Editor; disabled: boolean }
   }
 
   if (disabled) {
-    return <ToolbarButton label="Add or edit link" icon={Link2} disabled onClick={() => undefined} />;
+    return (
+      <ToolbarButton
+        label="Add or edit link"
+        icon={Link2}
+        disabled
+        onClick={() => undefined}
+      />
+    );
   }
 
   return (
@@ -124,13 +146,16 @@ function LinkPopover({ editor, disabled }: { editor: Editor; disabled: boolean }
         className={cn(
           "flex h-9 w-9 shrink-0 items-center justify-center rounded-md text-muted transition-colors",
           "hover:bg-border/50 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50",
-          isActive && "bg-primary/15 text-primary"
+          isActive && "bg-primary/15 text-primary",
         )}
       >
         <Link2 className="h-4 w-4" />
       </PopoverTrigger>
       <PopoverContent className="w-[min(18rem,calc(100vw-2rem))]">
-        <label htmlFor="document-link-url" className="mb-1.5 block text-xs font-medium text-foreground">
+        <label
+          htmlFor="document-link-url"
+          className="mb-1.5 block text-xs font-medium text-foreground"
+        >
           Link URL
         </label>
         <Input
@@ -146,15 +171,27 @@ function LinkPopover({ editor, disabled }: { editor: Editor; disabled: boolean }
             }
           }}
         />
-        <p className="mt-1 text-[11px] text-muted">Only http, https, and mailto links are allowed.</p>
+        <p className="mt-1 text-[11px] text-muted">
+          Only http, https, and mailto links are allowed.
+        </p>
         <div className="mt-3 flex flex-wrap justify-end gap-2">
           {isActive && (
-            <Button type="button" size="sm" variant="secondary" onClick={removeLink}>
+            <Button
+              type="button"
+              size="sm"
+              variant="secondary"
+              onClick={removeLink}
+            >
               <Unlink className="h-3.5 w-3.5" />
               Remove
             </Button>
           )}
-          <Button type="button" size="sm" onClick={applyLink} disabled={!isSafeUrl(url)}>
+          <Button
+            type="button"
+            size="sm"
+            onClick={applyLink}
+            disabled={!isSafeUrl(url)}
+          >
             Apply
           </Button>
         </div>
@@ -179,7 +216,7 @@ export function DocumentEditorToolbar({
   const activeHeading = HEADING_OPTIONS.find((option) =>
     option.level === 0
       ? editor.isActive("paragraph")
-      : editor.isActive("heading", { level: option.level })
+      : editor.isActive("heading", { level: option.level }),
   );
 
   const can = {
@@ -198,7 +235,12 @@ export function DocumentEditorToolbar({
     blockquote: editor.can().chain().focus().toggleBlockquote().run(),
     codeBlock: editor.can().chain().focus().toggleCodeBlock().run(),
     horizontalRule: editor.can().chain().focus().setHorizontalRule().run(),
-    insertTable: editor.can().chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run(),
+    insertTable: editor
+      .can()
+      .chain()
+      .focus()
+      .insertTable({ rows: 3, cols: 3, withHeaderRow: true })
+      .run(),
     addRow: editor.can().chain().focus().addRowAfter().run(),
     deleteRow: editor.can().chain().focus().deleteRow().run(),
     addColumn: editor.can().chain().focus().addColumnAfter().run(),
@@ -241,7 +283,9 @@ export function DocumentEditorToolbar({
           <DropdownMenuContent align="start">
             {HEADING_OPTIONS.map((option) => {
               const commandAvailable =
-                option.level === 0 ? can.paragraph : can[`h${option.level}` as "h1" | "h2" | "h3"];
+                option.level === 0
+                  ? can.paragraph
+                  : can[`h${option.level}` as "h1" | "h2" | "h3"];
 
               return (
                 <DropdownMenuItem
@@ -251,7 +295,11 @@ export function DocumentEditorToolbar({
                     if (option.level === 0) {
                       editor.chain().focus().setParagraph().run();
                     } else {
-                      editor.chain().focus().setHeading({ level: option.level }).run();
+                      editor
+                        .chain()
+                        .focus()
+                        .setHeading({ level: option.level })
+                        .run();
                     }
                   }}
                 >
@@ -264,18 +312,72 @@ export function DocumentEditorToolbar({
 
         <ToolbarDivider />
 
-        <ToolbarButton label="Bold" icon={Bold} active={editor.isActive("bold")} disabled={disabled || !can.bold} onClick={() => editor.chain().focus().toggleBold().run()} />
-        <ToolbarButton label="Italic" icon={Italic} active={editor.isActive("italic")} disabled={disabled || !can.italic} onClick={() => editor.chain().focus().toggleItalic().run()} />
-        <ToolbarButton label="Underline" icon={UnderlineIcon} active={editor.isActive("underline")} disabled={disabled || !can.underline} onClick={() => editor.chain().focus().toggleUnderline().run()} />
-        <ToolbarButton label="Strikethrough" icon={Strikethrough} active={editor.isActive("strike")} disabled={disabled || !can.strike} onClick={() => editor.chain().focus().toggleStrike().run()} />
-        <ToolbarButton label="Inline code" icon={Code} active={editor.isActive("code")} disabled={disabled || !can.code} onClick={() => editor.chain().focus().toggleCode().run()} />
+        <ToolbarButton
+          label="Bold"
+          icon={Bold}
+          active={editor.isActive("bold")}
+          disabled={disabled || !can.bold}
+          onClick={() => editor.chain().focus().toggleBold().run()}
+        />
+        <ToolbarButton
+          label="Italic"
+          icon={Italic}
+          active={editor.isActive("italic")}
+          disabled={disabled || !can.italic}
+          onClick={() => editor.chain().focus().toggleItalic().run()}
+        />
+        <ToolbarButton
+          label="Underline"
+          icon={UnderlineIcon}
+          active={editor.isActive("underline")}
+          disabled={disabled || !can.underline}
+          onClick={() => editor.chain().focus().toggleUnderline().run()}
+        />
+        <ToolbarButton
+          label="Strikethrough"
+          icon={Strikethrough}
+          active={editor.isActive("strike")}
+          disabled={disabled || !can.strike}
+          onClick={() => editor.chain().focus().toggleStrike().run()}
+        />
+        <ToolbarButton
+          label="Inline code"
+          icon={Code}
+          active={editor.isActive("code")}
+          disabled={disabled || !can.code}
+          onClick={() => editor.chain().focus().toggleCode().run()}
+        />
 
         <ToolbarDivider />
 
-        <ToolbarButton label="Bullet list" icon={List} active={editor.isActive("bulletList")} disabled={disabled || !can.bulletList} onClick={() => editor.chain().focus().toggleBulletList().run()} />
-        <ToolbarButton label="Numbered list" icon={ListOrdered} active={editor.isActive("orderedList")} disabled={disabled || !can.orderedList} onClick={() => editor.chain().focus().toggleOrderedList().run()} />
-        <ToolbarButton label="Task list" icon={ListChecks} active={editor.isActive("taskList")} disabled={disabled || !can.taskList} onClick={() => editor.chain().focus().toggleTaskList().run()} />
-        <ToolbarButton label="Blockquote" icon={Quote} active={editor.isActive("blockquote")} disabled={disabled || !can.blockquote} onClick={() => editor.chain().focus().toggleBlockquote().run()} />
+        <ToolbarButton
+          label="Bullet list"
+          icon={List}
+          active={editor.isActive("bulletList")}
+          disabled={disabled || !can.bulletList}
+          onClick={() => editor.chain().focus().toggleBulletList().run()}
+        />
+        <ToolbarButton
+          label="Numbered list"
+          icon={ListOrdered}
+          active={editor.isActive("orderedList")}
+          disabled={disabled || !can.orderedList}
+          onClick={() => editor.chain().focus().toggleOrderedList().run()}
+        />
+        <ToolbarButton
+          label="Task list"
+          icon={ListChecks}
+          active={editor.isActive("taskList")}
+          disabled={disabled || !can.taskList}
+          onClick={() => editor.chain().focus().toggleTaskList().run()}
+        />
+        <ToolbarButton
+          label="Blockquote"
+          icon={Quote}
+          active={editor.isActive("blockquote")}
+          disabled={disabled || !can.blockquote}
+          onClick={() => editor.chain().focus().toggleBlockquote().run()}
+        />
 
         <ToolbarDivider />
         <LinkPopover editor={editor} disabled={disabled} />
@@ -284,16 +386,34 @@ export function DocumentEditorToolbar({
           <DropdownMenuTrigger aria-label="More formatting options">
             <MoreHorizontal className="h-4 w-4" />
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="max-h-[min(70vh,30rem)] overflow-y-auto">
-            <DropdownMenuItem disabled={disabled || !can.codeBlock} onClick={() => editor.chain().focus().toggleCodeBlock().run()}>
+          <DropdownMenuContent
+            align="end"
+            className="max-h-[min(70vh,30rem)] overflow-y-auto"
+          >
+            <DropdownMenuItem
+              disabled={disabled || !can.codeBlock}
+              onClick={() => editor.chain().focus().toggleCodeBlock().run()}
+            >
               <Code2 className="h-3.5 w-3.5" />
               Code block
             </DropdownMenuItem>
-            <DropdownMenuItem disabled={disabled || !can.horizontalRule} onClick={() => editor.chain().focus().setHorizontalRule().run()}>
+            <DropdownMenuItem
+              disabled={disabled || !can.horizontalRule}
+              onClick={() => editor.chain().focus().setHorizontalRule().run()}
+            >
               <Minus className="h-3.5 w-3.5" />
               Horizontal rule
             </DropdownMenuItem>
-            <DropdownMenuItem disabled={disabled || !can.insertTable} onClick={() => editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()}>
+            <DropdownMenuItem
+              disabled={disabled || !can.insertTable}
+              onClick={() =>
+                editor
+                  .chain()
+                  .focus()
+                  .insertTable({ rows: 3, cols: 3, withHeaderRow: true })
+                  .run()
+              }
+            >
               <Table2 className="h-3.5 w-3.5" />
               Insert 3 × 3 table
             </DropdownMenuItem>
@@ -301,29 +421,54 @@ export function DocumentEditorToolbar({
             {editor.isActive("table") && (
               <>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem disabled={disabled || !can.addRow} onClick={() => editor.chain().focus().addRowAfter().run()}>
+                <DropdownMenuItem
+                  disabled={disabled || !can.addRow}
+                  onClick={() => editor.chain().focus().addRowAfter().run()}
+                >
                   Add row below
                 </DropdownMenuItem>
-                <DropdownMenuItem disabled={disabled || !can.deleteRow} onClick={() => editor.chain().focus().deleteRow().run()}>
+                <DropdownMenuItem
+                  disabled={disabled || !can.deleteRow}
+                  onClick={() => editor.chain().focus().deleteRow().run()}
+                >
                   Delete current row
                 </DropdownMenuItem>
-                <DropdownMenuItem disabled={disabled || !can.addColumn} onClick={() => editor.chain().focus().addColumnAfter().run()}>
+                <DropdownMenuItem
+                  disabled={disabled || !can.addColumn}
+                  onClick={() => editor.chain().focus().addColumnAfter().run()}
+                >
                   Add column after
                 </DropdownMenuItem>
-                <DropdownMenuItem disabled={disabled || !can.deleteColumn} onClick={() => editor.chain().focus().deleteColumn().run()}>
+                <DropdownMenuItem
+                  disabled={disabled || !can.deleteColumn}
+                  onClick={() => editor.chain().focus().deleteColumn().run()}
+                >
                   Delete current column
                 </DropdownMenuItem>
-                <DropdownMenuItem disabled={disabled || !can.mergeCells} onClick={() => editor.chain().focus().mergeCells().run()}>
+                <DropdownMenuItem
+                  disabled={disabled || !can.mergeCells}
+                  onClick={() => editor.chain().focus().mergeCells().run()}
+                >
                   Merge selected cells
                 </DropdownMenuItem>
-                <DropdownMenuItem disabled={disabled || !can.splitCell} onClick={() => editor.chain().focus().splitCell().run()}>
+                <DropdownMenuItem
+                  disabled={disabled || !can.splitCell}
+                  onClick={() => editor.chain().focus().splitCell().run()}
+                >
                   Split current cell
                 </DropdownMenuItem>
-                <DropdownMenuItem disabled={disabled || !can.toggleHeaderRow} onClick={() => editor.chain().focus().toggleHeaderRow().run()}>
+                <DropdownMenuItem
+                  disabled={disabled || !can.toggleHeaderRow}
+                  onClick={() => editor.chain().focus().toggleHeaderRow().run()}
+                >
                   Toggle header row
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem variant="danger" disabled={disabled || !can.deleteTable} onClick={() => editor.chain().focus().deleteTable().run()}>
+                <DropdownMenuItem
+                  variant="danger"
+                  disabled={disabled || !can.deleteTable}
+                  onClick={() => editor.chain().focus().deleteTable().run()}
+                >
                   Delete table
                 </DropdownMenuItem>
               </>

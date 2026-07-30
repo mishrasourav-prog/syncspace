@@ -4,7 +4,10 @@ import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useMediaQuery } from "@/features/discussions/hooks/useMediaQuery";
 import { DashboardSectionError } from "@/features/workspaces/components/dashboard/DashboardSectionError";
-import { useNotificationsQuery, useUnreadNotificationCountQuery } from "../hooks/useNotificationQueries";
+import {
+  useNotificationsQuery,
+  useUnreadNotificationCountQuery,
+} from "../hooks/useNotificationQueries";
 import {
   useMarkAllNotificationsAsReadMutation,
   useMarkNotificationAsReadMutation,
@@ -17,9 +20,18 @@ import { NotificationFilterRail } from "../components/NotificationFilterRail";
 import { NotificationListPanel } from "../components/NotificationListPanel";
 import { NotificationDetailPanel } from "../components/NotificationDetailPanel";
 import { NotificationPageSkeleton } from "../components/NotificationPageSkeleton";
-import type { NotificationFilter, NotificationItem } from "../notification.types";
+import type {
+  NotificationFilter,
+  NotificationItem,
+} from "../notification.types";
 
-const FILTER_ORDER: NotificationFilter[] = ["all", "unread", "tasks", "discussions", "read"];
+const FILTER_ORDER: NotificationFilter[] = [
+  "all",
+  "unread",
+  "tasks",
+  "discussions",
+  "read",
+];
 
 export function NotificationsPage() {
   const navigate = useNavigate();
@@ -30,7 +42,10 @@ export function NotificationsPage() {
   const markOneReadMutation = useMarkNotificationAsReadMutation();
   const markAllReadMutation = useMarkAllNotificationsAsReadMutation();
 
-  const notifications = useMemo(() => notificationsQuery.data ?? [], [notificationsQuery.data]);
+  const notifications = useMemo(
+    () => notificationsQuery.data ?? [],
+    [notificationsQuery.data],
+  );
 
   const {
     q,
@@ -50,7 +65,7 @@ export function NotificationsPage() {
     const result = {} as Record<NotificationFilter, number>;
     for (const candidateFilter of FILTER_ORDER) {
       result[candidateFilter] = notifications.filter((notification) =>
-        matchesNotificationFilter(notification, candidateFilter)
+        matchesNotificationFilter(notification, candidateFilter),
       ).length;
     }
     return result;
@@ -99,7 +114,9 @@ export function NotificationsPage() {
           isRefreshing={notificationsQuery.isFetching}
         />
         <DashboardSectionError
-          message={notificationsQuery.error?.message ?? "Unable to load notifications."}
+          message={
+            notificationsQuery.error?.message ?? "Unable to load notifications."
+          }
           onRetry={() => notificationsQuery.refetch()}
         />
       </div>
@@ -117,12 +134,19 @@ export function NotificationsPage() {
       />
 
       {unreadCountQuery.isError && (
-        <p className="text-caption text-danger">Unread count is temporarily unavailable.</p>
+        <p className="text-caption text-danger">
+          Unread count is temporarily unavailable.
+        </p>
       )}
 
       {showMobileDetail ? (
         <div>
-          <Button size="sm" variant="ghost" onClick={clearSelection} className="mb-3 !px-2">
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={clearSelection}
+            className="mb-3 !px-2"
+          >
             <ArrowLeft className="h-4 w-4" />
             Back to notifications
           </Button>
@@ -141,7 +165,11 @@ export function NotificationsPage() {
               : "grid grid-cols-1 gap-4"
           }
         >
-          <NotificationFilterRail activeFilter={filter} onFilterChange={setFilter} counts={counts} />
+          <NotificationFilterRail
+            activeFilter={filter}
+            onFilterChange={setFilter}
+            counts={counts}
+          />
 
           <NotificationListPanel
             filter={filter}

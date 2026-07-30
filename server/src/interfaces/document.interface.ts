@@ -1,74 +1,65 @@
 export interface IDocumentUserPreview {
-    _id: string;
+  _id: string;
 
-    name: string;
+  name: string;
 
-    username: string;
+  username: string;
 
-    avatar?: string;
+  avatar?: string;
 }
 
 export interface IProjectDocumentResponse {
-    _id: string;
+  _id: string;
 
-    workspace: string;
+  workspace: string;
 
-    project: string;
+  project: string;
 
-    title: string;
+  title: string;
 
-    content: unknown;
+  content: unknown;
 
-    createdBy:
-        IDocumentUserPreview |
-        null;
+  createdBy: IDocumentUserPreview | null;
 
-    updatedBy:
-        IDocumentUserPreview |
-        null;
+  updatedBy: IDocumentUserPreview | null;
 
-    revision: number;
+  revision: number;
 
-    isArchived: boolean;
+  isArchived: boolean;
 
-    archivedAt:
-        Date |
-        null;
+  archivedAt: Date | null;
 
-    createdAt: Date;
+  createdAt: Date;
 
-    updatedAt: Date;
+  updatedAt: Date;
 }
 
 export interface ICreateProjectDocumentInput {
-    title: string;
+  title: string;
 
-    content?: unknown;
+  content?: unknown;
 }
 
 export interface IUpdateProjectDocumentInput {
-    title?: string;
+  title?: string;
 
-    content?: unknown;
+  content?: unknown;
 
-    expectedRevision: number;
+  expectedRevision: number;
 }
 
 export interface IProjectDocumentListQuery {
-    isArchived?: boolean;
+  isArchived?: boolean;
 
-    search?: string;
+  search?: string;
 
-    cursor?: string;
+  cursor?: string;
 
-    limit: number;
+  limit: number;
 }
 
 export interface IProjectDocumentListResponse {
-    documents:
-        IProjectDocumentResponse[];
+  documents: IProjectDocumentResponse[];
 
-    nextCursor:
-        string |
-        null;
+  nextCursor: string | null;
 }

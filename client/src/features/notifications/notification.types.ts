@@ -45,7 +45,8 @@ export interface NotificationItem {
   createdAt: string;
 }
 
-export type NotificationFilter = "all" | "unread" | "tasks" | "discussions" | "read";
+export type NotificationFilter =
+  "all" | "unread" | "tasks" | "discussions" | "read";
 export type NotificationSort = "newest" | "oldest";
 export type TaskStatus = "TODO" | "IN_PROGRESS" | "IN_REVIEW" | "DONE";
 

@@ -1,11 +1,6 @@
-import {
-  randomUUID,
-} from "node:crypto";
+import { randomUUID } from "node:crypto";
 
-import type {
-  UploadApiErrorResponse,
-  UploadApiResponse,
-} from "cloudinary";
+import type { UploadApiErrorResponse, UploadApiResponse } from "cloudinary";
 
 import {
   getCloudinary,
@@ -14,9 +9,7 @@ import {
 
 import ApiError from "../../utils/ApiError";
 
-import {
-  deleteAvatarAssetBestEffort,
-} from "../users/user.avatar";
+import { deleteAvatarAssetBestEffort } from "../users/user.avatar";
 
 export interface UploadedWorkspaceAvatar {
   url: string;
@@ -27,165 +20,101 @@ export interface UploadedWorkspaceAvatar {
   bytes: number;
 }
 
-const WORKSPACE_AVATAR_WIDTH =
-  512;
+const WORKSPACE_AVATAR_WIDTH = 512;
 
-const WORKSPACE_AVATAR_HEIGHT =
-  512;
+const WORKSPACE_AVATAR_HEIGHT = 512;
 
-export const uploadWorkspaceAvatarBuffer =
-  async (
-    buffer: Buffer,
-    workspaceId: string
-  ): Promise<UploadedWorkspaceAvatar> => {
-    if (
-      !Buffer.isBuffer(
-        buffer
-      ) ||
-      buffer.length ===
-        0
-    ) {
-      throw new ApiError(
-        400,
-        "Workspace avatar image is required."
-      );
-    }
+export const uploadWorkspaceAvatarBuffer = async (
+  buffer: Buffer,
+  workspaceId: string,
+): Promise<UploadedWorkspaceAvatar> => {
+  if (!Buffer.isBuffer(buffer) || buffer.length === 0) {
+    throw new ApiError(400, "Workspace avatar image is required.");
+  }
 
-    const cloudinary =
-      getCloudinary();
+  const cloudinary = getCloudinary();
 
-    const folder =
-      `${getCloudinaryWorkspaceAvatarFolder()}/${workspaceId}`;
+  const folder = `${getCloudinaryWorkspaceAvatarFolder()}/${workspaceId}`;
 
-    const publicId =
-      `workspace-avatar-${randomUUID()}`;
+  const publicId = `workspace-avatar-${randomUUID()}`;
 
-    const uploadResult =
-      await new Promise<UploadApiResponse>(
+  const uploadResult = await new Promise<UploadApiResponse>(
+    (resolve, reject) => {
+      const uploadStream = cloudinary.uploader.upload_stream(
+        {
+          folder,
+          public_id: publicId,
+          resource_type: "image",
+          type: "upload",
+          overwrite: false,
+          unique_filename: false,
+          use_filename: false,
+          format: "webp",
+          transformation: [
+            {
+              width: WORKSPACE_AVATAR_WIDTH,
+              height: WORKSPACE_AVATAR_HEIGHT,
+              crop: "fill",
+              gravity: "auto",
+              quality: "auto:good",
+            },
+          ],
+        },
         (
-          resolve,
-          reject
+          error: UploadApiErrorResponse | undefined,
+          result: UploadApiResponse | undefined,
         ) => {
-          const uploadStream =
-            cloudinary.uploader.upload_stream(
-              {
-                folder,
-                public_id:
-                  publicId,
-                resource_type:
-                  "image",
-                type:
-                  "upload",
-                overwrite:
-                  false,
-                unique_filename:
-                  false,
-                use_filename:
-                  false,
-                format:
-                  "webp",
-                transformation: [
-                  {
-                    width:
-                      WORKSPACE_AVATAR_WIDTH,
-                    height:
-                      WORKSPACE_AVATAR_HEIGHT,
-                    crop:
-                      "fill",
-                    gravity:
-                      "auto",
-                    quality:
-                      "auto:good",
-                  },
-                ],
-              },
-              (
-                error:
-                  | UploadApiErrorResponse
-                  | undefined,
-                result:
-                  | UploadApiResponse
-                  | undefined
-              ) => {
-                if (
-                  error
-                ) {
-                  reject(
-                    error
-                  );
+          if (error) {
+            reject(error);
 
-                  return;
-                }
+            return;
+          }
 
-                if (
-                  !result
-                ) {
-                  reject(
-                    new Error(
-                      "Cloudinary returned no workspace avatar upload result."
-                    )
-                  );
-
-                  return;
-                }
-
-                resolve(
-                  result
-                );
-              }
+          if (!result) {
+            reject(
+              new Error(
+                "Cloudinary returned no workspace avatar upload result.",
+              ),
             );
 
-          uploadStream.end(
-            buffer
-          );
-        }
-      ).catch(
-        (
-          error:
-            unknown
-        ) => {
-          console.error(
-            "Cloudinary workspace avatar upload failed:",
-            error
-          );
+            return;
+          }
 
-          throw new ApiError(
-            502,
-            "Workspace avatar storage is temporarily unavailable. Please try again."
-          );
-        }
+          resolve(result);
+        },
       );
 
-    if (
-      !uploadResult.secure_url ||
-      !uploadResult.public_id
-    ) {
-      console.error(
-        "Cloudinary workspace avatar upload returned an incomplete result:",
-        uploadResult
-      );
+      uploadStream.end(buffer);
+    },
+  ).catch((error: unknown) => {
+    console.error("Cloudinary workspace avatar upload failed:", error);
 
-      throw new ApiError(
-        502,
-        "Workspace avatar storage returned an invalid response."
-      );
-    }
+    throw new ApiError(
+      502,
+      "Workspace avatar storage is temporarily unavailable. Please try again.",
+    );
+  });
 
-    return {
-      url:
-        uploadResult.secure_url,
-      publicId:
-        uploadResult.public_id,
-      width:
-        uploadResult.width,
-      height:
-        uploadResult.height,
-      format:
-        uploadResult.format,
-      bytes:
-        uploadResult.bytes,
-    };
+  if (!uploadResult.secure_url || !uploadResult.public_id) {
+    console.error(
+      "Cloudinary workspace avatar upload returned an incomplete result:",
+      uploadResult,
+    );
+
+    throw new ApiError(
+      502,
+      "Workspace avatar storage returned an invalid response.",
+    );
+  }
+
+  return {
+    url: uploadResult.secure_url,
+    publicId: uploadResult.public_id,
+    width: uploadResult.width,
+    height: uploadResult.height,
+    format: uploadResult.format,
+    bytes: uploadResult.bytes,
   };
+};
 
-export const deleteWorkspaceAvatarAssetBestEffort =
-  deleteAvatarAssetBestEffort;
+export const deleteWorkspaceAvatarAssetBestEffort = deleteAvatarAssetBestEffort;

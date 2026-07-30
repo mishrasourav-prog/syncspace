@@ -32,7 +32,7 @@ function isStoredDocumentDraft(value: unknown): value is StoredDocumentDraft {
 export function readDocumentDraft(
   userId: string | undefined,
   documentId: string,
-  serverRevision: number
+  serverRevision: number,
 ): StoredDocumentDraft | null {
   if (!userId || typeof window === "undefined") return null;
 
@@ -53,8 +53,6 @@ export function readDocumentDraft(
       parsed.documentId !== documentId ||
       parsed.baseRevision !== serverRevision
     ) {
-      // A draft created against an older revision must never be silently
-      // restored over newer server content.
       window.localStorage.removeItem(key);
       return null;
     }
@@ -63,9 +61,7 @@ export function readDocumentDraft(
   } catch {
     try {
       window.localStorage.removeItem(key);
-    } catch {
-      // Storage can be unavailable entirely in strict privacy modes.
-    }
+    } catch {}
     return null;
   }
 }
@@ -76,23 +72,18 @@ export function writeDocumentDraft(draft: StoredDocumentDraft): void {
   try {
     window.localStorage.setItem(
       getDraftKey(draft.userId, draft.documentId),
-      JSON.stringify(draft)
+      JSON.stringify(draft),
     );
-  } catch {
-    // Storage may be unavailable in privacy mode or full. The editor remains
-    // usable and the existing unsaved-changes guard still protects navigation.
-  }
+  } catch {}
 }
 
 export function clearDocumentDraft(
   userId: string | undefined,
-  documentId: string
+  documentId: string,
 ): void {
   if (!userId || typeof window === "undefined") return;
 
   try {
     window.localStorage.removeItem(getDraftKey(userId, documentId));
-  } catch {
-    // Ignore storage cleanup failures.
-  }
+  } catch {}
 }

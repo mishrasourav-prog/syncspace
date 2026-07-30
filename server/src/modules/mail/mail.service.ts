@@ -14,20 +14,13 @@ interface BrevoErrorBody {
 }
 
 class MailService {
-  private readonly endpoint =
-    "https://api.brevo.com/v3/smtp/email";
+  private readonly endpoint = "https://api.brevo.com/v3/smtp/email";
 
-  private getRequiredEnvironmentVariable(
-    name: string
-  ): string {
-    const value =
-      process.env[name]?.trim();
+  private getRequiredEnvironmentVariable(name: string): string {
+    const value = process.env[name]?.trim();
 
     if (!value) {
-      throw new ApiError(
-        500,
-        `${name} is not configured.`
-      );
+      throw new ApiError(500, `${name} is not configured.`);
     }
 
     return value;
@@ -38,121 +31,80 @@ class MailService {
     name: string;
   } {
     return {
-      email:
-        this.getRequiredEnvironmentVariable(
-          "EMAIL_FROM"
-        ),
+      email: this.getRequiredEnvironmentVariable("EMAIL_FROM"),
 
-      name:
-        process.env.EMAIL_FROM_NAME?.trim() ||
-        "SyncSpace",
+      name: process.env.EMAIL_FROM_NAME?.trim() || "SyncSpace",
     };
   }
 
-  private async sendEmail(
-    options: SendEmailOptions
-  ): Promise<void> {
-    const apiKey =
-      this.getRequiredEnvironmentVariable(
-        "BREVO_API_KEY"
-      );
+  private async sendEmail(options: SendEmailOptions): Promise<void> {
+    const apiKey = this.getRequiredEnvironmentVariable("BREVO_API_KEY");
 
-    let response: Awaited<
-      ReturnType<typeof fetch>
-    >;
+    let response: Awaited<ReturnType<typeof fetch>>;
 
     try {
-      response =
-        await fetch(
-          this.endpoint,
-          {
-            method: "POST",
+      response = await fetch(this.endpoint, {
+        method: "POST",
 
-            headers: {
-              accept: "application/json",
-              "content-type":
-                "application/json",
-              "api-key": apiKey,
+        headers: {
+          accept: "application/json",
+          "content-type": "application/json",
+          "api-key": apiKey,
+        },
+
+        body: JSON.stringify({
+          sender: this.getSender(),
+
+          to: [
+            {
+              email: options.to,
             },
+          ],
 
-            body:
-              JSON.stringify({
-                sender:
-                  this.getSender(),
+          subject: options.subject,
 
-                to: [
-                  {
-                    email:
-                      options.to,
-                  },
-                ],
+          htmlContent: options.html,
+        }),
 
-                subject:
-                  options.subject,
-
-                htmlContent:
-                  options.html,
-              }),
-
-            signal:
-              AbortSignal.timeout(
-                12_000
-              ),
-          }
-        );
+        signal: AbortSignal.timeout(12_000),
+      });
     } catch (error) {
-      console.error(
-        "Brevo request failed:",
-        error
-      );
+      console.error("Brevo request failed:", error);
 
       throw new ApiError(
         503,
-        "Email delivery is temporarily unavailable. Please try again."
+        "Email delivery is temporarily unavailable. Please try again.",
       );
     }
 
     if (!response.ok) {
-      let providerError:
-        BrevoErrorBody = {};
+      let providerError: BrevoErrorBody = {};
 
       try {
-        providerError =
-          (await response.json()) as
-            BrevoErrorBody;
-      } catch {
-        // Brevo did not return a JSON error body.
-      }
+        providerError = (await response.json()) as BrevoErrorBody;
+      } catch {}
 
-      console.error(
-        "Brevo rejected the email:",
-        {
-          status:
-            response.status,
+      console.error("Brevo rejected the email:", {
+        status: response.status,
 
-          code:
-            providerError.code,
+        code: providerError.code,
 
-          message:
-            providerError.message,
-        }
-      );
+        message: providerError.message,
+      });
 
       throw new ApiError(
         503,
-        "Email delivery is temporarily unavailable. Please try again."
+        "Email delivery is temporarily unavailable. Please try again.",
       );
     }
   }
 
-  private buildOtpTemplate(
-    options: {
-      title: string;
-      introduction: string;
-      otp: string;
-      ignoreMessage: string;
-    }
-  ): string {
+  private buildOtpTemplate(options: {
+    title: string;
+    introduction: string;
+    otp: string;
+    ignoreMessage: string;
+  }): string {
     return `
       <!doctype html>
 
@@ -284,71 +236,52 @@ class MailService {
     `;
   }
 
-  async sendEmailVerificationOtp(
-    email: string,
-    otp: string
-  ): Promise<void> {
+  async sendEmailVerificationOtp(email: string, otp: string): Promise<void> {
     await this.sendEmail({
       to: email,
 
-      subject:
-        "Verify your SyncSpace email",
+      subject: "Verify your SyncSpace email",
 
-      html:
-        this.buildOtpTemplate({
-          title:
-            "Verify your email address",
+      html: this.buildOtpTemplate({
+        title: "Verify your email address",
 
-          introduction:
-            "Use the following code to complete your SyncSpace registration.",
+        introduction:
+          "Use the following code to complete your SyncSpace registration.",
 
-          otp,
+        otp,
 
-          ignoreMessage:
-            "If you did not attempt to create a SyncSpace account, you can safely ignore this email.",
-        }),
+        ignoreMessage:
+          "If you did not attempt to create a SyncSpace account, you can safely ignore this email.",
+      }),
     });
   }
 
-  async sendPasswordResetOtp(
-    email: string,
-    otp: string
-  ): Promise<void> {
+  async sendPasswordResetOtp(email: string, otp: string): Promise<void> {
     await this.sendEmail({
       to: email,
 
-      subject:
-        "SyncSpace password reset code",
+      subject: "SyncSpace password reset code",
 
-      html:
-        this.buildOtpTemplate({
-          title:
-            "Reset your password",
+      html: this.buildOtpTemplate({
+        title: "Reset your password",
 
-          introduction:
-            "Use the following code to continue resetting your SyncSpace password.",
+        introduction:
+          "Use the following code to continue resetting your SyncSpace password.",
 
-          otp,
+        otp,
 
-          ignoreMessage:
-            "If you did not request a password reset, you can safely ignore this email.",
-        }),
+        ignoreMessage:
+          "If you did not request a password reset, you can safely ignore this email.",
+      }),
     });
   }
 
-  async verifyConnection():
-    Promise<void> {
-    this.getRequiredEnvironmentVariable(
-      "BREVO_API_KEY"
-    );
+  async verifyConnection(): Promise<void> {
+    this.getRequiredEnvironmentVariable("BREVO_API_KEY");
 
-    this.getRequiredEnvironmentVariable(
-      "EMAIL_FROM"
-    );
+    this.getRequiredEnvironmentVariable("EMAIL_FROM");
 
-    console.log(
-      "Brevo email API configuration verified."
-    );
+    console.log("Brevo email API configuration verified.");
   }
 }
 

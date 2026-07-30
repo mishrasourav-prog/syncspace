@@ -43,21 +43,32 @@ export function DiscussionDetailHeader({
   const unlockMutation = useUnlockDiscussionMutation(projectId, discussion._id);
 
   const isModerationPending =
-    pinMutation.isPending || unpinMutation.isPending || lockMutation.isPending || unlockMutation.isPending;
+    pinMutation.isPending ||
+    unpinMutation.isPending ||
+    lockMutation.isPending ||
+    unlockMutation.isPending;
 
   function handleTogglePin() {
     const mutation = discussion.isPinned ? unpinMutation : pinMutation;
     mutation.mutate(undefined, {
-      onSuccess: () => toast.success(discussion.isPinned ? "Discussion unpinned." : "Discussion pinned."),
-      onError: (error) => toast.error(error.message ?? "Unable to update this discussion."),
+      onSuccess: () =>
+        toast.success(
+          discussion.isPinned ? "Discussion unpinned." : "Discussion pinned.",
+        ),
+      onError: (error) =>
+        toast.error(error.message ?? "Unable to update this discussion."),
     });
   }
 
   function handleToggleLock() {
     const mutation = discussion.isLocked ? unlockMutation : lockMutation;
     mutation.mutate(undefined, {
-      onSuccess: () => toast.success(discussion.isLocked ? "Discussion unlocked." : "Discussion locked."),
-      onError: (error) => toast.error(error.message ?? "Unable to update this discussion."),
+      onSuccess: () =>
+        toast.success(
+          discussion.isLocked ? "Discussion unlocked." : "Discussion locked.",
+        ),
+      onError: (error) =>
+        toast.error(error.message ?? "Unable to update this discussion."),
     });
   }
 
@@ -65,7 +76,7 @@ export function DiscussionDetailHeader({
   const isEdited =
     Math.abs(
       new Date(discussion.updatedAt).getTime() -
-        new Date(discussion.createdAt).getTime()
+        new Date(discussion.createdAt).getTime(),
     ) > 1000;
 
   return (
@@ -84,12 +95,22 @@ export function DiscussionDetailHeader({
               </Badge>
             )}
           </div>
-          <h1 className="text-h1 break-words text-foreground">{discussion.title}</h1>
+          <h1 className="text-h1 break-words text-foreground">
+            {discussion.title}
+          </h1>
           <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-muted">
-            <Avatar src={discussion.author?.avatar} name={discussion.author?.name ?? "Former member"} size="sm" />
-            <span className="font-medium text-foreground">{discussion.author?.name ?? "Former member"}</span>
+            <Avatar
+              src={discussion.author?.avatar}
+              name={discussion.author?.name ?? "Former member"}
+              size="sm"
+            />
+            <span className="font-medium text-foreground">
+              {discussion.author?.name ?? "Former member"}
+            </span>
             <span aria-hidden>·</span>
-            <span title={formatDateTime(discussion.createdAt)}>{formatRelativeTime(discussion.createdAt)}</span>
+            <span title={formatDateTime(discussion.createdAt)}>
+              {formatRelativeTime(discussion.createdAt)}
+            </span>
             {isEdited && <span className="text-muted/70">(edited)</span>}
           </div>
         </div>
@@ -100,14 +121,25 @@ export function DiscussionDetailHeader({
               <MoreHorizontal className="h-4 w-4" />
             </DropdownMenuTrigger>
             <DropdownMenuContent>
-              {canEdit && <DropdownMenuItem onClick={onEdit}>Edit discussion</DropdownMenuItem>}
-              {canModerate && (
-                <DropdownMenuItem onClick={handleTogglePin} disabled={isModerationPending}>
-                  <Pin className="h-3.5 w-3.5" /> {discussion.isPinned ? "Unpin discussion" : "Pin discussion"}
+              {canEdit && (
+                <DropdownMenuItem onClick={onEdit}>
+                  Edit discussion
                 </DropdownMenuItem>
               )}
               {canModerate && (
-                <DropdownMenuItem onClick={handleToggleLock} disabled={isModerationPending}>
+                <DropdownMenuItem
+                  onClick={handleTogglePin}
+                  disabled={isModerationPending}
+                >
+                  <Pin className="h-3.5 w-3.5" />{" "}
+                  {discussion.isPinned ? "Unpin discussion" : "Pin discussion"}
+                </DropdownMenuItem>
+              )}
+              {canModerate && (
+                <DropdownMenuItem
+                  onClick={handleToggleLock}
+                  disabled={isModerationPending}
+                >
                   {discussion.isLocked ? (
                     <>
                       <Unlock className="h-3.5 w-3.5" /> Unlock discussion

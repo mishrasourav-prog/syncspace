@@ -9,7 +9,10 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useCreateTaskMutation } from "../hooks/useTaskMutations";
-import { createTaskSchema, type CreateTaskFormValues } from "../schemas/task.schemas";
+import {
+  createTaskSchema,
+  type CreateTaskFormValues,
+} from "../schemas/task.schemas";
 
 interface CreateSubtaskDialogProps {
   projectId: string;
@@ -19,11 +22,13 @@ interface CreateSubtaskDialogProps {
   onClose: () => void;
 }
 
-/**
- * A fixed-parent variant of CreateTaskDialog for adding a direct subtask
- * from the Task Detail page. No free-form parent selector is exposed.
- */
-export function CreateSubtaskDialog({ projectId, parentTaskId, parentTaskTitle, open, onClose }: CreateSubtaskDialogProps) {
+export function CreateSubtaskDialog({
+  projectId,
+  parentTaskId,
+  parentTaskTitle,
+  open,
+  onClose,
+}: CreateSubtaskDialogProps) {
   const createTaskMutation = useCreateTaskMutation(projectId);
 
   const {
@@ -33,15 +38,28 @@ export function CreateSubtaskDialog({ projectId, parentTaskId, parentTaskTitle, 
     formState: { errors },
   } = useForm<CreateTaskFormValues>({
     resolver: zodResolver(createTaskSchema),
-    defaultValues: { title: "", description: "", type: "task", priority: "MEDIUM", startDate: "", dueDate: "" },
+    defaultValues: {
+      title: "",
+      description: "",
+      type: "task",
+      priority: "MEDIUM",
+      startDate: "",
+      dueDate: "",
+    },
   });
 
   useEffect(() => {
     if (open) {
-      reset({ title: "", description: "", type: "task", priority: "MEDIUM", startDate: "", dueDate: "" });
+      reset({
+        title: "",
+        description: "",
+        type: "task",
+        priority: "MEDIUM",
+        startDate: "",
+        dueDate: "",
+      });
       createTaskMutation.reset();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
   function handleClose() {
@@ -68,12 +86,17 @@ export function CreateSubtaskDialog({ projectId, parentTaskId, parentTaskTitle, 
           reset();
           onClose();
         },
-      }
+      },
     );
   };
 
   return (
-    <Dialog open={open} onClose={handleClose} title="New subtask" description={`Add a direct subtask of "${parentTaskTitle}".`}>
+    <Dialog
+      open={open}
+      onClose={handleClose}
+      title="New subtask"
+      description={`Add a direct subtask of "${parentTaskTitle}".`}
+    >
       {createTaskMutation.isError && (
         <div className="mb-4 rounded-md border border-danger/30 bg-danger/10 px-3 py-2 text-xs text-danger">
           {createTaskMutation.error?.message ?? "Unable to create subtask."}
@@ -95,7 +118,11 @@ export function CreateSubtaskDialog({ projectId, parentTaskId, parentTaskTitle, 
           </div>
           <div className="min-w-0 flex-1">
             <Label htmlFor="subtask-title">Title</Label>
-            <Input id="subtask-title" error={errors.title?.message} {...register("title")} />
+            <Input
+              id="subtask-title"
+              error={errors.title?.message}
+              {...register("title")}
+            />
           </div>
         </div>
 
@@ -103,7 +130,12 @@ export function CreateSubtaskDialog({ projectId, parentTaskId, parentTaskTitle, 
           <Label htmlFor="subtask-description">
             Description <span className="text-muted/60">(optional)</span>
           </Label>
-          <Textarea id="subtask-description" rows={3} error={errors.description?.message} {...register("description")} />
+          <Textarea
+            id="subtask-description"
+            rows={3}
+            error={errors.description?.message}
+            {...register("description")}
+          />
         </div>
 
         <div className="mb-4">
@@ -125,7 +157,12 @@ export function CreateSubtaskDialog({ projectId, parentTaskId, parentTaskTitle, 
             <Label htmlFor="subtask-start-date">
               Start date <span className="text-muted/60">(optional)</span>
             </Label>
-            <Input id="subtask-start-date" type="date" error={errors.startDate?.message} {...register("startDate")} />
+            <Input
+              id="subtask-start-date"
+              type="date"
+              error={errors.startDate?.message}
+              {...register("startDate")}
+            />
           </div>
           <div className="min-w-0 flex-1">
             <Label htmlFor="subtask-due-date">
@@ -142,7 +179,12 @@ export function CreateSubtaskDialog({ projectId, parentTaskId, parentTaskTitle, 
         </div>
 
         <DialogFooter>
-          <Button type="button" variant="secondary" onClick={handleClose} disabled={createTaskMutation.isPending}>
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={handleClose}
+            disabled={createTaskMutation.isPending}
+          >
             Cancel
           </Button>
           <Button type="submit" disabled={createTaskMutation.isPending}>

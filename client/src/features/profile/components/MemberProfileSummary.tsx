@@ -27,7 +27,10 @@ export function MemberProfileSummary({ member }: MemberProfileSummaryProps) {
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div className="min-w-0">
-              <h2 id="member-summary-heading" className="truncate text-h2 text-foreground">
+              <h2
+                id="member-summary-heading"
+                className="truncate text-h2 text-foreground"
+              >
                 {member.name}
               </h2>
               <p className="mt-0.5 truncate text-caption">@{member.username}</p>

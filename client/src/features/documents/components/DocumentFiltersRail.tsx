@@ -1,14 +1,8 @@
-import type {
-  ReactNode,
-} from "react";
+import type { ReactNode } from "react";
 
-import {
-  ChevronDown,
-} from "lucide-react";
+import { ChevronDown } from "lucide-react";
 
-import {
-  Avatar,
-} from "@/components/ui/avatar";
+import { Avatar } from "@/components/ui/avatar";
 
 import {
   Popover,
@@ -16,13 +10,9 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 
-import type {
-  ProjectMember,
-} from "@/features/project-members/types/projectMember.types";
+import type { ProjectMember } from "@/features/project-members/types/projectMember.types";
 
-import {
-  cn,
-} from "@/lib/utils";
+import { cn } from "@/lib/utils";
 
 import {
   REVISION_LABEL,
@@ -38,22 +28,16 @@ const STATE_OPTIONS: Array<{
   label: string;
 }> = [
   {
-    value:
-      "all",
-    label:
-      "All documents",
+    value: "all",
+    label: "All documents",
   },
   {
-    value:
-      "active",
-    label:
-      "Active",
+    value: "active",
+    label: "Active",
   },
   {
-    value:
-      "archived",
-    label:
-      "Archived",
+    value: "archived",
+    label: "Archived",
   },
 ];
 
@@ -76,48 +60,28 @@ interface FilterRowProps {
   children: ReactNode;
 }
 
-function FilterRow({
-  label,
-  count,
-  children,
-}: FilterRowProps) {
+function FilterRow({ label, count, children }: FilterRowProps) {
   return (
     <Popover>
       <PopoverTrigger
-        aria-label={
-          `${label} filter`
-        }
+        aria-label={`${label} filter`}
         className="flex w-full items-center justify-between rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground transition-colors hover:bg-border/30"
       >
         <span className="flex min-w-0 items-center gap-1.5">
-          <span className="truncate">
-            {
-              label
-            }
-          </span>
+          <span className="truncate">{label}</span>
 
-          {
-            count >
-              0 && (
-              <span className="flex h-4.5 min-w-[18px] shrink-0 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-semibold text-primary-foreground">
-                {
-                  count
-                }
-              </span>
-            )
-          }
+          {count > 0 && (
+            <span className="flex h-4.5 min-w-[18px] shrink-0 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-semibold text-primary-foreground">
+              {count}
+            </span>
+          )}
         </span>
 
         <ChevronDown className="h-3.5 w-3.5 shrink-0 text-muted" />
       </PopoverTrigger>
 
-      <PopoverContent
-        align="start"
-        className="w-56"
-      >
-        {
-          children
-        }
+      <PopoverContent align="start" className="w-56">
+        {children}
       </PopoverContent>
     </Popover>
   );
@@ -129,18 +93,10 @@ interface DocumentFiltersRailProps {
   membersLoading: boolean;
   membersUnavailable: boolean;
   activeFilterCount: number;
-  onStateChange: (
-    state: DocumentState
-  ) => void;
-  onCreatorChange: (
-    creator: string | null
-  ) => void;
-  onUpdatedChange: (
-    updated: DocumentUpdatedFilter | null
-  ) => void;
-  onRevisionChange: (
-    revision: DocumentRevisionFilter
-  ) => void;
+  onStateChange: (state: DocumentState) => void;
+  onCreatorChange: (creator: string | null) => void;
+  onUpdatedChange: (updated: DocumentUpdatedFilter | null) => void;
+  onRevisionChange: (revision: DocumentRevisionFilter) => void;
   onRetryMembers: () => void;
   onClear: () => void;
 }
@@ -158,23 +114,12 @@ export function DocumentFiltersRail({
   onRetryMembers,
   onClear,
 }: DocumentFiltersRailProps) {
-  const selectedCreator =
-    members.find(
-      (
-        member
-      ) =>
-        member.user._id ===
-        filters.creator
-    );
+  const selectedCreator = members.find(
+    (member) => member.user._id === filters.creator,
+  );
 
   const stateLabel =
-    STATE_OPTIONS.find(
-      (
-        option
-      ) =>
-        option.value ===
-        filters.state
-    )?.label ??
+    STATE_OPTIONS.find((option) => option.value === filters.state)?.label ??
     "All documents";
 
   return (
@@ -183,122 +128,72 @@ export function DocumentFiltersRail({
       className="rounded-xl border border-border bg-surface/60 p-4 shadow-soft"
     >
       <div className="mb-3 flex items-center justify-between gap-2">
-        <h2
-          id="document-filters-heading"
-          className="text-h3 text-foreground"
-        >
+        <h2 id="document-filters-heading" className="text-h3 text-foreground">
           Filters
         </h2>
 
-        {
-          activeFilterCount >
-            0 && (
-            <button
-              type="button"
-              onClick={
-                onClear
-              }
-              className="text-xs font-medium text-primary hover:text-primary/80"
-            >
-              Clear all
-            </button>
-          )
-        }
+        {activeFilterCount > 0 && (
+          <button
+            type="button"
+            onClick={onClear}
+            className="text-xs font-medium text-primary hover:text-primary/80"
+          >
+            Clear all
+          </button>
+        )}
       </div>
 
       <div className="space-y-3">
         <div>
-          <p className="mb-1.5 text-caption">
-            Status
-          </p>
+          <p className="mb-1.5 text-caption">Status</p>
 
-          <FilterRow
-            label={
-              stateLabel
-            }
-            count={
-              filters.state ===
-              "all"
-                ? 0
-                : 1
-            }
-          >
+          <FilterRow label={stateLabel} count={filters.state === "all" ? 0 : 1}>
             <div className="space-y-0.5">
-              {
-                STATE_OPTIONS.map(
-                  (
-                    option
-                  ) => (
-                    <button
-                      key={
-                        option.value
-                      }
-                      type="button"
-                      onClick={
-                        () =>
-                          onStateChange(
-                            option.value
-                          )
-                      }
-                      className={
-                        cn(
-                          "flex w-full items-center rounded-lg px-2.5 py-2 text-left text-sm transition-colors hover:bg-border/40",
-                          filters.state ===
-                            option.value &&
-                            "bg-primary/10 text-primary"
-                        )
-                      }
-                    >
-                      {
-                        option.label
-                      }
-                    </button>
-                  )
-                )
-              }
+              {STATE_OPTIONS.map((option) => (
+                <button
+                  key={option.value}
+                  type="button"
+                  onClick={() => onStateChange(option.value)}
+                  className={cn(
+                    "flex w-full items-center rounded-lg px-2.5 py-2 text-left text-sm transition-colors hover:bg-border/40",
+                    filters.state === option.value &&
+                      "bg-primary/10 text-primary",
+                  )}
+                >
+                  {option.label}
+                </button>
+              ))}
             </div>
           </FilterRow>
         </div>
 
         <div>
-          <p className="mb-1.5 text-caption">
-            Created by
-          </p>
+          <p className="mb-1.5 text-caption">Created by</p>
 
           <Popover>
             <PopoverTrigger
               aria-label="Creator filter"
               className="flex w-full items-center gap-2 rounded-md border border-border bg-background px-3 py-2 text-left text-sm text-foreground transition-colors hover:bg-border/30"
             >
-              {
-                selectedCreator ? (
-                  <>
-                    <Avatar
-                      src={
-                        selectedCreator.user.avatar
-                      }
-                      name={
-                        selectedCreator.user.name
-                      }
-                      size="sm"
-                    />
+              {selectedCreator ? (
+                <>
+                  <Avatar
+                    src={selectedCreator.user.avatar}
+                    name={selectedCreator.user.name}
+                    size="sm"
+                  />
 
-                    <span className="min-w-0 flex-1 truncate">
-                      {
-                        selectedCreator.user.name
-                      }
-                    </span>
-                  </>
-                ) : (
-                  <span className="min-w-0 flex-1 truncate text-muted">
-                    {
-                      filters.creator
-                        ? "Selected creator unavailable"
-                        : "Any creator"
-                    }
+                  <span className="min-w-0 flex-1 truncate">
+                    {selectedCreator.user.name}
                   </span>
-                )
-              }
+                </>
+              ) : (
+                <span className="min-w-0 flex-1 truncate text-muted">
+                  {filters.creator
+                    ? "Selected creator unavailable"
+                    : "Any creator"}
+                </span>
+              )}
 
               <ChevronDown className="h-3.5 w-3.5 shrink-0 text-muted" />
             </PopoverTrigger>
@@ -309,246 +204,129 @@ export function DocumentFiltersRail({
             >
               <button
                 type="button"
-                onClick={
-                  () =>
-                    onCreatorChange(
-                      null
-                    )
-                }
-                className={
-                  cn(
-                    "flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm transition-colors hover:bg-border/40",
-                    !filters.creator &&
-                      "bg-primary/10 text-primary"
-                  )
-                }
+                onClick={() => onCreatorChange(null)}
+                className={cn(
+                  "flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm transition-colors hover:bg-border/40",
+                  !filters.creator && "bg-primary/10 text-primary",
+                )}
               >
                 Any creator
               </button>
 
-              {
-                membersLoading ? (
-                  <p className="rounded-lg px-2.5 py-2 text-xs text-muted">
-                    Loading members…
-                  </p>
-                ) : membersUnavailable ? (
-                  <div className="rounded-lg px-2.5 py-2 text-xs text-warning">
-                    <p>
-                      Creator options are unavailable.
-                    </p>
+              {membersLoading ? (
+                <p className="rounded-lg px-2.5 py-2 text-xs text-muted">
+                  Loading members…
+                </p>
+              ) : membersUnavailable ? (
+                <div className="rounded-lg px-2.5 py-2 text-xs text-warning">
+                  <p>Creator options are unavailable.</p>
 
-                    <button
-                      type="button"
-                      onClick={
-                        onRetryMembers
-                      }
-                      className="mt-1 font-medium text-primary hover:text-primary/80"
-                    >
-                      Retry
-                    </button>
-                  </div>
-                ) : (
-                  members.map(
-                    (
-                      member
-                    ) => (
-                      <button
-                        key={
-                          member._id
-                        }
-                        type="button"
-                        onClick={
-                          () =>
-                            onCreatorChange(
-                              member.user._id
-                            )
-                        }
-                        className={
-                          cn(
-                            "flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm transition-colors hover:bg-border/40",
-                            filters.creator ===
-                              member.user._id &&
-                              "bg-primary/10 text-primary"
-                          )
-                        }
-                      >
-                        <Avatar
-                          src={
-                            member.user.avatar
-                          }
-                          name={
-                            member.user.name
-                          }
-                          size="sm"
-                        />
+                  <button
+                    type="button"
+                    onClick={onRetryMembers}
+                    className="mt-1 font-medium text-primary hover:text-primary/80"
+                  >
+                    Retry
+                  </button>
+                </div>
+              ) : (
+                members.map((member) => (
+                  <button
+                    key={member._id}
+                    type="button"
+                    onClick={() => onCreatorChange(member.user._id)}
+                    className={cn(
+                      "flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm transition-colors hover:bg-border/40",
+                      filters.creator === member.user._id &&
+                        "bg-primary/10 text-primary",
+                    )}
+                  >
+                    <Avatar
+                      src={member.user.avatar}
+                      name={member.user.name}
+                      size="sm"
+                    />
 
-                        <span className="truncate">
-                          {
-                            member.user.name
-                          }
-                        </span>
-                      </button>
-                    )
-                  )
-                )
-              }
+                    <span className="truncate">{member.user.name}</span>
+                  </button>
+                ))
+              )}
             </PopoverContent>
           </Popover>
         </div>
 
         <div>
-          <p className="mb-1.5 text-caption">
-            Date updated
-          </p>
+          <p className="mb-1.5 text-caption">Date updated</p>
 
           <FilterRow
             label={
-              filters.updated
-                ? UPDATED_LABEL[
-                    filters.updated
-                  ]
-                : "Any time"
+              filters.updated ? UPDATED_LABEL[filters.updated] : "Any time"
             }
-            count={
-              filters.updated
-                ? 1
-                : 0
-            }
+            count={filters.updated ? 1 : 0}
           >
             <div className="space-y-0.5">
               <button
                 type="button"
-                onClick={
-                  () =>
-                    onUpdatedChange(
-                      null
-                    )
-                }
-                className={
-                  cn(
-                    "flex w-full items-center rounded-lg px-2.5 py-2 text-left text-sm transition-colors hover:bg-border/40",
-                    !filters.updated &&
-                      "bg-primary/10 text-primary"
-                  )
-                }
+                onClick={() => onUpdatedChange(null)}
+                className={cn(
+                  "flex w-full items-center rounded-lg px-2.5 py-2 text-left text-sm transition-colors hover:bg-border/40",
+                  !filters.updated && "bg-primary/10 text-primary",
+                )}
               >
                 Any time
               </button>
 
-              {
-                UPDATED_OPTIONS.map(
-                  (
-                    option
-                  ) => (
-                    <button
-                      key={
-                        option
-                      }
-                      type="button"
-                      onClick={
-                        () =>
-                          onUpdatedChange(
-                            filters.updated ===
-                              option
-                              ? null
-                              : option
-                          )
-                      }
-                      className={
-                        cn(
-                          "flex w-full items-center rounded-lg px-2.5 py-2 text-left text-sm transition-colors hover:bg-border/40",
-                          filters.updated ===
-                            option &&
-                            "bg-primary/10 text-primary"
-                        )
-                      }
-                    >
-                      {
-                        UPDATED_LABEL[
-                          option
-                        ]
-                      }
-                    </button>
-                  )
-                )
-              }
+              {UPDATED_OPTIONS.map((option) => (
+                <button
+                  key={option}
+                  type="button"
+                  onClick={() =>
+                    onUpdatedChange(filters.updated === option ? null : option)
+                  }
+                  className={cn(
+                    "flex w-full items-center rounded-lg px-2.5 py-2 text-left text-sm transition-colors hover:bg-border/40",
+                    filters.updated === option && "bg-primary/10 text-primary",
+                  )}
+                >
+                  {UPDATED_LABEL[option]}
+                </button>
+              ))}
             </div>
           </FilterRow>
         </div>
 
         <div>
-          <p className="mb-1.5 text-caption">
-            Revision
-          </p>
+          <p className="mb-1.5 text-caption">Revision</p>
 
           <FilterRow
-            label={
-              REVISION_LABEL[
-                filters.revision
-              ]
-            }
-            count={
-              filters.revision !==
-              "any"
-                ? 1
-                : 0
-            }
+            label={REVISION_LABEL[filters.revision]}
+            count={filters.revision !== "any" ? 1 : 0}
           >
             <div className="space-y-0.5">
               <button
                 type="button"
-                onClick={
-                  () =>
-                    onRevisionChange(
-                      "any"
-                    )
-                }
-                className={
-                  cn(
-                    "flex w-full items-center rounded-lg px-2.5 py-2 text-left text-sm transition-colors hover:bg-border/40",
-                    filters.revision ===
-                      "any" &&
-                      "bg-primary/10 text-primary"
-                  )
-                }
+                onClick={() => onRevisionChange("any")}
+                className={cn(
+                  "flex w-full items-center rounded-lg px-2.5 py-2 text-left text-sm transition-colors hover:bg-border/40",
+                  filters.revision === "any" && "bg-primary/10 text-primary",
+                )}
               >
                 Any revision
               </button>
 
-              {
-                REVISION_OPTIONS.map(
-                  (
-                    option
-                  ) => (
-                    <button
-                      key={
-                        option
-                      }
-                      type="button"
-                      onClick={
-                        () =>
-                          onRevisionChange(
-                            option
-                          )
-                      }
-                      className={
-                        cn(
-                          "flex w-full items-center rounded-lg px-2.5 py-2 text-left text-sm transition-colors hover:bg-border/40",
-                          filters.revision ===
-                            option &&
-                            "bg-primary/10 text-primary"
-                        )
-                      }
-                    >
-                      {
-                        REVISION_LABEL[
-                          option
-                        ]
-                      }
-                    </button>
-                  )
-                )
-              }
+              {REVISION_OPTIONS.map((option) => (
+                <button
+                  key={option}
+                  type="button"
+                  onClick={() => onRevisionChange(option)}
+                  className={cn(
+                    "flex w-full items-center rounded-lg px-2.5 py-2 text-left text-sm transition-colors hover:bg-border/40",
+                    filters.revision === option && "bg-primary/10 text-primary",
+                  )}
+                >
+                  {REVISION_LABEL[option]}
+                </button>
+              ))}
             </div>
           </FilterRow>
         </div>

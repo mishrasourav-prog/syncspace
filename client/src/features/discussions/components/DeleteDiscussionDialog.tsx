@@ -21,7 +21,7 @@ export function DeleteDiscussionDialog({
 }: DeleteDiscussionDialogProps) {
   const deleteMutation = useDeleteDiscussionMutation(
     projectId,
-    discussion?._id ?? ""
+    discussion?._id ?? "",
   );
   const navigate = useNavigate();
 

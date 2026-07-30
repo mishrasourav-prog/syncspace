@@ -1,4 +1,7 @@
-import { getDiscussionReplyMetadata, getTaskAssignedMetadata } from "./notification.metadata";
+import {
+  getDiscussionReplyMetadata,
+  getTaskAssignedMetadata,
+} from "./notification.metadata";
 import type { NotificationItem } from "./notification.types";
 
 export interface NotificationDestination {
@@ -7,7 +10,9 @@ export interface NotificationDestination {
   requiresResourceAccess: boolean;
 }
 
-export function getNotificationDestination(notification: NotificationItem): NotificationDestination | null {
+export function getNotificationDestination(
+  notification: NotificationItem,
+): NotificationDestination | null {
   if (notification.entityType === "workspace_invitation") {
     return {
       path: "/dashboard#invitations",
@@ -32,7 +37,11 @@ export function getNotificationDestination(notification: NotificationItem): Noti
     };
   }
 
-  if (notification.entityType === "project" && notification.workspace && notification.project) {
+  if (
+    notification.entityType === "project" &&
+    notification.workspace &&
+    notification.project
+  ) {
     return {
       path: `/workspaces/${notification.workspace}/projects/${notification.project}`,
       label: "Open project",

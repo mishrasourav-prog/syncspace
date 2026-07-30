@@ -1,9 +1,21 @@
 import { useState } from "react";
 import { toast } from "sonner";
-import { AlertCircle, CheckSquare, Copy, MoreHorizontal, Pencil, Users } from "lucide-react";
+import {
+  AlertCircle,
+  CheckSquare,
+  Copy,
+  MoreHorizontal,
+  Pencil,
+  Users,
+} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import type { Task } from "../../types/task.types";
 import { TaskDetailMetadata } from "./TaskDetailMetadata";
 
@@ -61,7 +73,10 @@ export function TaskDetailHeader({
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="min-w-0 flex-1 space-y-2">
           <div className="flex flex-wrap items-center gap-2">
-            <Badge variant={task.type === "issue" ? "primary" : "secondary"} className="gap-1">
+            <Badge
+              variant={task.type === "issue" ? "primary" : "secondary"}
+              className="gap-1"
+            >
               <TypeIcon className="h-3 w-3" />
               {task.type === "issue" ? "ISSUE" : "TASK"}
             </Badge>
@@ -71,7 +86,9 @@ export function TaskDetailHeader({
           <h1 className="text-h1 break-words text-foreground">{task.title}</h1>
 
           {descriptionPreview && (
-            <p className="line-clamp-2 text-sm text-muted">{descriptionPreview}</p>
+            <p className="line-clamp-2 text-sm text-muted">
+              {descriptionPreview}
+            </p>
           )}
         </div>
 
@@ -84,7 +101,10 @@ export function TaskDetailHeader({
           )}
 
           <DropdownMenu>
-            <DropdownMenuTrigger aria-label="More task actions" className="border border-border">
+            <DropdownMenuTrigger
+              aria-label="More task actions"
+              className="border border-border"
+            >
               <MoreHorizontal className="h-4 w-4" />
             </DropdownMenuTrigger>
             <DropdownMenuContent>
@@ -109,7 +129,9 @@ export function TaskDetailHeader({
                   Archive
                 </DropdownMenuItem>
               )}
-              {canRestore && <DropdownMenuItem onClick={onRestore}>Restore</DropdownMenuItem>}
+              {canRestore && (
+                <DropdownMenuItem onClick={onRestore}>Restore</DropdownMenuItem>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

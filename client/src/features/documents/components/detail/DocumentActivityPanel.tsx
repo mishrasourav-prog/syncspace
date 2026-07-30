@@ -4,7 +4,12 @@ import { formatDateTime, formatRelativeTime } from "@/lib/date";
 import { useProjectActivitiesQuery } from "@/features/activity/hooks/useActivityQueries";
 import type { Activity } from "@/features/activity/types/activity.types";
 
-const SUPPORTED_DOCUMENT_ACTIVITY = new Set(["document.created", "document.updated", "document.archived", "document.restored"]);
+const SUPPORTED_DOCUMENT_ACTIVITY = new Set([
+  "document.created",
+  "document.updated",
+  "document.archived",
+  "document.restored",
+]);
 
 const ACTION_VERB: Record<string, string> = {
   "document.created": "created",
@@ -16,7 +21,10 @@ const ACTION_VERB: Record<string, string> = {
 function describeActivity(activity: Activity): string {
   const verb = ACTION_VERB[activity.action] ?? "updated";
   const revision = activity.metadata?.revision;
-  const revisionText = typeof revision === "number" ? ` this document to revision ${revision}` : " this document";
+  const revisionText =
+    typeof revision === "number"
+      ? ` this document to revision ${revision}`
+      : " this document";
   return `${verb}${revisionText}.`;
 }
 
@@ -25,18 +33,25 @@ interface DocumentActivityPanelProps {
   documentId: string;
 }
 
-export function DocumentActivityPanel({ projectId, documentId }: DocumentActivityPanelProps) {
+export function DocumentActivityPanel({
+  projectId,
+  documentId,
+}: DocumentActivityPanelProps) {
   const activitiesQuery = useProjectActivitiesQuery(projectId);
 
   const documentActivities = (activitiesQuery.data ?? []).filter(
     (activity) =>
-      activity.entityType === "document" && activity.entityId === documentId && SUPPORTED_DOCUMENT_ACTIVITY.has(activity.action)
+      activity.entityType === "document" &&
+      activity.entityId === documentId &&
+      SUPPORTED_DOCUMENT_ACTIVITY.has(activity.action),
   );
 
   return (
     <section className="rounded-xl border border-border bg-surface/60 p-4 shadow-soft">
       <h2 className="text-h3 mb-1 text-foreground">Activity</h2>
-      <p className="mb-3 text-[11px] text-muted/80">Recent document activity from the latest project events.</p>
+      <p className="mb-3 text-[11px] text-muted/80">
+        Recent document activity from the latest project events.
+      </p>
 
       {activitiesQuery.isLoading && (
         <div className="space-y-3">
@@ -65,34 +80,51 @@ export function DocumentActivityPanel({ projectId, documentId }: DocumentActivit
         </div>
       )}
 
-      {!activitiesQuery.isLoading && !activitiesQuery.isError && documentActivities.length === 0 && (
-        <p className="text-sm text-muted">No recent activity is available for this document.</p>
-      )}
+      {!activitiesQuery.isLoading &&
+        !activitiesQuery.isError &&
+        documentActivities.length === 0 && (
+          <p className="text-sm text-muted">
+            No recent activity is available for this document.
+          </p>
+        )}
 
-      {!activitiesQuery.isLoading && !activitiesQuery.isError && documentActivities.length > 0 && (
-        <ul className="space-y-3">
-          {documentActivities.map((activity) => (
-            <li key={activity._id} className="flex gap-2.5">
-              {activity.actor ? (
-                <Avatar src={activity.actor.avatar} name={activity.actor.name} size="sm" />
-              ) : (
-                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-border/50 text-[10px] text-muted">
-                  ?
-                </span>
-              )}
-              <div className="min-w-0 flex-1">
-                <p className="text-sm text-foreground">
-                  <span className="font-medium">{activity.actor?.name ?? "Unavailable member"}</span>{" "}
-                  <span className="text-muted">{describeActivity(activity)}</span>
-                </p>
-                <p className="mt-0.5 text-[11px] text-muted/70" title={formatDateTime(activity.createdAt)}>
-                  {formatRelativeTime(activity.createdAt)}
-                </p>
-              </div>
-            </li>
-          ))}
-        </ul>
-      )}
+      {!activitiesQuery.isLoading &&
+        !activitiesQuery.isError &&
+        documentActivities.length > 0 && (
+          <ul className="space-y-3">
+            {documentActivities.map((activity) => (
+              <li key={activity._id} className="flex gap-2.5">
+                {activity.actor ? (
+                  <Avatar
+                    src={activity.actor.avatar}
+                    name={activity.actor.name}
+                    size="sm"
+                  />
+                ) : (
+                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-border/50 text-[10px] text-muted">
+                    ?
+                  </span>
+                )}
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm text-foreground">
+                    <span className="font-medium">
+                      {activity.actor?.name ?? "Unavailable member"}
+                    </span>{" "}
+                    <span className="text-muted">
+                      {describeActivity(activity)}
+                    </span>
+                  </p>
+                  <p
+                    className="mt-0.5 text-[11px] text-muted/70"
+                    title={formatDateTime(activity.createdAt)}
+                  >
+                    {formatRelativeTime(activity.createdAt)}
+                  </p>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
     </section>
   );
 }

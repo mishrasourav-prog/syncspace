@@ -1,11 +1,6 @@
 export const taskQueryKeys = {
   all: ["tasks"] as const,
 
-  /**
-   * Parent key for every task resource belonging to one project.
-   * Removing this prefix clears the project list, task details, comments,
-   * and detailed assignee records after access is revoked or the user leaves.
-   */
   project: (projectId: string) =>
     [...taskQueryKeys.all, "project", projectId] as const,
 
@@ -19,5 +14,8 @@ export const taskQueryKeys = {
     [...taskQueryKeys.detail(projectId, taskId), "assignees"] as const,
 
   assignmentRequests: (projectId: string, taskId: string) =>
-    [...taskQueryKeys.detail(projectId, taskId), "assignment-requests"] as const,
+    [
+      ...taskQueryKeys.detail(projectId, taskId),
+      "assignment-requests",
+    ] as const,
 };

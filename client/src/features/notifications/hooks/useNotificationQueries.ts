@@ -1,7 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import type { ApiErrorShape } from "@/lib/axios";
 import { useAuthStore } from "@/app/store";
-import { getNotificationsRequest, getUnreadNotificationCountRequest } from "../api/notification.api";
+import {
+  getNotificationsRequest,
+  getUnreadNotificationCountRequest,
+} from "../api/notification.api";
 import { notificationQueryKeys } from "../notification.queryKeys";
 import type { NotificationItem } from "../notification.types";
 

@@ -6,16 +6,15 @@ interface AuthLayoutProps {
   children: ReactNode;
 }
 
-/**
- * Shared shell for /login, /signup, /forgot-password, /otp-verification.
- * Centered card on an ambient steel-blue glow, dark theme throughout.
- */
 export function AuthLayout({ children }: AuthLayoutProps) {
   return (
     <div className="min-h-screen w-full flex items-center justify-center bg-background px-4 py-10 relative overflow-hidden">
       <div
         className="absolute -top-40 left-1/2 -translate-x-1/2 w-[600px] h-[600px] rounded-full blur-3xl pointer-events-none"
-        style={{ background: "radial-gradient(closest-side, hsl(var(--primary) / 0.15), transparent)" }}
+        style={{
+          background:
+            "radial-gradient(closest-side, hsl(var(--primary) / 0.15), transparent)",
+        }}
         aria-hidden
       />
 
@@ -29,7 +28,9 @@ export function AuthLayout({ children }: AuthLayoutProps) {
           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
             <Sparkles className="w-4.5 h-4.5 text-white" />
           </div>
-          <span className="text-foreground font-semibold text-lg tracking-tight">SyncSpace</span>
+          <span className="text-foreground font-semibold text-lg tracking-tight">
+            SyncSpace
+          </span>
         </motion.div>
 
         <motion.div

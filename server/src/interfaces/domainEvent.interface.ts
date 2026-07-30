@@ -1,14 +1,5 @@
-import type {
-  TaskStatus,
-  TaskType,
-} from "../modules/tasks/task.model";
+import type { TaskStatus, TaskType } from "../modules/tasks/task.model";
 
-/**
- * Every domain event supported by SyncSpace.
- *
- * Keep this enum in one declaration. Splitting or redeclaring it causes
- * conflicting TypeScript definitions and makes the payload map unreliable.
- */
 export enum DomainEventName {
   TASK_CREATED = "task.created",
   TASK_UPDATED = "task.updated",
@@ -51,15 +42,10 @@ export enum DomainEventName {
   USER_SESSION_REVOKED = "user.session_revoked",
 }
 
-export type MembershipEndReason =
-  | "removed"
-  | "left";
+export type MembershipEndReason = "removed" | "left";
 
 export type UserSessionRevocationReason =
-  | "logout"
-  | "password_changed"
-  | "password_reset"
-  | "account_deleted";
+  "logout" | "password_changed" | "password_reset" | "account_deleted";
 
 export interface TaskCreatedEventPayload {
   workspaceId: string;
@@ -137,8 +123,7 @@ export interface TaskAssignmentRequestEventPayload {
   taskType: TaskType;
 }
 
-export interface TaskAssignmentRequestAcceptedEventPayload
-  extends TaskAssignmentRequestEventPayload {
+export interface TaskAssignmentRequestAcceptedEventPayload extends TaskAssignmentRequestEventPayload {
   acceptedById: string;
 }
 
@@ -180,7 +165,6 @@ export interface NotificationCreatedEventPayload {
   recipientId: string;
 }
 
-
 export interface WorkspaceMemberAddedEventPayload {
   workspaceId: string;
   memberId: string;
@@ -217,13 +201,8 @@ export interface ProjectMembershipEndedEventPayload {
   workspaceId: string;
   projectId: string;
 
-  /** User who no longer has project access. */
   affectedUserId: string;
 
-  /**
-   * User who performed the operation.
-   * For a voluntary leave, actorId equals affectedUserId.
-   */
   actorId: string;
 
   reason: MembershipEndReason;
@@ -232,7 +211,6 @@ export interface ProjectMembershipEndedEventPayload {
 export interface WorkspaceMembershipEndedEventPayload {
   workspaceId: string;
 
-  /** All project rooms the affected user must leave. */
   projectIds: string[];
 
   affectedUserId: string;
@@ -245,117 +223,77 @@ export interface UserSessionRevokedEventPayload {
   reason: UserSessionRevocationReason;
 }
 
-/**
- * Compile-time map between an event name and its exact payload.
- * This makes event publishing and subscription fully type-safe.
- */
 export interface DomainEventPayloadMap {
-  [DomainEventName.TASK_CREATED]:
-    TaskCreatedEventPayload;
+  [DomainEventName.TASK_CREATED]: TaskCreatedEventPayload;
 
-  [DomainEventName.TASK_UPDATED]:
-    TaskUpdatedEventPayload;
+  [DomainEventName.TASK_UPDATED]: TaskUpdatedEventPayload;
 
-  [DomainEventName.TASK_STATUS_CHANGED]:
-    TaskStatusChangedEventPayload;
+  [DomainEventName.TASK_STATUS_CHANGED]: TaskStatusChangedEventPayload;
 
-  [DomainEventName.TASK_ASSIGNED]:
-    TaskAssignedEventPayload;
+  [DomainEventName.TASK_ASSIGNED]: TaskAssignedEventPayload;
 
-  [DomainEventName.TASK_UNASSIGNED]:
-    TaskUnassignedEventPayload;
+  [DomainEventName.TASK_UNASSIGNED]: TaskUnassignedEventPayload;
 
-  [DomainEventName.TASKS_REORDERED]:
-    TasksReorderedEventPayload;
+  [DomainEventName.TASKS_REORDERED]: TasksReorderedEventPayload;
 
-  [DomainEventName.TASK_COMMENT_CREATED]:
-    TaskCommentChangedEventPayload;
+  [DomainEventName.TASK_COMMENT_CREATED]: TaskCommentChangedEventPayload;
 
-  [DomainEventName.TASK_COMMENT_UPDATED]:
-    TaskCommentChangedEventPayload;
+  [DomainEventName.TASK_COMMENT_UPDATED]: TaskCommentChangedEventPayload;
 
-  [DomainEventName.TASK_COMMENT_DELETED]:
-    TaskCommentChangedEventPayload;
+  [DomainEventName.TASK_COMMENT_DELETED]: TaskCommentChangedEventPayload;
 
-  [DomainEventName.TASK_ASSIGNMENT_REQUESTED]:
-    TaskAssignmentRequestEventPayload;
+  [DomainEventName.TASK_ASSIGNMENT_REQUESTED]: TaskAssignmentRequestEventPayload;
 
-  [DomainEventName.TASK_ASSIGNMENT_REQUEST_ACCEPTED]:
-    TaskAssignmentRequestAcceptedEventPayload;
+  [DomainEventName.TASK_ASSIGNMENT_REQUEST_ACCEPTED]: TaskAssignmentRequestAcceptedEventPayload;
 
-  [DomainEventName.DOCUMENT_CREATED]:
-    DocumentChangedEventPayload;
+  [DomainEventName.DOCUMENT_CREATED]: DocumentChangedEventPayload;
 
-  [DomainEventName.DOCUMENT_UPDATED]:
-    DocumentChangedEventPayload;
+  [DomainEventName.DOCUMENT_UPDATED]: DocumentChangedEventPayload;
 
-  [DomainEventName.DOCUMENT_ARCHIVED]:
-    DocumentChangedEventPayload;
+  [DomainEventName.DOCUMENT_ARCHIVED]: DocumentChangedEventPayload;
 
-  [DomainEventName.DOCUMENT_RESTORED]:
-    DocumentChangedEventPayload;
+  [DomainEventName.DOCUMENT_RESTORED]: DocumentChangedEventPayload;
 
-  [DomainEventName.DISCUSSION_CREATED]:
-    DiscussionChangedEventPayload;
+  [DomainEventName.DISCUSSION_CREATED]: DiscussionChangedEventPayload;
 
-  [DomainEventName.DISCUSSION_UPDATED]:
-    DiscussionChangedEventPayload;
+  [DomainEventName.DISCUSSION_UPDATED]: DiscussionChangedEventPayload;
 
-  [DomainEventName.DISCUSSION_DELETED]:
-    DiscussionChangedEventPayload;
+  [DomainEventName.DISCUSSION_DELETED]: DiscussionChangedEventPayload;
 
-  [DomainEventName.DISCUSSION_PINNED]:
-    DiscussionChangedEventPayload;
+  [DomainEventName.DISCUSSION_PINNED]: DiscussionChangedEventPayload;
 
-  [DomainEventName.DISCUSSION_UNPINNED]:
-    DiscussionChangedEventPayload;
+  [DomainEventName.DISCUSSION_UNPINNED]: DiscussionChangedEventPayload;
 
-  [DomainEventName.DISCUSSION_LOCKED]:
-    DiscussionChangedEventPayload;
+  [DomainEventName.DISCUSSION_LOCKED]: DiscussionChangedEventPayload;
 
-  [DomainEventName.DISCUSSION_UNLOCKED]:
-    DiscussionChangedEventPayload;
+  [DomainEventName.DISCUSSION_UNLOCKED]: DiscussionChangedEventPayload;
 
-  [DomainEventName.DISCUSSION_REPLY_CREATED]:
-    DiscussionReplyChangedEventPayload;
+  [DomainEventName.DISCUSSION_REPLY_CREATED]: DiscussionReplyChangedEventPayload;
 
-  [DomainEventName.DISCUSSION_REPLY_UPDATED]:
-    DiscussionReplyChangedEventPayload;
+  [DomainEventName.DISCUSSION_REPLY_UPDATED]: DiscussionReplyChangedEventPayload;
 
-  [DomainEventName.DISCUSSION_REPLY_DELETED]:
-    DiscussionReplyChangedEventPayload;
+  [DomainEventName.DISCUSSION_REPLY_DELETED]: DiscussionReplyChangedEventPayload;
 
-  [DomainEventName.ACTIVITY_CREATED]:
-    ActivityCreatedEventPayload;
+  [DomainEventName.ACTIVITY_CREATED]: ActivityCreatedEventPayload;
 
-  [DomainEventName.NOTIFICATION_CREATED]:
-    NotificationCreatedEventPayload;
+  [DomainEventName.NOTIFICATION_CREATED]: NotificationCreatedEventPayload;
 
-  [DomainEventName.WORKSPACE_MEMBER_ADDED]:
-    WorkspaceMemberAddedEventPayload;
+  [DomainEventName.WORKSPACE_MEMBER_ADDED]: WorkspaceMemberAddedEventPayload;
 
-  [DomainEventName.PROJECT_MEMBER_ADDED]:
-    ProjectMemberAddedEventPayload;
+  [DomainEventName.PROJECT_MEMBER_ADDED]: ProjectMemberAddedEventPayload;
 
-  [DomainEventName.WORKSPACE_MEMBER_ROLE_CHANGED]:
-    WorkspaceMemberRoleChangedEventPayload;
+  [DomainEventName.WORKSPACE_MEMBER_ROLE_CHANGED]: WorkspaceMemberRoleChangedEventPayload;
 
-  [DomainEventName.PROJECT_MEMBER_ROLE_CHANGED]:
-    ProjectMemberRoleChangedEventPayload;
+  [DomainEventName.PROJECT_MEMBER_ROLE_CHANGED]: ProjectMemberRoleChangedEventPayload;
 
-  [DomainEventName.PROJECT_MEMBERSHIP_ENDED]:
-    ProjectMembershipEndedEventPayload;
+  [DomainEventName.PROJECT_MEMBERSHIP_ENDED]: ProjectMembershipEndedEventPayload;
 
-  [DomainEventName.WORKSPACE_MEMBERSHIP_ENDED]:
-    WorkspaceMembershipEndedEventPayload;
+  [DomainEventName.WORKSPACE_MEMBERSHIP_ENDED]: WorkspaceMembershipEndedEventPayload;
 
-  [DomainEventName.USER_SESSION_REVOKED]:
-    UserSessionRevokedEventPayload;
+  [DomainEventName.USER_SESSION_REVOKED]: UserSessionRevokedEventPayload;
 }
 
-export interface DomainEvent<
-  TName extends keyof DomainEventPayloadMap,
-> {
+export interface DomainEvent<TName extends keyof DomainEventPayloadMap> {
   id: string;
   name: TName;
   occurredAt: Date;
@@ -363,12 +301,9 @@ export interface DomainEvent<
 }
 
 export type AnyDomainEvent = {
-  [TName in keyof DomainEventPayloadMap]:
-    DomainEvent<TName>;
+  [TName in keyof DomainEventPayloadMap]: DomainEvent<TName>;
 }[keyof DomainEventPayloadMap];
 
-export type DomainEventHandler<
-  TName extends keyof DomainEventPayloadMap,
-> = (
-  event: DomainEvent<TName>
+export type DomainEventHandler<TName extends keyof DomainEventPayloadMap> = (
+  event: DomainEvent<TName>,
 ) => void | Promise<void>;

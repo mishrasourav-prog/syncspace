@@ -1,6 +1,5 @@
 import { useCallback, useSyncExternalStore } from "react";
 
-/** React-safe media-query subscription used for responsive route behavior. */
 export function useMediaQuery(query: string): boolean {
   const subscribe = useCallback(
     (onStoreChange: () => void) => {
@@ -11,12 +10,12 @@ export function useMediaQuery(query: string): boolean {
         mediaQuery.removeEventListener("change", onStoreChange);
       };
     },
-    [query]
+    [query],
   );
 
   const getSnapshot = useCallback(
     () => window.matchMedia(query).matches,
-    [query]
+    [query],
   );
 
   const getServerSnapshot = useCallback(() => false, []);

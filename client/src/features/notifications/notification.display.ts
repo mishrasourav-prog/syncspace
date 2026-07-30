@@ -1,4 +1,8 @@
-import type { NotificationFilter, NotificationItem, NotificationType } from "./notification.types";
+import type {
+  NotificationFilter,
+  NotificationItem,
+  NotificationType,
+} from "./notification.types";
 import {
   getCollaborationNotificationMetadata,
   getDiscussionReplyMetadata,
@@ -21,7 +25,9 @@ const TYPE_LABELS: Record<NotificationType, string> = {
   "project.member_joined": "Project member joined",
 };
 
-export function getNotificationTypeLabel(notification: NotificationItem): string {
+export function getNotificationTypeLabel(
+  notification: NotificationItem,
+): string {
   if (notification.type === "task_assigned") {
     return getTaskAssignedMetadata(notification).taskType === "issue"
       ? "Issue assigned"
@@ -37,11 +43,15 @@ export function getNotificationTypeLabel(notification: NotificationItem): string
   return TYPE_LABELS[notification.type] ?? notification.type;
 }
 
-export function getNotificationActorName(notification: NotificationItem): string {
+export function getNotificationActorName(
+  notification: NotificationItem,
+): string {
   return notification.actor?.name ?? "System";
 }
 
-export function isInvitationNotification(notification: NotificationItem): boolean {
+export function isInvitationNotification(
+  notification: NotificationItem,
+): boolean {
   return (
     notification.type === "workspace.invitation" ||
     notification.type === "project.invitation"
@@ -50,7 +60,10 @@ export function isInvitationNotification(notification: NotificationItem): boolea
 
 const MAX_SEARCH_LENGTH = 200;
 
-export function matchesNotificationSearch(notification: NotificationItem, rawQuery: string): boolean {
+export function matchesNotificationSearch(
+  notification: NotificationItem,
+  rawQuery: string,
+): boolean {
   const query = rawQuery.trim().slice(0, MAX_SEARCH_LENGTH).toLowerCase();
   if (!query) return true;
 
@@ -61,10 +74,12 @@ export function matchesNotificationSearch(notification: NotificationItem, rawQue
     notification.actor?.name,
     notification.actor?.username,
     getNotificationTypeLabel(notification),
-    notification.type === "discussion.reply" || notification.type === "discussion.created"
+    notification.type === "discussion.reply" ||
+    notification.type === "discussion.created"
       ? getDiscussionReplyMetadata(notification).discussionTitle
       : undefined,
-    notification.type.startsWith("task_") || notification.type.startsWith("task.")
+    notification.type.startsWith("task_") ||
+    notification.type.startsWith("task.")
       ? getTaskAssignedMetadata(notification).taskTitle
       : undefined,
     collaboration.workspaceName,
@@ -78,16 +93,25 @@ export function matchesNotificationSearch(notification: NotificationItem, rawQue
   return haystack.includes(query);
 }
 
-export function matchesNotificationFilter(notification: NotificationItem, filter: NotificationFilter): boolean {
+export function matchesNotificationFilter(
+  notification: NotificationItem,
+  filter: NotificationFilter,
+): boolean {
   switch (filter) {
     case "all":
       return true;
     case "unread":
       return notification.isRead === false;
     case "tasks":
-      return notification.type.startsWith("task_") || notification.type.startsWith("task.");
+      return (
+        notification.type.startsWith("task_") ||
+        notification.type.startsWith("task.")
+      );
     case "discussions":
-      return notification.type === "discussion.created" || notification.type === "discussion.reply";
+      return (
+        notification.type === "discussion.created" ||
+        notification.type === "discussion.reply"
+      );
     case "read":
       return notification.isRead === true;
     default:

@@ -54,7 +54,7 @@ const taskAssignmentRequestSchema = new Schema<ITaskAssignmentRequestDocument>(
   {
     timestamps: true,
     versionKey: false,
-  }
+  },
 );
 
 taskAssignmentRequestSchema.index(
@@ -64,14 +64,14 @@ taskAssignmentRequestSchema.index(
     partialFilterExpression: {
       status: TaskAssignmentRequestStatus.PENDING,
     },
-  }
+  },
 );
 
 taskAssignmentRequestSchema.index({ task: 1, status: 1, requestedAt: 1 });
 
 const TaskAssignmentRequest = mongoose.model<ITaskAssignmentRequestDocument>(
   "TaskAssignmentRequest",
-  taskAssignmentRequestSchema
+  taskAssignmentRequestSchema,
 );
 
 export default TaskAssignmentRequest;

@@ -31,8 +31,9 @@ export function DocumentConflictDialog({
           <AlertTriangle className="h-4.5 w-4.5 text-danger" />
         </div>
         <p className="text-body">
-          A newer server revision is available. Your local changes are still in this browser. Download your draft first
-          when you need a copy, then reload the latest revision before continuing.
+          A newer server revision is available. Your local changes are still in
+          this browser. Download your draft first when you need a copy, then
+          reload the latest revision before continuing.
         </p>
       </div>
 
@@ -43,13 +44,28 @@ export function DocumentConflictDialog({
       )}
 
       <DialogFooter>
-        <Button type="button" variant="secondary" onClick={onCancel} disabled={isReloading}>
+        <Button
+          type="button"
+          variant="secondary"
+          onClick={onCancel}
+          disabled={isReloading}
+        >
           Keep my draft
         </Button>
-        <Button type="button" variant="secondary" onClick={onDownloadDraft} disabled={isReloading}>
+        <Button
+          type="button"
+          variant="secondary"
+          onClick={onDownloadDraft}
+          disabled={isReloading}
+        >
           Download my draft
         </Button>
-        <Button type="button" variant="danger" onClick={onReloadLatest} disabled={isReloading}>
+        <Button
+          type="button"
+          variant="danger"
+          onClick={onReloadLatest}
+          disabled={isReloading}
+        >
           {isReloading ? "Reloading…" : "Discard draft and reload latest"}
         </Button>
       </DialogFooter>

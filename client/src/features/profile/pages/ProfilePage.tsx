@@ -26,7 +26,9 @@ export function ProfilePage() {
           Back to Dashboard
         </Link>
         <h1 className="mt-3 text-h1 text-foreground">Profile</h1>
-        <p className="mt-1 text-body">Manage your personal information and account settings.</p>
+        <p className="mt-1 text-body">
+          Manage your personal information and account settings.
+        </p>
       </header>
 
       {profileQuery.isLoading ? <ProfilePageSkeleton /> : null}

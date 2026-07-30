@@ -52,7 +52,9 @@ function getMutationMessage(error: unknown, fallback: string): string {
   return fallback;
 }
 
-export function AccountInformationCard({ profile }: AccountInformationCardProps) {
+export function AccountInformationCard({
+  profile,
+}: AccountInformationCardProps) {
   const [copied, setCopied] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -63,7 +65,8 @@ export function AccountInformationCard({ profile }: AccountInformationCardProps)
 
   const replaceAvatarMutation = useReplaceAvatarMutation();
   const removeAvatarMutation = useRemoveAvatarMutation();
-  const isAvatarBusy = replaceAvatarMutation.isPending || removeAvatarMutation.isPending;
+  const isAvatarBusy =
+    replaceAvatarMutation.isPending || removeAvatarMutation.isPending;
 
   useEffect(() => {
     return () => {
@@ -123,7 +126,9 @@ export function AccountInformationCard({ profile }: AccountInformationCardProps)
 
     if (!result.success) {
       clearSelectedFile();
-      setValidationError(result.error.issues[0]?.message ?? "Choose a valid avatar image.");
+      setValidationError(
+        result.error.issues[0]?.message ?? "Choose a valid avatar image.",
+      );
       return;
     }
 
@@ -146,7 +151,7 @@ export function AccountInformationCard({ profile }: AccountInformationCardProps)
           clearSelectedFile();
           toast.success("Avatar updated successfully.");
         },
-      }
+      },
     );
   }
 
@@ -169,7 +174,9 @@ export function AccountInformationCard({ profile }: AccountInformationCardProps)
       icon: Fingerprint,
       value: (
         <span className="flex min-w-0 items-center justify-end gap-2">
-          <span className="truncate font-mono text-xs text-foreground">{profile._id}</span>
+          <span className="truncate font-mono text-xs text-foreground">
+            {profile._id}
+          </span>
           <button
             type="button"
             onClick={handleCopyUserId}
@@ -203,7 +210,9 @@ export function AccountInformationCard({ profile }: AccountInformationCardProps)
     {
       label: "Last Login",
       icon: Clock,
-      value: profile.lastLoginAt ? formatDateTime(profile.lastLoginAt) : "Not available yet",
+      value: profile.lastLoginAt
+        ? formatDateTime(profile.lastLoginAt)
+        : "Not available yet",
     },
   ] as const;
 
@@ -226,7 +235,9 @@ export function AccountInformationCard({ profile }: AccountInformationCardProps)
               <Icon className="h-3.5 w-3.5 shrink-0" aria-hidden />
               {label}
             </dt>
-            <dd className="min-w-0 text-sm text-foreground sm:text-right">{value}</dd>
+            <dd className="min-w-0 text-sm text-foreground sm:text-right">
+              {value}
+            </dd>
           </div>
         ))}
       </dl>
@@ -242,9 +253,13 @@ export function AccountInformationCard({ profile }: AccountInformationCardProps)
             />
             <div className="min-w-0">
               <h3 className="text-sm font-semibold text-foreground">Avatar</h3>
-              <p className="mt-0.5 text-caption">JPEG, PNG, or WebP. Maximum size 5 MB.</p>
+              <p className="mt-0.5 text-caption">
+                JPEG, PNG, or WebP. Maximum size 5 MB.
+              </p>
               {selectedFile ? (
-                <p className="mt-1 truncate text-xs text-secondary">Selected: {selectedFile.name}</p>
+                <p className="mt-1 truncate text-xs text-secondary">
+                  Selected: {selectedFile.name}
+                </p>
               ) : null}
             </div>
           </div>
@@ -267,7 +282,11 @@ export function AccountInformationCard({ profile }: AccountInformationCardProps)
               onClick={() => fileInputRef.current?.click()}
             >
               <ImagePlus className="h-3.5 w-3.5" aria-hidden />
-              {selectedFile ? "Choose another" : profile.avatar ? "Change avatar" : "Add avatar"}
+              {selectedFile
+                ? "Choose another"
+                : profile.avatar
+                  ? "Change avatar"
+                  : "Add avatar"}
             </Button>
 
             {selectedFile ? (
@@ -320,7 +339,10 @@ export function AccountInformationCard({ profile }: AccountInformationCardProps)
             role="alert"
             className="mt-3 rounded-md border border-danger/30 bg-danger/10 px-3 py-2 text-xs text-danger"
           >
-            {getMutationMessage(replaceAvatarMutation.error, "Unable to update the avatar.")}
+            {getMutationMessage(
+              replaceAvatarMutation.error,
+              "Unable to update the avatar.",
+            )}
           </p>
         ) : null}
       </div>
@@ -340,7 +362,10 @@ export function AccountInformationCard({ profile }: AccountInformationCardProps)
         isPending={removeAvatarMutation.isPending}
         errorMessage={
           removeAvatarMutation.error
-            ? getMutationMessage(removeAvatarMutation.error, "Unable to remove the avatar.")
+            ? getMutationMessage(
+                removeAvatarMutation.error,
+                "Unable to remove the avatar.",
+              )
             : null
         }
       />

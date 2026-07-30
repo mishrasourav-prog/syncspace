@@ -10,10 +10,6 @@ export function useLogout() {
 
   const logout = () => {
     logoutMutation.mutate(undefined, {
-      /*
-      Always end the local session, even when the backend cookie has already
-      expired. The shared helper also handles the HTTP/socket race safely.
-      */
       onSettled: () => {
         endAuthenticatedSession({
           navigate,

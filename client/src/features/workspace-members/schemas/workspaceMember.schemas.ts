@@ -5,4 +5,6 @@ export const inviteWorkspaceMemberSchema = z.object({
   role: z.enum(["admin", "member", "guest"]),
 });
 
-export type InviteWorkspaceMemberFormValues = z.infer<typeof inviteWorkspaceMemberSchema>;
+export type InviteWorkspaceMemberFormValues = z.infer<
+  typeof inviteWorkspaceMemberSchema
+>;

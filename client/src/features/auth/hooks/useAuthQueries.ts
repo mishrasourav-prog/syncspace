@@ -1,107 +1,47 @@
-import {
-    useEffect,
-} from "react";
+import { useEffect } from "react";
 
-import {
-    useQuery,
-} from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 
-import {
-    useAuthStore,
-} from "@/app/store";
+import { useAuthStore } from "@/app/store";
 
-import {
-    getCurrentUserRequest,
-} from "../api/auth.api";
+import { getCurrentUserRequest } from "../api/auth.api";
 
 export const authQueryKeys = {
-    currentUser: [
-        "auth",
-        "current-user",
-    ] as const,
+  currentUser: ["auth", "current-user"] as const,
 };
 
 export function useCurrentUserQuery() {
-    const setUser =
-        useAuthStore(
-            (
-                state
-            ) =>
-                state.setUser
-        );
+  const setUser = useAuthStore((state) => state.setUser);
 
-    const markAuthInitialized =
-        useAuthStore(
-            (
-                state
-            ) =>
-                state
-                    .markAuthInitialized
-        );
+  const markAuthInitialized = useAuthStore(
+    (state) => state.markAuthInitialized,
+  );
 
-    const query =
-        useQuery({
-            queryKey:
-                authQueryKeys
-                    .currentUser,
+  const query = useQuery({
+    queryKey: authQueryKeys.currentUser,
 
-            queryFn:
-                getCurrentUserRequest,
+    queryFn: getCurrentUserRequest,
 
-            retry:
-                false,
+    retry: false,
 
-            /*
-            Do not repeatedly refetch authentication
-            merely because the browser window regains focus.
-            */
-            refetchOnWindowFocus:
-                false,
-        });
+    refetchOnWindowFocus: false,
+  });
 
-    useEffect(
-        () => {
-            if (
-                query.isSuccess
-            ) {
-                setUser(
-                    query.data
-                );
+  useEffect(() => {
+    if (query.isSuccess) {
+      setUser(query.data);
 
-                markAuthInitialized();
-            }
-        },
-        [
-            query.isSuccess,
-            query.data,
-            setUser,
-            markAuthInitialized,
-        ]
-    );
+      markAuthInitialized();
+    }
+  }, [query.isSuccess, query.data, setUser, markAuthInitialized]);
 
-    useEffect(
-        () => {
-            if (
-                query.isError
-            ) {
-                /*
-                /auth/me failed even after the Axios refresh
-                attempt, so there is no valid authenticated user.
-                */
+  useEffect(() => {
+    if (query.isError) {
+      setUser(null);
 
-                setUser(
-                    null
-                );
+      markAuthInitialized();
+    }
+  }, [query.isError, setUser, markAuthInitialized]);
 
-                markAuthInitialized();
-            }
-        },
-        [
-            query.isError,
-            setUser,
-            markAuthInitialized,
-        ]
-    );
-
-    return query;
+  return query;
 }

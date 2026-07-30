@@ -9,7 +9,11 @@ interface RemoveProjectMemberDialogProps {
   onClose: () => void;
 }
 
-export function RemoveProjectMemberDialog({ projectId, member, onClose }: RemoveProjectMemberDialogProps) {
+export function RemoveProjectMemberDialog({
+  projectId,
+  member,
+  onClose,
+}: RemoveProjectMemberDialogProps) {
   const removeMutation = useRemoveProjectMemberMutation(projectId);
 
   function handleClose() {

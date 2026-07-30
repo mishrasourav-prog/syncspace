@@ -21,13 +21,21 @@ export function DocumentUnsavedChangesDialog({
   onSaveAndLeave,
 }: DocumentUnsavedChangesDialogProps) {
   return (
-    <Dialog open={open} onClose={onStay} title="You have unsaved changes" disableOutsideClose={isSaving}>
-      <p className="text-body">Leaving now will discard your unsaved edits unless you save first.</p>
+    <Dialog
+      open={open}
+      onClose={onStay}
+      title="You have unsaved changes"
+      disableOutsideClose={isSaving}
+    >
+      <p className="text-body">
+        Leaving now will discard your unsaved edits unless you save first.
+      </p>
 
       {!canSave && (
         <p className="mt-3 rounded-md border border-warning/30 bg-warning/10 px-3 py-2 text-xs text-warning">
-          Saving is unavailable until the newer server revision is reloaded. Download your draft before discarding it if
-          you need to preserve these edits.
+          Saving is unavailable until the newer server revision is reloaded.
+          Download your draft before discarding it if you need to preserve these
+          edits.
         </p>
       )}
 
@@ -38,13 +46,27 @@ export function DocumentUnsavedChangesDialog({
       )}
 
       <DialogFooter>
-        <Button type="button" variant="secondary" onClick={onStay} disabled={isSaving}>
+        <Button
+          type="button"
+          variant="secondary"
+          onClick={onStay}
+          disabled={isSaving}
+        >
           Stay and continue editing
         </Button>
-        <Button type="button" variant="danger" onClick={onDiscardAndLeave} disabled={isSaving}>
+        <Button
+          type="button"
+          variant="danger"
+          onClick={onDiscardAndLeave}
+          disabled={isSaving}
+        >
           Discard changes and leave
         </Button>
-        <Button type="button" onClick={onSaveAndLeave} disabled={isSaving || !canSave}>
+        <Button
+          type="button"
+          onClick={onSaveAndLeave}
+          disabled={isSaving || !canSave}
+        >
           {isSaving ? "Saving…" : "Save and leave"}
         </Button>
       </DialogFooter>

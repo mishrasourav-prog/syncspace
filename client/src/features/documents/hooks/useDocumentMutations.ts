@@ -7,7 +7,11 @@ import {
   restoreDocumentRequest,
   updateDocumentRequest,
 } from "../api/document.api";
-import { invalidateProjectDocuments, moveDocumentBetweenCaches, writeDocumentToCaches } from "../document.cache";
+import {
+  invalidateProjectDocuments,
+  moveDocumentBetweenCaches,
+  writeDocumentToCaches,
+} from "../document.cache";
 import type {
   CreateDocumentPayload,
   ProjectDocument,
@@ -40,7 +44,8 @@ export function useRenameDocumentMutation(projectId: string) {
   const queryClient = useQueryClient();
 
   return useMutation<ProjectDocument, ApiErrorShape, RenameDocumentVariables>({
-    mutationFn: ({ documentId, payload }) => renameDocumentRequest(documentId, payload),
+    mutationFn: ({ documentId, payload }) =>
+      renameDocumentRequest(documentId, payload),
 
     onSuccess: (document) => {
       writeDocumentToCaches(queryClient, projectId, document);
@@ -57,17 +62,12 @@ interface UpdateDocumentVariables {
   payload: UpdateDocumentPayload;
 }
 
-/**
- * The single save mutation used by the Document Editor (spec section 23).
- * A 409 revision conflict rejects with `ApiErrorShape.status === 409` and
- * the exact server message — the editor page distinguishes that case to
- * drive the conflict dialog instead of a generic error toast.
- */
 export function useUpdateDocumentMutation(projectId: string) {
   const queryClient = useQueryClient();
 
   return useMutation<ProjectDocument, ApiErrorShape, UpdateDocumentVariables>({
-    mutationFn: ({ documentId, payload }) => updateDocumentRequest(documentId, payload),
+    mutationFn: ({ documentId, payload }) =>
+      updateDocumentRequest(documentId, payload),
 
     onSuccess: (document) => {
       writeDocumentToCaches(queryClient, projectId, document);

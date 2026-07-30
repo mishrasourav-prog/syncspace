@@ -18,14 +18,21 @@ import type { ProjectInvitation } from "../types/projectInvitation.types";
 export function useInviteProjectMemberMutation(projectId: string) {
   const queryClient = useQueryClient();
 
-  return useMutation<ProjectInvitation, ApiErrorShape, InviteProjectMemberPayload>({
+  return useMutation<
+    ProjectInvitation,
+    ApiErrorShape,
+    InviteProjectMemberPayload
+  >({
     mutationFn: (payload) => inviteProjectMemberRequest(projectId, payload),
     onSuccess: (createdInvitation) => {
       queryClient.setQueryData<ProjectInvitation[]>(
         projectInvitationQueryKeys.list(projectId),
-        (previous) => (previous ? [createdInvitation, ...previous] : [createdInvitation])
+        (previous) =>
+          previous ? [createdInvitation, ...previous] : [createdInvitation],
       );
-      void queryClient.invalidateQueries({ queryKey: projectInvitationQueryKeys.list(projectId) });
+      void queryClient.invalidateQueries({
+        queryKey: projectInvitationQueryKeys.list(projectId),
+      });
     },
   });
 }
@@ -38,9 +45,12 @@ export function useCancelProjectInvitationMutation(projectId: string) {
     onSuccess: (_data, invitationId) => {
       queryClient.setQueryData<ProjectInvitation[]>(
         projectInvitationQueryKeys.list(projectId),
-        (previous) => previous?.filter((invitation) => invitation._id !== invitationId)
+        (previous) =>
+          previous?.filter((invitation) => invitation._id !== invitationId),
       );
-      void queryClient.invalidateQueries({ queryKey: projectInvitationQueryKeys.list(projectId) });
+      void queryClient.invalidateQueries({
+        queryKey: projectInvitationQueryKeys.list(projectId),
+      });
     },
   });
 }
@@ -51,11 +61,16 @@ export function useAcceptProjectInvitationMutation() {
   return useMutation<void, ApiErrorShape, ProjectInvitation>({
     mutationFn: (invitation) => acceptProjectInvitationRequest(invitation._id),
     onSuccess: (_data, invitation) => {
-      queryClient.setQueryData<ProjectInvitation[]>(projectInvitationQueryKeys.my(), (previous) =>
-        previous?.filter((item) => item._id !== invitation._id)
+      queryClient.setQueryData<ProjectInvitation[]>(
+        projectInvitationQueryKeys.my(),
+        (previous) => previous?.filter((item) => item._id !== invitation._id),
       );
-      void queryClient.invalidateQueries({ queryKey: projectInvitationQueryKeys.my() });
-      void queryClient.invalidateQueries({ queryKey: notificationQueryKeys.all });
+      void queryClient.invalidateQueries({
+        queryKey: projectInvitationQueryKeys.my(),
+      });
+      void queryClient.invalidateQueries({
+        queryKey: notificationQueryKeys.all,
+      });
       if (invitation.workspace) {
         void queryClient.invalidateQueries({
           queryKey: projectQueryKeys.workspaceList(invitation.workspace),
@@ -64,8 +79,12 @@ export function useAcceptProjectInvitationMutation() {
           queryKey: workspaceQueryKeys.detail(invitation.workspace),
         });
       }
-      void queryClient.invalidateQueries({ queryKey: projectQueryKeys.detail(invitation.project) });
-      void queryClient.invalidateQueries({ queryKey: projectMemberQueryKeys.list(invitation.project) });
+      void queryClient.invalidateQueries({
+        queryKey: projectQueryKeys.detail(invitation.project),
+      });
+      void queryClient.invalidateQueries({
+        queryKey: projectMemberQueryKeys.list(invitation.project),
+      });
     },
   });
 }
@@ -76,11 +95,16 @@ export function useRejectProjectInvitationMutation() {
   return useMutation<void, ApiErrorShape, ProjectInvitation>({
     mutationFn: (invitation) => rejectProjectInvitationRequest(invitation._id),
     onSuccess: (_data, invitation) => {
-      queryClient.setQueryData<ProjectInvitation[]>(projectInvitationQueryKeys.my(), (previous) =>
-        previous?.filter((item) => item._id !== invitation._id)
+      queryClient.setQueryData<ProjectInvitation[]>(
+        projectInvitationQueryKeys.my(),
+        (previous) => previous?.filter((item) => item._id !== invitation._id),
       );
-      void queryClient.invalidateQueries({ queryKey: projectInvitationQueryKeys.my() });
-      void queryClient.invalidateQueries({ queryKey: notificationQueryKeys.all });
+      void queryClient.invalidateQueries({
+        queryKey: projectInvitationQueryKeys.my(),
+      });
+      void queryClient.invalidateQueries({
+        queryKey: notificationQueryKeys.all,
+      });
     },
   });
 }

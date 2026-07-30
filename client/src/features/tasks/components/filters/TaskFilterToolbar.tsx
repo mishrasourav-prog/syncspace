@@ -1,7 +1,11 @@
 import { ChevronDown, Search, User, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Avatar } from "@/components/ui/avatar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import type { ProjectMember } from "@/features/project-members/types/projectMember.types";
 import {
@@ -15,7 +19,11 @@ import {
   type TaskFilters,
   type TaskStateFilter,
 } from "../../task.filters";
-import type { TaskPriority, TaskStatus, TaskType } from "../../types/task.types";
+import type {
+  TaskPriority,
+  TaskStatus,
+  TaskType,
+} from "../../types/task.types";
 import { TaskFiltersPopover } from "./TaskFiltersPopover";
 
 const DUE_OPTIONS: { value: TaskDueFilter; label: string }[] = [
@@ -31,7 +39,11 @@ interface FilterDropdownButtonProps {
   children: React.ReactNode;
 }
 
-function FilterDropdownButton({ label, count, children }: FilterDropdownButtonProps) {
+function FilterDropdownButton({
+  label,
+  count,
+  children,
+}: FilterDropdownButtonProps) {
   return (
     <Popover>
       <PopoverTrigger
@@ -62,10 +74,15 @@ function CheckboxOption({ label, checked, onChange }: CheckboxOptionProps) {
     <label
       className={cn(
         "flex cursor-pointer items-center gap-2 rounded-lg px-2.5 py-2 text-sm transition-colors hover:bg-border/40",
-        checked && "bg-primary/10 text-primary"
+        checked && "bg-primary/10 text-primary",
       )}
     >
-      <input type="checkbox" checked={checked} onChange={onChange} className="h-3.5 w-3.5 accent-primary" />
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={onChange}
+        className="h-3.5 w-3.5 accent-primary"
+      />
       {label}
     </label>
   );
@@ -98,7 +115,9 @@ export function TaskFilterToolbar({
   onStateChange,
   onClear,
 }: TaskFilterToolbarProps) {
-  const selectedAssigneeMember = members.find((member) => member.user._id === filters.assignee);
+  const selectedAssigneeMember = members.find(
+    (member) => member.user._id === filters.assignee,
+  );
 
   return (
     <div className="flex flex-wrap items-center gap-2">
@@ -124,7 +143,9 @@ export function TaskFilterToolbar({
       />
 
       <FilterDropdownButton label="Status" count={filters.status.length}>
-        <p className="mb-1 px-0.5 text-caption uppercase tracking-wide">Status</p>
+        <p className="mb-1 px-0.5 text-caption uppercase tracking-wide">
+          Status
+        </p>
         <div className="space-y-0.5">
           {ALL_STATUSES.map((status) => (
             <CheckboxOption
@@ -152,7 +173,9 @@ export function TaskFilterToolbar({
       </FilterDropdownButton>
 
       <FilterDropdownButton label="Priority" count={filters.priority.length}>
-        <p className="mb-1 px-0.5 text-caption uppercase tracking-wide">Priority</p>
+        <p className="mb-1 px-0.5 text-caption uppercase tracking-wide">
+          Priority
+        </p>
         <div className="space-y-0.5">
           {ALL_PRIORITIES.map((priority) => (
             <CheckboxOption
@@ -171,7 +194,12 @@ export function TaskFilterToolbar({
           className="inline-flex h-9 items-center gap-1.5 rounded-md border border-border bg-surface px-3 text-sm text-foreground transition-colors hover:bg-border/30"
         >
           {selectedAssigneeMember ? (
-            <Avatar src={selectedAssigneeMember.user.avatar} name={selectedAssigneeMember.user.name} size="sm" className="h-4.5 w-4.5" />
+            <Avatar
+              src={selectedAssigneeMember.user.avatar}
+              name={selectedAssigneeMember.user.name}
+              size="sm"
+              className="h-4.5 w-4.5"
+            />
           ) : (
             <User className="h-3.5 w-3.5" />
           )}
@@ -183,14 +211,16 @@ export function TaskFilterToolbar({
           <ChevronDown className="h-3.5 w-3.5 text-muted" />
         </PopoverTrigger>
         <PopoverContent className="w-60 max-h-72 overflow-y-auto">
-          <p className="mb-1 px-0.5 text-caption uppercase tracking-wide">Assignee</p>
+          <p className="mb-1 px-0.5 text-caption uppercase tracking-wide">
+            Assignee
+          </p>
           <div className="space-y-0.5">
             <button
               type="button"
               onClick={() => onAssigneeChange(null)}
               className={cn(
                 "flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm transition-colors hover:bg-border/40",
-                !filters.assignee && "bg-primary/10 text-primary"
+                !filters.assignee && "bg-primary/10 text-primary",
               )}
             >
               All assignees
@@ -200,7 +230,8 @@ export function TaskFilterToolbar({
               onClick={() => onAssigneeChange("unassigned")}
               className={cn(
                 "flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm transition-colors hover:bg-border/40",
-                filters.assignee === "unassigned" && "bg-primary/10 text-primary"
+                filters.assignee === "unassigned" &&
+                  "bg-primary/10 text-primary",
               )}
             >
               Unassigned
@@ -212,10 +243,15 @@ export function TaskFilterToolbar({
                 onClick={() => onAssigneeChange(member.user._id)}
                 className={cn(
                   "flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm transition-colors hover:bg-border/40",
-                  filters.assignee === member.user._id && "bg-primary/10 text-primary"
+                  filters.assignee === member.user._id &&
+                    "bg-primary/10 text-primary",
                 )}
               >
-                <Avatar src={member.user.avatar} name={member.user.name} size="sm" />
+                <Avatar
+                  src={member.user.avatar}
+                  name={member.user.name}
+                  size="sm"
+                />
                 <span className="truncate">{member.user.name}</span>
               </button>
             ))}
@@ -224,14 +260,16 @@ export function TaskFilterToolbar({
       </Popover>
 
       <FilterDropdownButton label="Due date" count={filters.due ? 1 : 0}>
-        <p className="mb-1 px-0.5 text-caption uppercase tracking-wide">Due date</p>
+        <p className="mb-1 px-0.5 text-caption uppercase tracking-wide">
+          Due date
+        </p>
         <div className="space-y-0.5">
           <button
             type="button"
             onClick={() => onDueChange(null)}
             className={cn(
               "flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm transition-colors hover:bg-border/40",
-              !filters.due && "bg-primary/10 text-primary"
+              !filters.due && "bg-primary/10 text-primary",
             )}
           >
             Any due date
@@ -240,10 +278,12 @@ export function TaskFilterToolbar({
             <button
               key={option.value}
               type="button"
-              onClick={() => onDueChange(filters.due === option.value ? null : option.value)}
+              onClick={() =>
+                onDueChange(filters.due === option.value ? null : option.value)
+              }
               className={cn(
                 "flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm transition-colors hover:bg-border/40",
-                filters.due === option.value && "bg-primary/10 text-primary"
+                filters.due === option.value && "bg-primary/10 text-primary",
               )}
             >
               {option.label}

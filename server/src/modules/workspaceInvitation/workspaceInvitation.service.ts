@@ -13,7 +13,10 @@ import {
   NotificationEntityType,
   NotificationType,
 } from "../notifications/notification.model";
-import { WorkspaceMember, WorkspaceRole } from "../workspace-member/workspace-member.model";
+import {
+  WorkspaceMember,
+  WorkspaceRole,
+} from "../workspace-member/workspace-member.model";
 import { Workspace } from "../workspace/workspace.model";
 import {
   InvitationRole,
@@ -25,7 +28,7 @@ import {
 class WorkspaceInvitationService {
   private mapInvitation(
     invitation: IWorkspaceInvitationDocument,
-    workspaceName: string
+    workspaceName: string,
   ): InvitationResponse {
     return {
       _id: invitation._id.toString(),
@@ -45,7 +48,7 @@ class WorkspaceInvitationService {
   private async markExpiredIfNeeded(
     invitationId: string,
     expiresAt: Date,
-    now: Date
+    now: Date,
   ): Promise<void> {
     if (expiresAt.getTime() > now.getTime()) return;
 
@@ -55,7 +58,7 @@ class WorkspaceInvitationService {
         status: InvitationStatus.PENDING,
         expiresAt: { $lte: now },
       },
-      { $set: { status: InvitationStatus.EXPIRED } }
+      { $set: { status: InvitationStatus.EXPIRED } },
     );
 
     throw new ApiError(410, "Invitation has expired.");
@@ -64,7 +67,7 @@ class WorkspaceInvitationService {
   async inviteUser(
     workspaceId: string,
     invitedBy: string,
-    data: InviteUserRequest
+    data: InviteUserRequest,
   ): Promise<InvitationResponse> {
     const workspace = await Workspace.findById(workspaceId);
     if (!workspace) throw new ApiError(404, "Workspace not found.");
@@ -74,9 +77,13 @@ class WorkspaceInvitationService {
       user: invitedBy,
     });
 
-    if (!inviter) throw new ApiError(403, "You are not a member of this workspace.");
+    if (!inviter)
+      throw new ApiError(403, "You are not a member of this workspace.");
     if (workspace.isArchived) {
-      throw new ApiError(409, "Users cannot be invited to an archived workspace.");
+      throw new ApiError(
+        409,
+        "Users cannot be invited to an archived workspace.",
+      );
     }
 
     const requestedRole = data.role ?? InvitationRole.MEMBER;
@@ -87,11 +94,17 @@ class WorkspaceInvitationService {
 
     if (inviter.role === WorkspaceRole.MEMBER) {
       if (!workspace.settings.allowMemberInvites) {
-        throw new ApiError(403, "Workspace members are not allowed to invite users.");
+        throw new ApiError(
+          403,
+          "Workspace members are not allowed to invite users.",
+        );
       }
 
       if (requestedRole === InvitationRole.ADMIN) {
-        throw new ApiError(403, "Workspace members cannot invite administrators.");
+        throw new ApiError(
+          403,
+          "Workspace members cannot invite administrators.",
+        );
       }
     }
 
@@ -99,7 +112,10 @@ class WorkspaceInvitationService {
       requestedRole === InvitationRole.GUEST &&
       !workspace.settings.allowGuestInvites
     ) {
-      throw new ApiError(403, "Guest invitations are disabled for this workspace.");
+      throw new ApiError(
+        403,
+        "Guest invitations are disabled for this workspace.",
+      );
     }
 
     const normalizedEmail = data.email.trim().toLowerCase();
@@ -126,7 +142,7 @@ class WorkspaceInvitationService {
         status: InvitationStatus.PENDING,
         expiresAt: { $lte: now },
       },
-      { $set: { status: InvitationStatus.EXPIRED } }
+      { $set: { status: InvitationStatus.EXPIRED } },
     );
 
     const existingInvitation = await WorkspaceInvitation.exists({
@@ -137,7 +153,10 @@ class WorkspaceInvitationService {
     });
 
     if (existingInvitation) {
-      throw new ApiError(409, "An active invitation already exists for this email.");
+      throw new ApiError(
+        409,
+        "An active invitation already exists for this email.",
+      );
     }
 
     const invitation = await WorkspaceInvitation.create({
@@ -167,8 +186,6 @@ class WorkspaceInvitationService {
           },
         });
       } catch (error) {
-        // Do not report a successful invitation when the registered recipient
-        // cannot receive the in-app invitation notification.
         await WorkspaceInvitation.deleteOne({ _id: invitation._id });
         throw error;
       }
@@ -190,7 +207,7 @@ class WorkspaceInvitationService {
         status: InvitationStatus.PENDING,
         expiresAt: { $lte: now },
       },
-      { $set: { status: InvitationStatus.EXPIRED } }
+      { $set: { status: InvitationStatus.EXPIRED } },
     );
 
     const invitations = await WorkspaceInvitation.find({
@@ -243,7 +260,11 @@ class WorkspaceInvitationService {
     }
 
     const now = new Date();
-    await this.markExpiredIfNeeded(invitation._id.toString(), invitation.expiresAt, now);
+    await this.markExpiredIfNeeded(
+      invitation._id.toString(),
+      invitation.expiresAt,
+      now,
+    );
 
     const session = await mongoose.startSession();
     let workspaceId: string | null = null;
@@ -303,7 +324,10 @@ class WorkspaceInvitationService {
     }
 
     if (!workspaceId || !workspaceName || !memberId || !inviterId) {
-      throw new ApiError(500, "Workspace invitation acceptance did not complete.");
+      throw new ApiError(
+        500,
+        "Workspace invitation acceptance did not complete.",
+      );
     }
 
     await eventBus.publish(DomainEventName.WORKSPACE_MEMBER_ADDED, {
@@ -329,7 +353,11 @@ class WorkspaceInvitationService {
     }
 
     const now = new Date();
-    await this.markExpiredIfNeeded(invitation._id.toString(), invitation.expiresAt, now);
+    await this.markExpiredIfNeeded(
+      invitation._id.toString(),
+      invitation.expiresAt,
+      now,
+    );
 
     invitation.status = InvitationStatus.REJECTED;
     await invitation.save();

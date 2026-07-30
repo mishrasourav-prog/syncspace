@@ -18,7 +18,12 @@ interface AboutRowProps {
   preserveWhitespace?: boolean;
 }
 
-function AboutRow({ label, value, icon: Icon, preserveWhitespace = false }: AboutRowProps) {
+function AboutRow({
+  label,
+  value,
+  icon: Icon,
+  preserveWhitespace = false,
+}: AboutRowProps) {
   return (
     <div className="rounded-lg border border-border/60 bg-background/35 p-3">
       <div className="flex items-center gap-2 text-caption">

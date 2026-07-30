@@ -33,8 +33,7 @@ export function DiscussionPageHeader({
   onCreate,
 }: DiscussionPageHeaderProps) {
   const activeFilter =
-    FILTER_OPTIONS.find((option) => option.id === filter) ??
-    FILTER_OPTIONS[0];
+    FILTER_OPTIONS.find((option) => option.id === filter) ?? FILTER_OPTIONS[0];
 
   return (
     <div className="space-y-4">
@@ -46,7 +45,8 @@ export function DiscussionPageHeader({
           <div className="min-w-0">
             <h1 className="text-h1 text-foreground">Discussions</h1>
             <p className="mt-0.5 max-w-2xl text-caption">
-              Collaborate and discuss ideas, feedback, and decisions about this project.
+              Collaborate and discuss ideas, feedback, and decisions about this
+              project.
             </p>
           </div>
         </div>
@@ -68,7 +68,7 @@ export function DiscussionPageHeader({
                   key={option.id}
                   onClick={() => onFilterChange(option.id)}
                   className={cn(
-                    filter === option.id && "bg-secondary/10 text-secondary"
+                    filter === option.id && "bg-secondary/10 text-secondary",
                   )}
                 >
                   {option.label}
@@ -109,7 +109,7 @@ export function DiscussionPageHeader({
                 "relative shrink-0 whitespace-nowrap px-3 py-2.5 text-sm font-medium transition-colors",
                 isActive
                   ? "text-secondary"
-                  : "text-muted hover:text-foreground"
+                  : "text-muted hover:text-foreground",
               )}
             >
               {option.label}

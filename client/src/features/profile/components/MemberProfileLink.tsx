@@ -31,7 +31,7 @@ export function MemberProfileLink({
         aria-label={ariaLabel}
         className={cn(
           "rounded-md transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50",
-          className
+          className,
         )}
       >
         {children}
@@ -59,7 +59,7 @@ export function MemberProfileLink({
       aria-label={ariaLabel}
       className={cn(
         "rounded-md transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50",
-        className
+        className,
       )}
     >
       {children}

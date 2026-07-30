@@ -12,12 +12,12 @@ import {
 import { workspaceInvitationQueryKeys } from "../workspaceInvitation.queryKeys";
 import type { WorkspaceInvitation } from "../workspaceInvitation.types";
 
-/*
-Inviting a user does not change workspace membership until the invitee
-accepts, so this intentionally does not touch the member-list cache.
-*/
 export function useInviteWorkspaceMemberMutation(workspaceId: string) {
-  return useMutation<WorkspaceInvitation, ApiErrorShape, InviteWorkspaceMemberPayload>({
+  return useMutation<
+    WorkspaceInvitation,
+    ApiErrorShape,
+    InviteWorkspaceMemberPayload
+  >({
     mutationFn: (payload) => inviteWorkspaceMemberRequest(workspaceId, payload),
   });
 }
@@ -28,9 +28,15 @@ export function useAcceptInvitationMutation() {
   return useMutation<void, ApiErrorShape, string>({
     mutationFn: acceptInvitationRequest,
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: workspaceInvitationQueryKeys.list() });
-      void queryClient.invalidateQueries({ queryKey: workspaceQueryKeys.list() });
-      void queryClient.invalidateQueries({ queryKey: notificationQueryKeys.all });
+      void queryClient.invalidateQueries({
+        queryKey: workspaceInvitationQueryKeys.list(),
+      });
+      void queryClient.invalidateQueries({
+        queryKey: workspaceQueryKeys.list(),
+      });
+      void queryClient.invalidateQueries({
+        queryKey: notificationQueryKeys.all,
+      });
     },
   });
 }
@@ -41,8 +47,12 @@ export function useRejectInvitationMutation() {
   return useMutation<void, ApiErrorShape, string>({
     mutationFn: rejectInvitationRequest,
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: workspaceInvitationQueryKeys.list() });
-      void queryClient.invalidateQueries({ queryKey: notificationQueryKeys.all });
+      void queryClient.invalidateQueries({
+        queryKey: workspaceInvitationQueryKeys.list(),
+      });
+      void queryClient.invalidateQueries({
+        queryKey: notificationQueryKeys.all,
+      });
     },
   });
 }

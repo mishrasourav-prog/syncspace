@@ -1,44 +1,34 @@
-import {
-    BrowserRouter,
-} from "react-router-dom";
+import { BrowserRouter } from "react-router-dom";
 
-import {
-    Providers,
-} from "./providers";
+import { Providers } from "./providers";
 
-import {
-    AppRouter,
-} from "./router";
+import { AppRouter } from "./router";
 
-import {
-    useCurrentUserQuery,
-} from "@/features/auth/hooks/useAuthQueries";
+import { useCurrentUserQuery } from "@/features/auth/hooks/useAuthQueries";
 
-import {
-    useAuthStore,
-} from "./store";
+import { useAuthStore } from "./store";
 
 function AuthLoadingScreen() {
-    return (
-        <div
-            className="
+  return (
+    <div
+      className="
                 flex
                 min-h-screen
                 items-center
                 justify-center
                 bg-background
             "
-        >
-            <div
-                className="
+    >
+      <div
+        className="
                     flex
                     flex-col
                     items-center
                     gap-3
                 "
-            >
-                <div
-                    className="
+      >
+        <div
+          className="
                         h-8
                         w-8
                         animate-spin
@@ -47,52 +37,39 @@ function AuthLoadingScreen() {
                         border-muted
                         border-t-primary
                     "
-                />
+        />
 
-                <p
-                    className="
+        <p
+          className="
                         text-sm
                         text-muted-foreground
                     "
-                >
-                    Loading SyncSpace...
-                </p>
-            </div>
-        </div>
-    );
+        >
+          Loading SyncSpace...
+        </p>
+      </div>
+    </div>
+  );
 }
 
 function AuthInitializer() {
-    useCurrentUserQuery();
+  useCurrentUserQuery();
 
-    const isAuthInitialized =
-        useAuthStore(
-            (
-                state
-            ) =>
-                state
-                    .isAuthInitialized
-        );
+  const isAuthInitialized = useAuthStore((state) => state.isAuthInitialized);
 
-    if (
-        !isAuthInitialized
-    ) {
-        return (
-            <AuthLoadingScreen />
-        );
-    }
+  if (!isAuthInitialized) {
+    return <AuthLoadingScreen />;
+  }
 
-    return (
-        <AppRouter />
-    );
+  return <AppRouter />;
 }
 
 export function App() {
-    return (
-        <Providers>
-            <BrowserRouter>
-                <AuthInitializer />
-            </BrowserRouter>
-        </Providers>
-    );
+  return (
+    <Providers>
+      <BrowserRouter>
+        <AuthInitializer />
+      </BrowserRouter>
+    </Providers>
+  );
 }

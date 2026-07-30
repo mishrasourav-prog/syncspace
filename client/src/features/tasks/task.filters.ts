@@ -1,12 +1,27 @@
-import type { Task, TaskPriority, TaskStatus, TaskType } from "./types/task.types";
+import type {
+  Task,
+  TaskPriority,
+  TaskStatus,
+  TaskType,
+} from "./types/task.types";
 
 export type TaskView = "board" | "list";
 export type TaskStateFilter = "active" | "archived" | "all";
 export type TaskDueFilter = "overdue" | "today" | "week" | "none";
 
-export const ALL_STATUSES: TaskStatus[] = ["TODO", "IN_PROGRESS", "IN_REVIEW", "DONE"];
+export const ALL_STATUSES: TaskStatus[] = [
+  "TODO",
+  "IN_PROGRESS",
+  "IN_REVIEW",
+  "DONE",
+];
 export const ALL_TYPES: TaskType[] = ["task", "issue"];
-export const ALL_PRIORITIES: TaskPriority[] = ["LOW", "MEDIUM", "HIGH", "URGENT"];
+export const ALL_PRIORITIES: TaskPriority[] = [
+  "LOW",
+  "MEDIUM",
+  "HIGH",
+  "URGENT",
+];
 
 export const STATUS_LABEL: Record<TaskStatus, string> = {
   TODO: "To Do",
@@ -33,12 +48,15 @@ export interface TaskFilters {
   status: TaskStatus[];
   type: TaskType[];
   priority: TaskPriority[];
-  assignee: string | null; // userId, or the literal "unassigned"
+  assignee: string | null;
   due: TaskDueFilter | null;
   state: TaskStateFilter;
 }
 
-function parseCsv<T extends string>(value: string | null, allowed: readonly T[]): T[] {
+function parseCsv<T extends string>(
+  value: string | null,
+  allowed: readonly T[],
+): T[] {
   if (!value) return [];
   const set = new Set(allowed as readonly string[]);
   return value
@@ -50,10 +68,16 @@ function parseCsv<T extends string>(value: string | null, allowed: readonly T[])
 export function parseTaskFilters(searchParams: URLSearchParams): TaskFilters {
   const view = searchParams.get("view") === "list" ? "list" : "board";
   const stateParam = searchParams.get("state");
-  const state: TaskStateFilter = stateParam === "archived" || stateParam === "all" ? stateParam : "active";
+  const state: TaskStateFilter =
+    stateParam === "archived" || stateParam === "all" ? stateParam : "active";
   const dueParam = searchParams.get("due");
   const due: TaskDueFilter | null =
-    dueParam === "overdue" || dueParam === "today" || dueParam === "week" || dueParam === "none" ? dueParam : null;
+    dueParam === "overdue" ||
+    dueParam === "today" ||
+    dueParam === "week" ||
+    dueParam === "none"
+      ? dueParam
+      : null;
 
   return {
     view,
@@ -67,7 +91,6 @@ export function parseTaskFilters(searchParams: URLSearchParams): TaskFilters {
   };
 }
 
-/** Number of active filters, excluding `view` and `q` per spec section 17. */
 export function countActiveFilters(filters: TaskFilters): number {
   let count = 0;
   if (filters.status.length > 0) count += 1;
@@ -103,14 +126,9 @@ function getLocalCalendarDay(value: string): Date {
 
   const parsed = new Date(value);
 
-  return new Date(
-    parsed.getFullYear(),
-    parsed.getMonth(),
-    parsed.getDate()
-  );
+  return new Date(parsed.getFullYear(), parsed.getMonth(), parsed.getDate());
 }
 
-/** Treats a due date as overdue only after the end of its local calendar day. */
 function isOverdue(task: Task, now: number): boolean {
   if (!task.dueDate || task.status === "DONE") return false;
 
@@ -118,7 +136,7 @@ function isOverdue(task: Task, now: number): boolean {
   const endOfDueDay = new Date(
     due.getFullYear(),
     due.getMonth(),
-    due.getDate() + 1
+    due.getDate() + 1,
   ).getTime();
 
   return endOfDueDay <= now;
@@ -145,18 +163,22 @@ function isDueWithinWeek(task: Task, now: number): boolean {
   const todayStart = new Date(
     today.getFullYear(),
     today.getMonth(),
-    today.getDate()
+    today.getDate(),
   ).getTime();
   const weekEnd = new Date(
     today.getFullYear(),
     today.getMonth(),
-    today.getDate() + 8
+    today.getDate() + 8,
   ).getTime();
 
   return dueStart >= todayStart && dueStart < weekEnd;
 }
 
-export function matchesDueFilter(task: Task, due: TaskDueFilter, now: number): boolean {
+export function matchesDueFilter(
+  task: Task,
+  due: TaskDueFilter,
+  now: number,
+): boolean {
   switch (due) {
     case "overdue":
       return isOverdue(task, now);
@@ -195,25 +217,32 @@ function matchesSearch(task: Task, query: string): boolean {
   return haystack.includes(query);
 }
 
-/**
- * Applies every collection-page filter to a task list. Does not mutate the
- * source array. `now` is passed in so callers can share a single time
- * snapshot across a render pass.
- */
-export function filterTasks(tasks: Task[], filters: TaskFilters, now: number): Task[] {
+export function filterTasks(
+  tasks: Task[],
+  filters: TaskFilters,
+  now: number,
+): Task[] {
   const query = filters.q.trim().toLowerCase();
 
   return tasks.filter((task) => {
     if (filters.state === "active" && task.isArchived) return false;
     if (filters.state === "archived" && !task.isArchived) return false;
 
-    if (filters.status.length > 0 && !filters.status.includes(task.status)) return false;
-    if (filters.type.length > 0 && !filters.type.includes(task.type)) return false;
-    if (filters.priority.length > 0 && !filters.priority.includes(task.priority)) return false;
+    if (filters.status.length > 0 && !filters.status.includes(task.status))
+      return false;
+    if (filters.type.length > 0 && !filters.type.includes(task.type))
+      return false;
+    if (
+      filters.priority.length > 0 &&
+      !filters.priority.includes(task.priority)
+    )
+      return false;
 
-    if (filters.assignee === "unassigned" && task.assignees.length > 0) return false;
+    if (filters.assignee === "unassigned" && task.assignees.length > 0)
+      return false;
     if (filters.assignee && filters.assignee !== "unassigned") {
-      if (!task.assignees.some((assignee) => assignee._id === filters.assignee)) return false;
+      if (!task.assignees.some((assignee) => assignee._id === filters.assignee))
+        return false;
     }
 
     if (filters.due && !matchesDueFilter(task, filters.due, now)) return false;

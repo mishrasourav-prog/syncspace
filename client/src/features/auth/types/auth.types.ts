@@ -15,8 +15,7 @@ export interface AuthSession {
   user: AuthUser;
 }
 
-export type LoginPayload =
-  LoginFormValues;
+export type LoginPayload = LoginFormValues;
 
 export interface RegisterPayload {
   name: string;
@@ -25,8 +24,7 @@ export interface RegisterPayload {
   password: string;
 }
 
-export type SignupPayload =
-  RegisterPayload;
+export type SignupPayload = RegisterPayload;
 
 export interface PendingRegistrationResponse {
   email: string;
@@ -38,8 +36,7 @@ export interface VerifyEmailResponse {
   user: AuthUser;
 }
 
-export type ForgotPasswordPayload =
-  ForgotPasswordFormValues;
+export type ForgotPasswordPayload = ForgotPasswordFormValues;
 
 export interface VerifyOtpPayload {
   email: string;

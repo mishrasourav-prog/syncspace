@@ -1,172 +1,131 @@
-import {
-    Types,
-} from "mongoose";
+import { Types } from "mongoose";
 
 import type {
-    IDiscussionReplyResponse,
-    IDiscussionResponse,
-    IDiscussionUserPreview,
+  IDiscussionReplyResponse,
+  IDiscussionResponse,
+  IDiscussionUserPreview,
 } from "../../interfaces/discussions.interface";
 
 interface IPopulatedDiscussionUser {
-    _id: Types.ObjectId;
+  _id: Types.ObjectId;
 
-    name: string;
+  name: string;
 
-    username: string;
+  username: string;
 
-    avatar?: string;
+  avatar?: string;
 }
 
 export interface IDiscussionForResponse {
-    _id: Types.ObjectId;
+  _id: Types.ObjectId;
 
-    workspace: Types.ObjectId;
+  workspace: Types.ObjectId;
 
-    project: Types.ObjectId;
+  project: Types.ObjectId;
 
-    title: string;
+  title: string;
 
-    body: string;
+  body: string;
 
-    author:
-        IPopulatedDiscussionUser |
-        null;
+  author: IPopulatedDiscussionUser | null;
 
-    isPinned: boolean;
+  isPinned: boolean;
 
-    isLocked: boolean;
+  isLocked: boolean;
 
-    replyCount?: number;
+  replyCount?: number;
 
-    createdAt: Date;
+  createdAt: Date;
 
-    updatedAt: Date;
+  updatedAt: Date;
 }
 
 export interface IDiscussionReplyForResponse {
-    _id: Types.ObjectId;
+  _id: Types.ObjectId;
 
-    workspace: Types.ObjectId;
+  workspace: Types.ObjectId;
 
-    project: Types.ObjectId;
+  project: Types.ObjectId;
 
-    discussion: Types.ObjectId;
+  discussion: Types.ObjectId;
 
-    author:
-        IPopulatedDiscussionUser |
-        null;
+  author: IPopulatedDiscussionUser | null;
 
-    body: string;
+  body: string;
 
-    isDeleted: boolean;
+  isDeleted: boolean;
 
-    createdAt: Date;
+  createdAt: Date;
 
-    updatedAt: Date;
+  updatedAt: Date;
 }
 
 const mapUserPreview = (
-    user:
-        IPopulatedDiscussionUser |
-        null
+  user: IPopulatedDiscussionUser | null,
 ): IDiscussionUserPreview | null => {
-    if (!user) {
-        return null;
-    }
+  if (!user) {
+    return null;
+  }
 
-    return {
-        _id:
-            user._id.toString(),
+  return {
+    _id: user._id.toString(),
 
-        name:
-            user.name,
+    name: user.name,
 
-        username:
-            user.username,
+    username: user.username,
 
-        avatar:
-            user.avatar,
-    };
+    avatar: user.avatar,
+  };
 };
 
 export const mapDiscussion = (
-    discussion:
-        IDiscussionForResponse
+  discussion: IDiscussionForResponse,
 ): IDiscussionResponse => {
-    return {
-        _id:
-            discussion._id.toString(),
+  return {
+    _id: discussion._id.toString(),
 
-        workspace:
-            discussion.workspace.toString(),
+    workspace: discussion.workspace.toString(),
 
-        project:
-            discussion.project.toString(),
+    project: discussion.project.toString(),
 
-        title:
-            discussion.title,
+    title: discussion.title,
 
-        body:
-            discussion.body,
+    body: discussion.body,
 
-        author:
-            mapUserPreview(
-                discussion.author
-            ),
+    author: mapUserPreview(discussion.author),
 
-        isPinned:
-            discussion.isPinned,
+    isPinned: discussion.isPinned,
 
-        isLocked:
-            discussion.isLocked,
+    isLocked: discussion.isLocked,
 
-        replyCount:
-            discussion.replyCount ??
-            0,
+    replyCount: discussion.replyCount ?? 0,
 
-        createdAt:
-            discussion.createdAt,
+    createdAt: discussion.createdAt,
 
-        updatedAt:
-            discussion.updatedAt,
-    };
+    updatedAt: discussion.updatedAt,
+  };
 };
 
 export const mapDiscussionReply = (
-    reply:
-        IDiscussionReplyForResponse
+  reply: IDiscussionReplyForResponse,
 ): IDiscussionReplyResponse => {
-    return {
-        _id:
-            reply._id.toString(),
+  return {
+    _id: reply._id.toString(),
 
-        workspace:
-            reply.workspace.toString(),
+    workspace: reply.workspace.toString(),
 
-        project:
-            reply.project.toString(),
+    project: reply.project.toString(),
 
-        discussion:
-            reply.discussion.toString(),
+    discussion: reply.discussion.toString(),
 
-        author:
-            mapUserPreview(
-                reply.author
-            ),
+    author: mapUserPreview(reply.author),
 
-        body:
-            reply.isDeleted
-                ? null
-                : reply.body,
+    body: reply.isDeleted ? null : reply.body,
 
-        isDeleted:
-            reply.isDeleted,
+    isDeleted: reply.isDeleted,
 
-        createdAt:
-            reply.createdAt,
+    createdAt: reply.createdAt,
 
-        updatedAt:
-            reply.updatedAt,
-    };
+    updatedAt: reply.updatedAt,
+  };
 };

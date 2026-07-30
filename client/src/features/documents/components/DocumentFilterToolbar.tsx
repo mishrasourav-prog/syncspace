@@ -1,6 +1,10 @@
 import { ChevronDown, Search, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { SORT_LABEL, type DocumentSort } from "../document.filters";
 
@@ -55,7 +59,9 @@ export function DocumentFilterToolbar({
           <ChevronDown className="h-3.5 w-3.5 text-muted" />
         </PopoverTrigger>
         <PopoverContent className="w-52">
-          <p className="mb-1 px-0.5 text-caption uppercase tracking-wide">Sort by</p>
+          <p className="mb-1 px-0.5 text-caption uppercase tracking-wide">
+            Sort by
+          </p>
           <div className="space-y-0.5">
             {SORT_OPTIONS.map((option) => (
               <button
@@ -64,7 +70,7 @@ export function DocumentFilterToolbar({
                 onClick={() => onSortChange(option)}
                 className={cn(
                   "flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm transition-colors hover:bg-border/40",
-                  sort === option && "bg-primary/10 text-primary"
+                  sort === option && "bg-primary/10 text-primary",
                 )}
               >
                 {SORT_LABEL[option]}
@@ -75,7 +81,11 @@ export function DocumentFilterToolbar({
       </Popover>
 
       {activeFilterCount > 0 && (
-        <button type="button" onClick={onClear} className="text-sm font-medium text-primary transition-colors hover:text-primary/80">
+        <button
+          type="button"
+          onClick={onClear}
+          className="text-sm font-medium text-primary transition-colors hover:text-primary/80"
+        >
           Clear
         </button>
       )}

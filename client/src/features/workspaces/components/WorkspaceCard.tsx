@@ -1,6 +1,13 @@
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Archive, ArchiveRestore, Clock, LogOut, MoreVertical, Pencil } from "lucide-react";
+import {
+  Archive,
+  ArchiveRestore,
+  Clock,
+  LogOut,
+  MoreVertical,
+  Pencil,
+} from "lucide-react";
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -18,7 +25,10 @@ import {
   canRestoreWorkspace,
 } from "../workspace.permissions";
 
-const roleBadgeVariant: Record<WorkspaceSummary["role"], "primary" | "secondary" | "neutral"> = {
+const roleBadgeVariant: Record<
+  WorkspaceSummary["role"],
+  "primary" | "secondary" | "neutral"
+> = {
   owner: "primary",
   admin: "secondary",
   member: "neutral",
@@ -33,7 +43,13 @@ interface WorkspaceCardProps {
   onLeave: (workspace: WorkspaceSummary) => void;
 }
 
-export function WorkspaceCard({ workspace, onEdit, onArchive, onRestore, onLeave }: WorkspaceCardProps) {
+export function WorkspaceCard({
+  workspace,
+  onEdit,
+  onArchive,
+  onRestore,
+  onLeave,
+}: WorkspaceCardProps) {
   const navigate = useNavigate();
 
   const showEdit = canEditWorkspace(workspace);
@@ -53,12 +69,21 @@ export function WorkspaceCard({ workspace, onEdit, onArchive, onRestore, onLeave
           onClick={() => navigate(`/workspaces/${workspace._id}`)}
           className="flex min-w-0 items-center gap-3 text-left"
         >
-          <Avatar src={workspace.avatar} name={workspace.name} size="md" square />
+          <Avatar
+            src={workspace.avatar}
+            name={workspace.name}
+            size="md"
+            square
+          />
           <div className="min-w-0">
             <p className="truncate text-h3 text-foreground">{workspace.name}</p>
             <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
-              <Badge variant={roleBadgeVariant[workspace.role]}>{workspace.role}</Badge>
-              {workspace.isArchived && <Badge variant="warning">Archived</Badge>}
+              <Badge variant={roleBadgeVariant[workspace.role]}>
+                {workspace.role}
+              </Badge>
+              {workspace.isArchived && (
+                <Badge variant="warning">Archived</Badge>
+              )}
             </div>
           </div>
         </button>
@@ -68,7 +93,9 @@ export function WorkspaceCard({ workspace, onEdit, onArchive, onRestore, onLeave
             <MoreVertical className="h-4 w-4" />
           </DropdownMenuTrigger>
           <DropdownMenuContent>
-            <DropdownMenuItem onClick={() => navigate(`/workspaces/${workspace._id}`)}>
+            <DropdownMenuItem
+              onClick={() => navigate(`/workspaces/${workspace._id}`)}
+            >
               Open {workspace.isArchived ? "(read-only)" : "workspace"}
             </DropdownMenuItem>
             {showEdit && (
@@ -78,7 +105,10 @@ export function WorkspaceCard({ workspace, onEdit, onArchive, onRestore, onLeave
               </DropdownMenuItem>
             )}
             {showArchive && (
-              <DropdownMenuItem variant="danger" onClick={() => onArchive(workspace)}>
+              <DropdownMenuItem
+                variant="danger"
+                onClick={() => onArchive(workspace)}
+              >
                 <Archive className="h-3.5 w-3.5" />
                 Archive workspace
               </DropdownMenuItem>
@@ -90,7 +120,10 @@ export function WorkspaceCard({ workspace, onEdit, onArchive, onRestore, onLeave
               </DropdownMenuItem>
             )}
             {showLeave && (
-              <DropdownMenuItem variant="danger" onClick={() => onLeave(workspace)}>
+              <DropdownMenuItem
+                variant="danger"
+                onClick={() => onLeave(workspace)}
+              >
                 <LogOut className="h-3.5 w-3.5" />
                 Leave workspace
               </DropdownMenuItem>

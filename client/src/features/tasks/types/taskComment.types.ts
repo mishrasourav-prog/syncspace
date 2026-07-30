@@ -8,7 +8,7 @@ export interface TaskCommentAuthor {
 export interface TaskComment {
   _id: string;
   task: string;
-  /** Null when the original author is no longer resolvable. */
+
   author: TaskCommentAuthor | null;
   body: string;
   isEdited: boolean;

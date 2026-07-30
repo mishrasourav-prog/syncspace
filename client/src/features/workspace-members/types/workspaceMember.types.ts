@@ -17,5 +17,4 @@ export interface WorkspaceMember {
   updatedAt: string;
 }
 
-/** Roles a workspace member can be changed to. The owner role is never assignable. */
 export type AssignableWorkspaceRole = "admin" | "member" | "guest";

@@ -31,13 +31,19 @@ interface WorkspaceProjectsPanelProps {
   search: string;
 }
 
-export function WorkspaceProjectsPanel({ workspace, search }: WorkspaceProjectsPanelProps) {
+export function WorkspaceProjectsPanel({
+  workspace,
+  search,
+}: WorkspaceProjectsPanelProps) {
   const navigate = useNavigate();
   const projectsQuery = useWorkspaceProjectsQuery(workspace._id);
   const [showAll, setShowAll] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
 
-  const projects = useMemo(() => projectsQuery.data ?? [], [projectsQuery.data]);
+  const projects = useMemo(
+    () => projectsQuery.data ?? [],
+    [projectsQuery.data],
+  );
   const canCreate = canCreateProject(workspace);
 
   const filteredProjects = useMemo(() => {
@@ -48,11 +54,13 @@ export function WorkspaceProjectsPanel({ workspace, search }: WorkspaceProjectsP
       (project) =>
         project.name.toLowerCase().includes(query) ||
         project.description.toLowerCase().includes(query) ||
-        project.slug.toLowerCase().includes(query)
+        project.slug.toLowerCase().includes(query),
     );
   }, [projects, search]);
 
-  const visibleProjects = showAll ? filteredProjects : filteredProjects.slice(0, INITIAL_VISIBLE);
+  const visibleProjects = showAll
+    ? filteredProjects
+    : filteredProjects.slice(0, INITIAL_VISIBLE);
   const hasMore = filteredProjects.length > INITIAL_VISIBLE;
 
   return (
@@ -91,64 +99,93 @@ export function WorkspaceProjectsPanel({ workspace, search }: WorkspaceProjectsP
         />
       )}
 
-      {!projectsQuery.isLoading && !projectsQuery.isError && projects.length === 0 && (
-        <div className="rounded-xl border border-dashed border-border bg-background/40 px-4 py-8 text-center">
-          <FolderKanban className="mx-auto h-6 w-6 text-muted" />
-          <p className="mt-2 text-body">No projects yet.</p>
-          <p className="text-caption">Create the first project for this workspace.</p>
-          {canCreate && (
-            <Button size="sm" className="mt-3" onClick={() => setCreateOpen(true)}>
-              <Plus className="h-3.5 w-3.5" />
-              New project
-            </Button>
-          )}
-        </div>
-      )}
+      {!projectsQuery.isLoading &&
+        !projectsQuery.isError &&
+        projects.length === 0 && (
+          <div className="rounded-xl border border-dashed border-border bg-background/40 px-4 py-8 text-center">
+            <FolderKanban className="mx-auto h-6 w-6 text-muted" />
+            <p className="mt-2 text-body">No projects yet.</p>
+            <p className="text-caption">
+              Create the first project for this workspace.
+            </p>
+            {canCreate && (
+              <Button
+                size="sm"
+                className="mt-3"
+                onClick={() => setCreateOpen(true)}
+              >
+                <Plus className="h-3.5 w-3.5" />
+                New project
+              </Button>
+            )}
+          </div>
+        )}
 
-      {!projectsQuery.isLoading && !projectsQuery.isError && projects.length > 0 && filteredProjects.length === 0 && (
-        <div className="rounded-xl border border-dashed border-border bg-background/40 px-4 py-8 text-center">
-          <p className="text-body">No projects match your search.</p>
-        </div>
-      )}
+      {!projectsQuery.isLoading &&
+        !projectsQuery.isError &&
+        projects.length > 0 &&
+        filteredProjects.length === 0 && (
+          <div className="rounded-xl border border-dashed border-border bg-background/40 px-4 py-8 text-center">
+            <p className="text-body">No projects match your search.</p>
+          </div>
+        )}
 
-      {!projectsQuery.isLoading && !projectsQuery.isError && filteredProjects.length > 0 && (
-        <div className="space-y-2">
-          {visibleProjects.map((project) => (
-            <button
-              key={project._id}
-              type="button"
-              onClick={() => navigate(`/workspaces/${workspace._id}/projects/${project._id}`)}
-              className="flex w-full items-center gap-3 rounded-lg border border-border/60 px-3 py-2.5 text-left transition-colors hover:border-muted/40 hover:bg-background/40"
-            >
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/15 text-sm text-primary">
-                {project.icon || <FolderKanban className="h-4 w-4" />}
-              </span>
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-medium text-foreground">{project.name}</p>
-                <p className="truncate text-caption">{project.description || "No description."}</p>
-              </div>
-              <div className="flex shrink-0 flex-col items-end gap-1">
-                <Badge variant={project.isArchived ? "warning" : "success"}>
-                  {project.isArchived ? "Archived" : "Active"}
-                </Badge>
-                <span className="text-[11px] text-muted">{formatRelativeTime(project.updatedAt)}</span>
-              </div>
-            </button>
-          ))}
+      {!projectsQuery.isLoading &&
+        !projectsQuery.isError &&
+        filteredProjects.length > 0 && (
+          <div className="space-y-2">
+            {visibleProjects.map((project) => (
+              <button
+                key={project._id}
+                type="button"
+                onClick={() =>
+                  navigate(
+                    `/workspaces/${workspace._id}/projects/${project._id}`,
+                  )
+                }
+                className="flex w-full items-center gap-3 rounded-lg border border-border/60 px-3 py-2.5 text-left transition-colors hover:border-muted/40 hover:bg-background/40"
+              >
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/15 text-sm text-primary">
+                  {project.icon || <FolderKanban className="h-4 w-4" />}
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-medium text-foreground">
+                    {project.name}
+                  </p>
+                  <p className="truncate text-caption">
+                    {project.description || "No description."}
+                  </p>
+                </div>
+                <div className="flex shrink-0 flex-col items-end gap-1">
+                  <Badge variant={project.isArchived ? "warning" : "success"}>
+                    {project.isArchived ? "Archived" : "Active"}
+                  </Badge>
+                  <span className="text-[11px] text-muted">
+                    {formatRelativeTime(project.updatedAt)}
+                  </span>
+                </div>
+              </button>
+            ))}
 
-          {hasMore && (
-            <button
-              type="button"
-              onClick={() => setShowAll((value) => !value)}
-              className="w-full rounded-lg py-2 text-center text-xs font-medium text-primary transition-colors hover:text-primary/80"
-            >
-              {showAll ? "Show less" : `View all ${filteredProjects.length} projects`}
-            </button>
-          )}
-        </div>
-      )}
+            {hasMore && (
+              <button
+                type="button"
+                onClick={() => setShowAll((value) => !value)}
+                className="w-full rounded-lg py-2 text-center text-xs font-medium text-primary transition-colors hover:text-primary/80"
+              >
+                {showAll
+                  ? "Show less"
+                  : `View all ${filteredProjects.length} projects`}
+              </button>
+            )}
+          </div>
+        )}
 
-      <CreateProjectDialog workspaceId={workspace._id} open={createOpen} onClose={() => setCreateOpen(false)} />
+      <CreateProjectDialog
+        workspaceId={workspace._id}
+        open={createOpen}
+        onClose={() => setCreateOpen(false)}
+      />
     </section>
   );
 }

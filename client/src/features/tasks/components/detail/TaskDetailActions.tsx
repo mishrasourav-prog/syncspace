@@ -46,12 +46,21 @@ export function TaskDetailActions({
           )}
           {canMarkDone &&
             (task.status === "DONE" ? (
-              <Button size="sm" variant="secondary" disabled={isUpdatingStatus} onClick={onReopen}>
+              <Button
+                size="sm"
+                variant="secondary"
+                disabled={isUpdatingStatus}
+                onClick={onReopen}
+              >
                 <RotateCcw className="h-3.5 w-3.5" />
                 Reopen
               </Button>
             ) : (
-              <Button size="sm" disabled={isUpdatingStatus} onClick={onMarkDone}>
+              <Button
+                size="sm"
+                disabled={isUpdatingStatus}
+                onClick={onMarkDone}
+              >
                 <CheckCircle2 className="h-3.5 w-3.5" />
                 Mark as Done
               </Button>

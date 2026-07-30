@@ -1,69 +1,40 @@
-import {
-    create,
-} from "zustand";
+import { create } from "zustand";
 
-import type {
-    AuthUser,
-} from "@/features/auth/types/auth.types";
+import type { AuthUser } from "@/features/auth/types/auth.types";
 
 interface AuthState {
-    user:
-        AuthUser |
-        null;
+  user: AuthUser | null;
 
-    /*
-    False while the application is checking /auth/me.
+  isAuthInitialized: boolean;
 
-    Route guards must not redirect until this becomes true.
-    */
-    isAuthInitialized:
-        boolean;
+  setUser: (user: AuthUser | null) => void;
 
-    setUser: (
-        user:
-            AuthUser |
-            null
-    ) => void;
+  markAuthInitialized: () => void;
 
-    markAuthInitialized:
-        () => void;
-
-    clearSession:
-        () => void;
+  clearSession: () => void;
 }
 
-export const useAuthStore =
-    create<AuthState>(
-        (set) => ({
-            user:
-                null,
+export const useAuthStore = create<AuthState>((set) => ({
+  user: null,
 
-            isAuthInitialized:
-                false,
+  isAuthInitialized: false,
 
-            setUser: (
-                user
-            ) => {
-                set({
-                    user,
-                });
-            },
+  setUser: (user) => {
+    set({
+      user,
+    });
+  },
 
-            markAuthInitialized:
-                () => {
-                    set({
-                        isAuthInitialized:
-                            true,
-                    });
-                },
+  markAuthInitialized: () => {
+    set({
+      isAuthInitialized: true,
+    });
+  },
 
-            clearSession:
-                () => {
-                    set({
-                        user:
-                            null,
-                            isAuthInitialized: true,
-                    });
-                },
-        })
-    );
+  clearSession: () => {
+    set({
+      user: null,
+      isAuthInitialized: true,
+    });
+  },
+}));

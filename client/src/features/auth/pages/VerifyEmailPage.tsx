@@ -1,6 +1,4 @@
-import {
-  OtpVerificationForm,
-} from "../components/OtpVerificationForm";
+import { OtpVerificationForm } from "../components/OtpVerificationForm";
 
 import {
   useResendEmailVerificationMutation,
@@ -18,11 +16,9 @@ export function VerifyEmailPage({
   onSuccess,
   onChangeEmail,
 }: VerifyEmailPageProps) {
-  const verifyMutation =
-    useVerifyEmailMutation();
+  const verifyMutation = useVerifyEmailMutation();
 
-  const resendMutation =
-    useResendEmailVerificationMutation();
+  const resendMutation = useResendEmailVerificationMutation();
 
   return (
     <OtpVerificationForm
@@ -32,49 +28,31 @@ export function VerifyEmailPage({
       verifyLabel="Verify email"
       verifyingLabel="Creating account..."
       errorMessage={
-        verifyMutation.error
-          ?.message ??
-        resendMutation.error
-          ?.message
+        verifyMutation.error?.message ?? resendMutation.error?.message
       }
-      isVerifying={
-        verifyMutation.isPending
-      }
-      isResending={
-        resendMutation.isPending
-      }
+      isVerifying={verifyMutation.isPending}
+      isResending={resendMutation.isPending}
       onCodeChange={() => {
         verifyMutation.reset();
         resendMutation.reset();
       }}
-      onVerify={
-        async (
-          otp
-        ) => {
-          resendMutation.reset();
-          await verifyMutation.mutateAsync({
-            email,
-            otp,
-          });
+      onVerify={async (otp) => {
+        resendMutation.reset();
+        await verifyMutation.mutateAsync({
+          email,
+          otp,
+        });
 
-          onSuccess();
-        }
-      }
-      onResend={
-        async () => {
-          verifyMutation.reset();
+        onSuccess();
+      }}
+      onResend={async () => {
+        verifyMutation.reset();
 
-          const result =
-            await resendMutation.mutateAsync(
-              email
-            );
+        const result = await resendMutation.mutateAsync(email);
 
-          return result.resendAvailableInSeconds;
-        }
-      }
-      onChangeEmail={
-        onChangeEmail
-      }
+        return result.resendAvailableInSeconds;
+      }}
+      onChangeEmail={onChangeEmail}
       changeEmailLabel="Use another email"
       initialCooldownSeconds={60}
     />

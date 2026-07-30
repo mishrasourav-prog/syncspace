@@ -1,6 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import type { ApiErrorShape } from "@/lib/axios";
-import { getUserWorkspacesRequest, getWorkspaceRequest } from "../api/workspace.api";
+import {
+  getUserWorkspacesRequest,
+  getWorkspaceRequest,
+} from "../api/workspace.api";
 import { workspaceQueryKeys } from "../workspace.queryKeys";
 import type { WorkspaceSummary } from "../types/workspace.types";
 

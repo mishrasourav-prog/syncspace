@@ -17,7 +17,7 @@ function renderWithLinks(text: string) {
       </a>
     ) : (
       <Fragment key={index}>{part}</Fragment>
-    )
+    ),
   );
 }
 
@@ -25,7 +25,9 @@ interface TaskDescriptionPanelProps {
   description: string;
 }
 
-export function TaskDescriptionPanel({ description }: TaskDescriptionPanelProps) {
+export function TaskDescriptionPanel({
+  description,
+}: TaskDescriptionPanelProps) {
   const trimmed = description.trim();
 
   return (

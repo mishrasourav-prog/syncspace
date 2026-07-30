@@ -45,7 +45,13 @@ export function TaskHierarchyPanel({
       {isError && (
         <div className="text-sm text-muted">
           <p>Unable to load hierarchy information.</p>
-          <Button type="button" size="sm" variant="secondary" className="mt-2" onClick={onRetry}>
+          <Button
+            type="button"
+            size="sm"
+            variant="secondary"
+            className="mt-2"
+            onClick={onRetry}
+          >
             Retry
           </Button>
         </div>
@@ -72,7 +78,9 @@ export function TaskHierarchyPanel({
                   <CheckSquare className="h-3.5 w-3.5 shrink-0 text-muted" />
                 )}
                 <span className="truncate">{parentTask.title}</span>
-                {parentTask.isArchived && <Badge variant="warning">Archived</Badge>}
+                {parentTask.isArchived && (
+                  <Badge variant="warning">Archived</Badge>
+                )}
               </Link>
             )}
           </div>
@@ -80,7 +88,9 @@ export function TaskHierarchyPanel({
           <div>
             <p className="text-caption mb-1">Direct subtasks</p>
             <p className="text-sm text-foreground">
-              {subtaskCount === 0 ? "None" : `${subtaskCount} subtask${subtaskCount === 1 ? "" : "s"}`}
+              {subtaskCount === 0
+                ? "None"
+                : `${subtaskCount} subtask${subtaskCount === 1 ? "" : "s"}`}
             </p>
           </div>
         </div>

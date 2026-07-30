@@ -1,35 +1,37 @@
-import { InvitationRole, InvitationStatus } from "../modules/workspaceInvitation/workspaceInvitation.model";
+import {
+  InvitationRole,
+  InvitationStatus,
+} from "../modules/workspaceInvitation/workspaceInvitation.model";
 
 export interface InviteUserRequest {
-    email: string;
-    role?: InvitationRole;
+  email: string;
+  role?: InvitationRole;
 }
 
 export interface InvitationResponse {
-    _id: string;
+  _id: string;
 
-    workspace: string;
+  workspace: string;
 
-    workspaceName: string;
+  workspaceName: string;
 
-    email: string;
+  email: string;
 
-    invitedBy: string;
+  invitedBy: string;
 
-    role: InvitationRole;
+  role: InvitationRole;
 
-    status: InvitationStatus;
+  status: InvitationStatus;
 
-    expiresAt: Date;
+  expiresAt: Date;
 
-    acceptedAt?: Date;
+  acceptedAt?: Date;
 
-    createdAt: Date;
+  createdAt: Date;
 
-    updatedAt: Date;
+  updatedAt: Date;
 }
 
 export interface InvitationListResponse {
-    invitations: InvitationResponse[];
+  invitations: InvitationResponse[];
 }
-

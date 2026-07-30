@@ -5,7 +5,9 @@ interface WorkspaceReadOnlyBannerProps {
   workspace: WorkspaceSummary;
 }
 
-export function WorkspaceReadOnlyBanner({ workspace }: WorkspaceReadOnlyBannerProps) {
+export function WorkspaceReadOnlyBanner({
+  workspace,
+}: WorkspaceReadOnlyBannerProps) {
   if (!workspace.isArchived) return null;
 
   return (

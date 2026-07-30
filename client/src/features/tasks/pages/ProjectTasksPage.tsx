@@ -18,7 +18,10 @@ import { useProjectQuery } from "@/features/projects/hooks/useProjectQueries";
 import { useProjectMembersQuery } from "@/features/project-members/hooks/useProjectMemberQueries";
 import { InviteProjectMemberDialog } from "@/features/project-invitations/components/InviteProjectMemberDialog";
 import { EditProjectDialog } from "@/features/projects/components/EditProjectDialog";
-import { ProjectActionDialogs, type ProjectActionTarget } from "@/features/projects/components/ProjectActionDialogs";
+import {
+  ProjectActionDialogs,
+  type ProjectActionTarget,
+} from "@/features/projects/components/ProjectActionDialogs";
 import { ProjectHeader } from "@/features/projects/components/overview/ProjectHeader";
 import { ProjectOverviewNavigation } from "@/features/projects/components/overview/ProjectOverviewNavigation";
 import { ProjectReadOnlyBanner } from "@/features/projects/components/overview/ProjectReadOnlyBanner";
@@ -42,7 +45,12 @@ import {
   type TaskStateFilter,
   type TaskView,
 } from "../task.filters";
-import type { Task, TaskPriority, TaskStatus, TaskType } from "../types/task.types";
+import type {
+  Task,
+  TaskPriority,
+  TaskStatus,
+  TaskType,
+} from "../types/task.types";
 import { CreateTaskDialog } from "../components/CreateTaskDialog";
 import { TaskViewSwitcher } from "../components/TaskViewSwitcher";
 import { TaskSummaryRail } from "../components/TaskSummaryRail";
@@ -69,7 +77,10 @@ function ProjectTasksSkeleton() {
       </div>
       <div className="flex gap-3">
         {Array.from({ length: 4 }).map((_, index) => (
-          <Skeleton key={index} className="h-72 w-[280px] shrink-0 rounded-xl" />
+          <Skeleton
+            key={index}
+            className="h-72 w-[280px] shrink-0 rounded-xl"
+          />
         ))}
       </div>
     </div>
@@ -77,7 +88,10 @@ function ProjectTasksSkeleton() {
 }
 
 export function ProjectTasksPage() {
-  const { workspaceId, projectId } = useParams<{ workspaceId: string; projectId: string }>();
+  const { workspaceId, projectId } = useParams<{
+    workspaceId: string;
+    projectId: string;
+  }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -91,7 +105,8 @@ export function ProjectTasksPage() {
 
   const [inviteOpen, setInviteOpen] = useState(false);
   const [editingProject, setEditingProject] = useState(false);
-  const [projectActionTarget, setProjectActionTarget] = useState<ProjectActionTarget | null>(null);
+  const [projectActionTarget, setProjectActionTarget] =
+    useState<ProjectActionTarget | null>(null);
 
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [createDialogType, setCreateDialogType] = useState<TaskType>("task");
@@ -103,13 +118,17 @@ export function ProjectTasksPage() {
   function navigateToTaskDetail(taskId: string) {
     if (!workspaceId || !projectId) return;
     const search = searchParams.toString();
-    navigate(`/workspaces/${workspaceId}/projects/${projectId}/tasks/${taskId}`, {
-      state: search ? { fromTasksSearch: `?${search}` } : undefined,
-    });
+    navigate(
+      `/workspaces/${workspaceId}/projects/${projectId}/tasks/${taskId}`,
+      {
+        state: search ? { fromTasksSearch: `?${search}` } : undefined,
+      },
+    );
   }
 
   const isProjectInaccessible =
-    projectQuery.isError && (projectQuery.error?.status === 403 || projectQuery.error?.status === 404);
+    projectQuery.isError &&
+    (projectQuery.error?.status === 403 || projectQuery.error?.status === 404);
 
   useEffect(() => {
     hasShownInaccessibleToast.current = false;
@@ -117,9 +136,13 @@ export function ProjectTasksPage() {
     hasHandledWorkspaceMismatch.current = false;
   }, [workspaceId, projectId]);
 
-  // Realtime: join the project's room and keep the task list in sync.
   useEffect(() => {
-    if (!projectId || !workspaceId || !projectQuery.isSuccess || projectQuery.data?.workspace !== workspaceId) {
+    if (
+      !projectId ||
+      !workspaceId ||
+      !projectQuery.isSuccess ||
+      projectQuery.data?.workspace !== workspaceId
+    ) {
       return;
     }
 
@@ -127,7 +150,9 @@ export function ProjectTasksPage() {
 
     function handleTaskChanged(payload: { projectId: string }) {
       if (payload.projectId !== projectId) return;
-      void queryClient.invalidateQueries({ queryKey: taskQueryKeys.projectList(projectId) });
+      void queryClient.invalidateQueries({
+        queryKey: taskQueryKeys.projectList(projectId),
+      });
     }
 
     socket.on("task:created", handleTaskChanged);
@@ -148,7 +173,13 @@ export function ProjectTasksPage() {
       socket.off("tasks:reordered", handleTaskChanged);
       socket.emit("project:leave", projectId, () => undefined);
     };
-  }, [projectId, workspaceId, projectQuery.isSuccess, projectQuery.data, queryClient]);
+  }, [
+    projectId,
+    workspaceId,
+    projectQuery.isSuccess,
+    projectQuery.data,
+    queryClient,
+  ]);
 
   useEffect(() => {
     if (!isProjectInaccessible || hasShownInaccessibleToast.current) return;
@@ -156,9 +187,12 @@ export function ProjectTasksPage() {
     toast.error(
       projectQuery.error?.status === 403
         ? "You do not have access to this project."
-        : "This project is no longer accessible."
+        : "This project is no longer accessible.",
     );
-    navigate(workspaceId ? `/workspaces/${workspaceId}#projects` : "/dashboard", { replace: true });
+    navigate(
+      workspaceId ? `/workspaces/${workspaceId}#projects` : "/dashboard",
+      { replace: true },
+    );
   }, [isProjectInaccessible, projectQuery.error, navigate, workspaceId]);
 
   useEffect(() => {
@@ -174,7 +208,12 @@ export function ProjectTasksPage() {
     hasShownWorkspaceNotFoundToast.current = true;
     toast.error("This workspace is no longer accessible.");
     navigate("/dashboard", { replace: true });
-  }, [workspaceQuery.isError, workspaceQuery.error, isProjectInaccessible, navigate]);
+  }, [
+    workspaceQuery.isError,
+    workspaceQuery.error,
+    isProjectInaccessible,
+    navigate,
+  ]);
 
   useEffect(() => {
     const project = projectQuery.data;
@@ -201,7 +240,9 @@ export function ProjectTasksPage() {
   }
 
   function setView(view: TaskView) {
-    updateParams((next) => (view === "board" ? next.delete("view") : next.set("view", view)));
+    updateParams((next) =>
+      view === "board" ? next.delete("view") : next.set("view", view),
+    );
   }
 
   function setSearch(value: string) {
@@ -209,7 +250,9 @@ export function ProjectTasksPage() {
   }
 
   function setCsvParam(key: "status" | "type" | "priority", values: string[]) {
-    updateParams((next) => (values.length > 0 ? next.set(key, values.join(",")) : next.delete(key)));
+    updateParams((next) =>
+      values.length > 0 ? next.set(key, values.join(",")) : next.delete(key),
+    );
   }
 
   function toggleStatus(status: TaskStatus) {
@@ -220,7 +263,9 @@ export function ProjectTasksPage() {
   }
 
   function toggleType(type: TaskType) {
-    const next = filters.type.includes(type) ? filters.type.filter((value) => value !== type) : [...filters.type, type];
+    const next = filters.type.includes(type)
+      ? filters.type.filter((value) => value !== type)
+      : [...filters.type, type];
     setCsvParam("type", next);
   }
 
@@ -232,7 +277,9 @@ export function ProjectTasksPage() {
   }
 
   function setAssignee(assignee: string | null) {
-    updateParams((next) => (assignee ? next.set("assignee", assignee) : next.delete("assignee")));
+    updateParams((next) =>
+      assignee ? next.set("assignee", assignee) : next.delete("assignee"),
+    );
   }
 
   function setDue(due: TaskDueFilter | null) {
@@ -240,7 +287,9 @@ export function ProjectTasksPage() {
   }
 
   function setState(state: TaskStateFilter) {
-    updateParams((next) => (state === "active" ? next.delete("state") : next.set("state", state)));
+    updateParams((next) =>
+      state === "active" ? next.delete("state") : next.set("state", state),
+    );
   }
 
   function clearFilters() {
@@ -261,11 +310,17 @@ export function ProjectTasksPage() {
   }
 
   if (projectQuery.isError) {
-    if (projectQuery.error?.status === 403 || projectQuery.error?.status === 404) return null;
+    if (
+      projectQuery.error?.status === 403 ||
+      projectQuery.error?.status === 404
+    )
+      return null;
 
     return (
       <div className="rounded-xl border border-danger/30 bg-danger/5 px-6 py-10 text-center">
-        <p className="text-body">{projectQuery.error?.message ?? "Unable to load this project."}</p>
+        <p className="text-body">
+          {projectQuery.error?.message ?? "Unable to load this project."}
+        </p>
         <div className="mt-4 flex justify-center gap-2">
           <Button
             variant="secondary"
@@ -275,7 +330,10 @@ export function ProjectTasksPage() {
           >
             Retry
           </Button>
-          <Button variant="secondary" onClick={() => navigate(`/workspaces/${workspaceId}#projects`)}>
+          <Button
+            variant="secondary"
+            onClick={() => navigate(`/workspaces/${workspaceId}#projects`)}
+          >
             Back to workspace
           </Button>
         </div>
@@ -288,7 +346,10 @@ export function ProjectTasksPage() {
 
     return (
       <div className="rounded-xl border border-danger/30 bg-danger/5 px-6 py-10 text-center">
-        <p className="text-body">{workspaceQuery.error?.message ?? "Unable to load this project's workspace."}</p>
+        <p className="text-body">
+          {workspaceQuery.error?.message ??
+            "Unable to load this project's workspace."}
+        </p>
         <div className="mt-4 flex justify-center gap-2">
           <Button
             variant="secondary"
@@ -318,12 +379,12 @@ export function ProjectTasksPage() {
   const canEdit = canEditProject(project, workspace, role);
   const canCreateTask = canCreateWorkItem(project, workspace, role);
 
-  // A single "now" snapshot for this render pass, threaded down to every
-  // component that needs to compare against due dates.
-  // eslint-disable-next-line react-hooks/purity -- intentional single time snapshot per render, not used for logic that must be reactive to the clock ticking.
   const now = Date.now();
   const activeFilterCount = countActiveFilters(filters);
-  const hasFilters = hasNonSearchFilters(filters) || filters.q.trim().length > 0 || filters.state !== "active";
+  const hasFilters =
+    hasNonSearchFilters(filters) ||
+    filters.q.trim().length > 0 ||
+    filters.state !== "active";
 
   const filteredTasks = filterTasks(rootTasks, filters, now);
 
@@ -334,21 +395,31 @@ export function ProjectTasksPage() {
     DONE: filteredTasks.filter((task) => task.status === "DONE"),
   };
 
-  const taskCountByColumn = Object.fromEntries(ALL_STATUSES.map((status) => [status, columns[status].length]));
+  const taskCountByColumn = Object.fromEntries(
+    ALL_STATUSES.map((status) => [status, columns[status].length]),
+  );
 
   const reorderAllowed = canReorderTaskBoard(
     project,
     workspace,
     role,
-    { search: filters.q, status: filters.status, type: filters.type, priority: filters.priority, assignee: filters.assignee, due: filters.due, state: filters.state },
-    taskCountByColumn
+    {
+      search: filters.q,
+      status: filters.status,
+      type: filters.type,
+      priority: filters.priority,
+      assignee: filters.assignee,
+      due: filters.due,
+      state: filters.state,
+    },
+    taskCountByColumn,
   );
 
   const reorderEnabled = reorderAllowed && !reorderMutation.isPending;
 
   function handleReorder(
     next: Record<TaskStatus, Task[]>,
-    affectedStatuses: TaskStatus[]
+    affectedStatuses: TaskStatus[],
   ) {
     if (!reorderEnabled || !projectId) return;
 
@@ -398,10 +469,11 @@ export function ProjectTasksPage() {
           toast.error(
             error.status === 409
               ? "The task board changed. It has been refreshed."
-              : error.message ?? "Unable to reorder tasks. The board has been refreshed."
+              : (error.message ??
+                  "Unable to reorder tasks. The board has been refreshed."),
           );
         },
-      }
+      },
     );
   }
 
@@ -412,7 +484,11 @@ export function ProjectTasksPage() {
 
   return (
     <div className="space-y-5">
-      <ProjectReadOnlyBanner project={project} workspace={workspace} role={role} />
+      <ProjectReadOnlyBanner
+        project={project}
+        workspace={workspace}
+        role={role}
+      />
 
       <ProjectHeader
         project={project}
@@ -440,21 +516,33 @@ export function ProjectTasksPage() {
 
               {canCreateTask && (
                 <div className="flex">
-                <Button size="sm" onClick={() => openCreateDialog("task")} className="rounded-r-none">
-                  <Plus className="h-3.5 w-3.5" />
-                  New Task
-                </Button>
-                <DropdownMenu>
-                  <DropdownMenuTrigger
-                    aria-label="Choose item type"
-                    className="!h-8 !w-8 rounded-l-none border-l border-primary-foreground/20 bg-primary text-primary-foreground hover:bg-primary/90"
+                  <Button
+                    size="sm"
+                    onClick={() => openCreateDialog("task")}
+                    className="rounded-r-none"
                   >
-                    <ChevronDown className="h-3.5 w-3.5" />
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => openCreateDialog("task")}>New task</DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => openCreateDialog("issue")}>New issue</DropdownMenuItem>
-                  </DropdownMenuContent>
+                    <Plus className="h-3.5 w-3.5" />
+                    New Task
+                  </Button>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger
+                      aria-label="Choose item type"
+                      className="!h-8 !w-8 rounded-l-none border-l border-primary-foreground/20 bg-primary text-primary-foreground hover:bg-primary/90"
+                    >
+                      <ChevronDown className="h-3.5 w-3.5" />
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem
+                        onClick={() => openCreateDialog("task")}
+                      >
+                        New task
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => openCreateDialog("issue")}
+                      >
+                        New issue
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
               )}
@@ -478,14 +566,19 @@ export function ProjectTasksPage() {
           {tasksQuery.isLoading && (
             <div className="flex gap-3">
               {Array.from({ length: 4 }).map((_, index) => (
-                <Skeleton key={index} className="h-72 w-[280px] shrink-0 rounded-xl" />
+                <Skeleton
+                  key={index}
+                  className="h-72 w-[280px] shrink-0 rounded-xl"
+                />
               ))}
             </div>
           )}
 
           {tasksQuery.isError && (
             <div className="rounded-xl border border-danger/30 bg-danger/5 px-6 py-10 text-center">
-              <p className="text-body">{tasksQuery.error?.message ?? "Unable to load tasks."}</p>
+              <p className="text-body">
+                {tasksQuery.error?.message ?? "Unable to load tasks."}
+              </p>
               <div className="mt-3 flex flex-wrap justify-center gap-2">
                 <Button
                   variant="secondary"
@@ -497,7 +590,9 @@ export function ProjectTasksPage() {
                 </Button>
                 <Button
                   variant="secondary"
-                  onClick={() => navigate(`/workspaces/${workspaceId}/projects/${projectId}`)}
+                  onClick={() =>
+                    navigate(`/workspaces/${workspaceId}/projects/${projectId}`)
+                  }
                 >
                   Back to Project Overview
                 </Button>
@@ -505,49 +600,63 @@ export function ProjectTasksPage() {
             </div>
           )}
 
-          {!tasksQuery.isLoading && !tasksQuery.isError && filters.view === "board" && (
-            <>
-              {filteredTasks.length === 0 && hasFilters && (
-                <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-surface/50 px-4 py-3">
-                  <p className="text-sm text-muted">No tasks or issues match the current filters.</p>
-                  <Button variant="secondary" size="sm" onClick={clearFilters}>
-                    Clear filters
-                  </Button>
-                </div>
-              )}
+          {!tasksQuery.isLoading &&
+            !tasksQuery.isError &&
+            filters.view === "board" && (
+              <>
+                {filteredTasks.length === 0 && hasFilters && (
+                  <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-surface/50 px-4 py-3">
+                    <p className="text-sm text-muted">
+                      No tasks or issues match the current filters.
+                    </p>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={clearFilters}
+                    >
+                      Clear filters
+                    </Button>
+                  </div>
+                )}
 
-              <TaskBoard
-                columns={columns}
+                <TaskBoard
+                  columns={columns}
+                  now={now}
+                  onTaskClick={(task) => navigateToTaskDetail(task._id)}
+                  reorderDisabled={!reorderEnabled}
+                  reorderDisabledReason={
+                    reorderMutation.isPending
+                      ? "Saving the board order…"
+                      : !reorderAllowed && role
+                        ? hasFilters
+                          ? "Clear filters and switch to Active tasks to reorder the board."
+                          : project.isArchived || workspace.isArchived
+                            ? "This board is read-only while its project or workspace is archived."
+                            : undefined
+                        : undefined
+                  }
+                  onReorder={handleReorder}
+                  onAddTask={
+                    canCreateTask ? () => openCreateDialog("task") : undefined
+                  }
+                />
+              </>
+            )}
+
+          {!tasksQuery.isLoading &&
+            !tasksQuery.isError &&
+            filters.view === "list" && (
+              <TaskListView
+                tasks={filteredTasks}
                 now={now}
                 onTaskClick={(task) => navigateToTaskDetail(task._id)}
-                reorderDisabled={!reorderEnabled}
-                reorderDisabledReason={
-                  reorderMutation.isPending
-                    ? "Saving the board order…"
-                    : !reorderAllowed && role
-                      ? hasFilters
-                        ? "Clear filters and switch to Active tasks to reorder the board."
-                        : project.isArchived || workspace.isArchived
-                          ? "This board is read-only while its project or workspace is archived."
-                          : undefined
-                      : undefined
+                emptyMessage={
+                  rootTasks.length === 0
+                    ? "No tasks or issues yet."
+                    : "No tasks or issues match your filters."
                 }
-                onReorder={handleReorder}
-                onAddTask={canCreateTask ? () => openCreateDialog("task") : undefined}
               />
-            </>
-          )}
-
-          {!tasksQuery.isLoading && !tasksQuery.isError && filters.view === "list" && (
-            <TaskListView
-              tasks={filteredTasks}
-              now={now}
-              onTaskClick={(task) => navigateToTaskDetail(task._id)}
-              emptyMessage={
-                rootTasks.length === 0 ? "No tasks or issues yet." : "No tasks or issues match your filters."
-              }
-            />
-          )}
+            )}
         </div>
 
         <div className="xl:col-span-3 xl:sticky xl:top-[6.5rem] xl:self-start">

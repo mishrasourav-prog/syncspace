@@ -1,52 +1,24 @@
-import {
-  useEffect,
-  useRef,
-  useState,
-  type ChangeEvent,
-} from "react";
+import { useEffect, useRef, useState, type ChangeEvent } from "react";
 
-import {
-  zodResolver,
-} from "@hookform/resolvers/zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 
-import {
-  ImagePlus,
-  RotateCcw,
-  Trash2,
-} from "lucide-react";
+import { ImagePlus, RotateCcw, Trash2 } from "lucide-react";
 
-import {
-  useForm,
-} from "react-hook-form";
+import { useForm } from "react-hook-form";
 
-import {
-  toast,
-} from "sonner";
+import { toast } from "sonner";
 
-import {
-  Avatar,
-} from "@/components/ui/avatar";
+import { Avatar } from "@/components/ui/avatar";
 
-import {
-  Button,
-} from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 
-import {
-  Dialog,
-  DialogFooter,
-} from "@/components/ui/dialog";
+import { Dialog, DialogFooter } from "@/components/ui/dialog";
 
-import {
-  Input,
-} from "@/components/ui/input";
+import { Input } from "@/components/ui/input";
 
-import {
-  Label,
-} from "@/components/ui/label";
+import { Label } from "@/components/ui/label";
 
-import {
-  Textarea,
-} from "@/components/ui/textarea";
+import { Textarea } from "@/components/ui/textarea";
 
 import {
   useRemoveWorkspaceAvatarMutation,
@@ -67,38 +39,19 @@ import type {
 } from "../types/workspace.types";
 
 interface EditWorkspaceDialogProps {
-  workspace:
-    | WorkspaceSummary
-    | null;
+  workspace: WorkspaceSummary | null;
   onClose: () => void;
 }
 
-function getMutationMessage(
-  error: unknown,
-  fallback: string
-): string {
-  if (
-    typeof error ===
-      "object" &&
-    error !==
-      null &&
-    "message" in
-      error
-  ) {
-    const message =
-      (
-        error as {
-          message?:
-            unknown;
-        }
-      ).message;
+function getMutationMessage(error: unknown, fallback: string): string {
+  if (typeof error === "object" && error !== null && "message" in error) {
+    const message = (
+      error as {
+        message?: unknown;
+      }
+    ).message;
 
-    if (
-      typeof message ===
-        "string" &&
-      message.length >
-        0
-    ) {
+    if (typeof message === "string" && message.length > 0) {
       return message;
     }
   }
@@ -110,73 +63,41 @@ export function EditWorkspaceDialog({
   workspace,
   onClose,
 }: EditWorkspaceDialogProps) {
-  const updateWorkspaceMutation =
-    useUpdateWorkspaceMutation();
+  const updateWorkspaceMutation = useUpdateWorkspaceMutation();
 
-  const replaceAvatarMutation =
-    useReplaceWorkspaceAvatarMutation();
+  const replaceAvatarMutation = useReplaceWorkspaceAvatarMutation();
 
-  const removeAvatarMutation =
-    useRemoveWorkspaceAvatarMutation();
+  const removeAvatarMutation = useRemoveWorkspaceAvatarMutation();
 
-  const [selectedFile, setSelectedFile] =
-    useState<File | null>(
-      null
-    );
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
-  const [previewUrl, setPreviewUrl] =
-    useState<string | null>(
-      null
-    );
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
-  const [avatarValidationError, setAvatarValidationError] =
-    useState<string | null>(
-      null
-    );
+  const [avatarValidationError, setAvatarValidationError] = useState<
+    string | null
+  >(null);
 
-  const [avatarRemovalRequested, setAvatarRemovalRequested] =
-    useState(
-      false
-    );
+  const [avatarRemovalRequested, setAvatarRemovalRequested] = useState(false);
 
-  const fileInputRef =
-    useRef<HTMLInputElement>(
-      null
-    );
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const wasOpenRef =
-    useRef(
-      false
-    );
+  const wasOpenRef = useRef(false);
 
   const {
     register,
     handleSubmit,
     reset,
-    formState: {
-      errors,
-      dirtyFields,
+    formState: { errors, dirtyFields },
+  } = useForm<EditWorkspaceFormValues>({
+    resolver: zodResolver(editWorkspaceSchema),
+    defaultValues: {
+      name: "",
+      description: "",
+      timezone: "",
     },
-  } =
-    useForm<EditWorkspaceFormValues>({
-      resolver:
-        zodResolver(
-          editWorkspaceSchema
-        ),
-      defaultValues: {
-        name:
-          "",
-        description:
-          "",
-        timezone:
-          "",
-      },
-    });
+  });
 
-  const isOpen =
-    Boolean(
-      workspace
-    );
+  const isOpen = Boolean(workspace);
 
   const isBusy =
     updateWorkspaceMutation.isPending ||
@@ -185,64 +106,38 @@ export function EditWorkspaceDialog({
 
   useEffect(() => {
     return () => {
-      if (
-        previewUrl
-      ) {
-        URL.revokeObjectURL(
-          previewUrl
-        );
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
       }
     };
-  }, [
-    previewUrl,
-  ]);
+  }, [previewUrl]);
 
   useEffect(() => {
-    if (
-      isOpen &&
-      !wasOpenRef.current &&
-      workspace
-    ) {
+    if (isOpen && !wasOpenRef.current && workspace) {
       reset({
-        name:
-          workspace.name,
-        description:
-          workspace.description ??
-          "",
-        timezone:
-          workspace.timezone,
+        name: workspace.name,
+        description: workspace.description ?? "",
+        timezone: workspace.timezone,
       });
 
-      setSelectedFile(
-        null
-      );
+      setSelectedFile(null);
 
-      setPreviewUrl(
-        null
-      );
+      setPreviewUrl(null);
 
-      setAvatarValidationError(
-        null
-      );
+      setAvatarValidationError(null);
 
-      setAvatarRemovalRequested(
-        false
-      );
+      setAvatarRemovalRequested(false);
 
       updateWorkspaceMutation.reset();
       replaceAvatarMutation.reset();
       removeAvatarMutation.reset();
 
-      if (
-        fileInputRef.current
-      ) {
-        fileInputRef.current.value =
-          "";
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
       }
     }
 
-    wasOpenRef.current =
-      isOpen;
+    wasOpenRef.current = isOpen;
   }, [
     isOpen,
     workspace,
@@ -253,96 +148,63 @@ export function EditWorkspaceDialog({
   ]);
 
   function clearSelectedFileState() {
-    setSelectedFile(
-      null
-    );
+    setSelectedFile(null);
 
-    setPreviewUrl(
-      null
-    );
+    setPreviewUrl(null);
 
-    setAvatarValidationError(
-      null
-    );
+    setAvatarValidationError(null);
   }
 
   function clearSelectedFile() {
     clearSelectedFileState();
 
-    if (
-      fileInputRef.current
-    ) {
-      fileInputRef.current.value =
-        "";
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
     }
   }
 
   function handleClose() {
-    if (
-      isBusy
-    ) {
+    if (isBusy) {
       return;
     }
 
     clearSelectedFile();
-    setAvatarRemovalRequested(
-      false
-    );
+    setAvatarRemovalRequested(false);
 
     onClose();
   }
 
-  function handleFileChange(
-    event: ChangeEvent<HTMLInputElement>
-  ) {
-    const file =
-      event.target.files?.[0];
+  function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
 
-    event.target.value =
-      "";
+    event.target.value = "";
 
-    if (
-      !file
-    ) {
+    if (!file) {
       return;
     }
 
-    const result =
-      workspaceAvatarFormSchema.safeParse({
-        file,
-      });
+    const result = workspaceAvatarFormSchema.safeParse({
+      file,
+    });
 
-    if (
-      !result.success
-    ) {
+    if (!result.success) {
       clearSelectedFile();
 
       setAvatarValidationError(
-        result.error.issues[0]
-          ?.message ??
-          "Choose a valid workspace avatar image."
+        result.error.issues[0]?.message ??
+          "Choose a valid workspace avatar image.",
       );
 
       return;
     }
 
-    setSelectedFile(
-      file
-    );
+    setSelectedFile(file);
 
-    setPreviewUrl(
-      URL.createObjectURL(
-        file
-      )
-    );
+    setPreviewUrl(URL.createObjectURL(file));
 
-    setAvatarRemovalRequested(
-      false
-    );
+    setAvatarRemovalRequested(false);
 
-    setAvatarValidationError(
-      null
-    );
+    setAvatarValidationError(null);
 
     replaceAvatarMutation.reset();
     removeAvatarMutation.reset();
@@ -350,172 +212,109 @@ export function EditWorkspaceDialog({
 
   function requestAvatarRemoval() {
     clearSelectedFile();
-    setAvatarRemovalRequested(
-      true
-    );
+    setAvatarRemovalRequested(true);
     removeAvatarMutation.reset();
   }
 
-  const onSubmit =
-    async (
-      values: EditWorkspaceFormValues
-    ) => {
-      if (
-        !workspace ||
-        isBusy
-      ) {
-        return;
-      }
+  const onSubmit = async (values: EditWorkspaceFormValues) => {
+    if (!workspace || isBusy) {
+      return;
+    }
 
-      const payload:
-        UpdateWorkspacePayload =
-          {};
+    const payload: UpdateWorkspacePayload = {};
 
-      if (
-        dirtyFields.name
-      ) {
-        payload.name =
-          values.name;
-      }
+    if (dirtyFields.name) {
+      payload.name = values.name;
+    }
 
-      if (
-        dirtyFields.description
-      ) {
-        payload.description =
-          values.description ??
-          "";
-      }
+    if (dirtyFields.description) {
+      payload.description = values.description ?? "";
+    }
 
-      if (
-        dirtyFields.timezone
-      ) {
-        payload.timezone =
-          values.timezone;
-      }
+    if (dirtyFields.timezone) {
+      payload.timezone = values.timezone;
+    }
 
-      const hasWorkspaceDetailsChange =
-        Object.keys(
-          payload
-        ).length >
-        0;
+    const hasWorkspaceDetailsChange = Object.keys(payload).length > 0;
 
-      const hasAvatarChange =
-        Boolean(
-          selectedFile
-        ) ||
-        avatarRemovalRequested;
+    const hasAvatarChange = Boolean(selectedFile) || avatarRemovalRequested;
 
-      if (
-        !hasWorkspaceDetailsChange &&
-        !hasAvatarChange
-      ) {
-        onClose();
+    if (!hasWorkspaceDetailsChange && !hasAvatarChange) {
+      onClose();
 
-        return;
-      }
+      return;
+    }
 
-      updateWorkspaceMutation.reset();
-      replaceAvatarMutation.reset();
-      removeAvatarMutation.reset();
+    updateWorkspaceMutation.reset();
+    replaceAvatarMutation.reset();
+    removeAvatarMutation.reset();
 
-      let avatarWasUpdated =
-        false;
+    let avatarWasUpdated = false;
 
-      try {
-        if (
-          selectedFile
-        ) {
-          await replaceAvatarMutation.mutateAsync({
-            workspaceId:
-              workspace._id,
-            file:
-              selectedFile,
-          });
+    try {
+      if (selectedFile) {
+        await replaceAvatarMutation.mutateAsync({
+          workspaceId: workspace._id,
+          file: selectedFile,
+        });
 
-          avatarWasUpdated =
-            true;
-
-          clearSelectedFileState();
-        } else if (
-          avatarRemovalRequested
-        ) {
-          await removeAvatarMutation.mutateAsync(
-            workspace._id
-          );
-
-          avatarWasUpdated =
-            true;
-
-          setAvatarRemovalRequested(
-            false
-          );
-        }
-
-        if (
-          hasWorkspaceDetailsChange
-        ) {
-          await updateWorkspaceMutation.mutateAsync({
-            workspaceId:
-              workspace._id,
-            payload,
-          });
-        }
-
-        toast.success(
-          avatarWasUpdated &&
-            hasWorkspaceDetailsChange
-            ? "Workspace details and avatar updated successfully."
-            : avatarWasUpdated
-              ? "Workspace avatar updated successfully."
-              : "Workspace updated successfully."
-        );
+        avatarWasUpdated = true;
 
         clearSelectedFileState();
-        setAvatarRemovalRequested(
-          false
-        );
-        onClose();
-      } catch {
-        if (
-          avatarWasUpdated &&
-          hasWorkspaceDetailsChange
-        ) {
-          toast.warning(
-            "The avatar was updated, but the workspace details could not be saved. Review the error and try again."
-          );
-        }
-      }
-    };
+      } else if (avatarRemovalRequested) {
+        await removeAvatarMutation.mutateAsync(workspace._id);
 
-  const avatarError =
-    replaceAvatarMutation.error
+        avatarWasUpdated = true;
+
+        setAvatarRemovalRequested(false);
+      }
+
+      if (hasWorkspaceDetailsChange) {
+        await updateWorkspaceMutation.mutateAsync({
+          workspaceId: workspace._id,
+          payload,
+        });
+      }
+
+      toast.success(
+        avatarWasUpdated && hasWorkspaceDetailsChange
+          ? "Workspace details and avatar updated successfully."
+          : avatarWasUpdated
+            ? "Workspace avatar updated successfully."
+            : "Workspace updated successfully.",
+      );
+
+      clearSelectedFileState();
+      setAvatarRemovalRequested(false);
+      onClose();
+    } catch {
+      if (avatarWasUpdated && hasWorkspaceDetailsChange) {
+        toast.warning(
+          "The avatar was updated, but the workspace details could not be saved. Review the error and try again.",
+        );
+      }
+    }
+  };
+
+  const avatarError = replaceAvatarMutation.error
+    ? getMutationMessage(
+        replaceAvatarMutation.error,
+        "Unable to update the workspace avatar.",
+      )
+    : removeAvatarMutation.error
       ? getMutationMessage(
-          replaceAvatarMutation.error,
-          "Unable to update the workspace avatar."
+          removeAvatarMutation.error,
+          "Unable to remove the workspace avatar.",
         )
-      : removeAvatarMutation.error
-        ? getMutationMessage(
-            removeAvatarMutation.error,
-            "Unable to remove the workspace avatar."
-          )
-        : null;
+      : null;
 
   const effectiveAvatar =
-    previewUrl ??
-    (
-      avatarRemovalRequested
-        ? undefined
-        : workspace?.avatar
-    );
+    previewUrl ?? (avatarRemovalRequested ? undefined : workspace?.avatar);
 
   return (
     <Dialog
-      open={
-        isOpen
-      }
-      onClose={
-        handleClose
-      }
+      open={isOpen}
+      onClose={handleClose}
       title="Edit workspace"
       description="Update workspace details and choose an avatar from your device."
       className="sm:max-w-xl"
@@ -527,7 +326,7 @@ export function EditWorkspaceDialog({
         >
           {getMutationMessage(
             updateWorkspaceMutation.error,
-            "Unable to update workspace details."
+            "Unable to update workspace details.",
           )}
         </div>
       ) : null}
@@ -541,72 +340,40 @@ export function EditWorkspaceDialog({
         </div>
       ) : null}
 
-      <form
-        onSubmit={
-          handleSubmit(
-            onSubmit
-          )
-        }
-        noValidate
-      >
+      <form onSubmit={handleSubmit(onSubmit)} noValidate>
         <div className="mb-4">
-          <Label htmlFor="edit-workspace-name">
-            Name
-          </Label>
+          <Label htmlFor="edit-workspace-name">Name</Label>
 
           <Input
             id="edit-workspace-name"
-            error={
-              errors.name?.message
-            }
-            {...register(
-              "name"
-            )}
+            error={errors.name?.message}
+            {...register("name")}
           />
         </div>
 
         <div className="mb-4">
           <Label htmlFor="edit-workspace-description">
-            Description{" "}
-            <span className="text-muted/60">
-              (optional)
-            </span>
+            Description <span className="text-muted/60">(optional)</span>
           </Label>
 
           <Textarea
             id="edit-workspace-description"
-            rows={
-              4
-            }
-            maxLength={
-              500
-            }
-            error={
-              errors.description
-                ?.message
-            }
-            {...register(
-              "description"
-            )}
+            rows={4}
+            maxLength={500}
+            error={errors.description?.message}
+            {...register("description")}
           />
         </div>
 
         <div className="mb-4">
-          <Label htmlFor="workspace-avatar-file">
-            Workspace avatar
-          </Label>
+          <Label htmlFor="workspace-avatar-file">Workspace avatar</Label>
 
           <div className="mt-1.5 rounded-xl border border-border bg-background/35 p-3 sm:p-4">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex min-w-0 items-center gap-3">
                 <Avatar
-                  src={
-                    effectiveAvatar
-                  }
-                  name={
-                    workspace?.name ??
-                    "Workspace"
-                  }
+                  src={effectiveAvatar}
+                  name={workspace?.name ?? "Workspace"}
                   size="lg"
                   square
                   className="h-16 w-16 shrink-0 bg-gradient-to-br from-primary to-secondary text-white"
@@ -624,7 +391,8 @@ export function EditWorkspaceDialog({
                   </p>
 
                   <p className="mt-1 text-xs leading-5 text-muted">
-                    JPEG, PNG, or WebP. Maximum size 5 MB. The image is cropped to a square.
+                    JPEG, PNG, or WebP. Maximum size 5 MB. The image is cropped
+                    to a square.
                   </p>
 
                   {selectedFile ? (
@@ -637,20 +405,12 @@ export function EditWorkspaceDialog({
 
               <div className="flex flex-wrap gap-2 sm:justify-end">
                 <input
-                  ref={
-                    fileInputRef
-                  }
+                  ref={fileInputRef}
                   id="workspace-avatar-file"
                   type="file"
-                  accept={
-                    WORKSPACE_AVATAR_ACCEPT
-                  }
-                  onChange={
-                    handleFileChange
-                  }
-                  disabled={
-                    isBusy
-                  }
+                  accept={WORKSPACE_AVATAR_ACCEPT}
+                  onChange={handleFileChange}
+                  disabled={isBusy}
                   className="sr-only"
                 />
 
@@ -658,17 +418,10 @@ export function EditWorkspaceDialog({
                   type="button"
                   size="sm"
                   variant="secondary"
-                  disabled={
-                    isBusy
-                  }
-                  onClick={() =>
-                    fileInputRef.current?.click()
-                  }
+                  disabled={isBusy}
+                  onClick={() => fileInputRef.current?.click()}
                 >
-                  <ImagePlus
-                    className="h-3.5 w-3.5"
-                    aria-hidden
-                  />
+                  <ImagePlus className="h-3.5 w-3.5" aria-hidden />
                   {selectedFile
                     ? "Choose another"
                     : workspace?.avatar
@@ -681,36 +434,22 @@ export function EditWorkspaceDialog({
                     type="button"
                     size="sm"
                     variant="ghost"
-                    disabled={
-                      isBusy
-                    }
-                    onClick={
-                      clearSelectedFile
-                    }
+                    disabled={isBusy}
+                    onClick={clearSelectedFile}
                   >
                     Cancel selection
                   </Button>
                 ) : null}
 
-                {!selectedFile &&
-                avatarRemovalRequested ? (
+                {!selectedFile && avatarRemovalRequested ? (
                   <Button
                     type="button"
                     size="sm"
                     variant="secondary"
-                    disabled={
-                      isBusy
-                    }
-                    onClick={() =>
-                      setAvatarRemovalRequested(
-                        false
-                      )
-                    }
+                    disabled={isBusy}
+                    onClick={() => setAvatarRemovalRequested(false)}
                   >
-                    <RotateCcw
-                      className="h-3.5 w-3.5"
-                      aria-hidden
-                    />
+                    <RotateCcw className="h-3.5 w-3.5" aria-hidden />
                     Keep avatar
                   </Button>
                 ) : null}
@@ -723,17 +462,10 @@ export function EditWorkspaceDialog({
                     size="sm"
                     variant="secondary"
                     className="text-danger hover:text-danger"
-                    disabled={
-                      isBusy
-                    }
-                    onClick={
-                      requestAvatarRemoval
-                    }
+                    disabled={isBusy}
+                    onClick={requestAvatarRemoval}
                   >
-                    <Trash2
-                      className="h-3.5 w-3.5"
-                      aria-hidden
-                    />
+                    <Trash2 className="h-3.5 w-3.5" aria-hidden />
                     Remove
                   </Button>
                 ) : null}
@@ -745,10 +477,7 @@ export function EditWorkspaceDialog({
             </p>
 
             {avatarValidationError ? (
-              <p
-                role="alert"
-                className="mt-2 text-xs text-danger"
-              >
+              <p role="alert" className="mt-2 text-xs text-danger">
                 {avatarValidationError}
               </p>
             ) : null}
@@ -756,19 +485,12 @@ export function EditWorkspaceDialog({
         </div>
 
         <div>
-          <Label htmlFor="edit-workspace-timezone">
-            Timezone
-          </Label>
+          <Label htmlFor="edit-workspace-timezone">Timezone</Label>
 
           <Input
             id="edit-workspace-timezone"
-            error={
-              errors.timezone
-                ?.message
-            }
-            {...register(
-              "timezone"
-            )}
+            error={errors.timezone?.message}
+            {...register("timezone")}
           />
         </div>
 
@@ -776,25 +498,14 @@ export function EditWorkspaceDialog({
           <Button
             type="button"
             variant="secondary"
-            onClick={
-              handleClose
-            }
-            disabled={
-              isBusy
-            }
+            onClick={handleClose}
+            disabled={isBusy}
           >
             Cancel
           </Button>
 
-          <Button
-            type="submit"
-            disabled={
-              isBusy
-            }
-          >
-            {isBusy
-              ? "Saving..."
-              : "Save changes"}
+          <Button type="submit" disabled={isBusy}>
+            {isBusy ? "Saving..." : "Save changes"}
           </Button>
         </DialogFooter>
       </form>

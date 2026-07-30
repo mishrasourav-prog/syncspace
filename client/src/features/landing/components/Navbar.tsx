@@ -16,7 +16,9 @@ const NAV_LINKS = [
 ] as const;
 
 function scrollToSection(target: string): void {
-  document.getElementById(target)?.scrollIntoView({ behavior: "smooth", block: "start" });
+  document
+    .getElementById(target)
+    ?.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
 export function Navbar({ onGetStarted, onLogin }: NavbarProps) {
@@ -75,10 +77,15 @@ export function Navbar({ onGetStarted, onLogin }: NavbarProps) {
           <span className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-sm font-semibold text-primary-foreground">
             S
           </span>
-          <span className="text-base font-semibold tracking-tight text-foreground">SyncSpace</span>
+          <span className="text-base font-semibold tracking-tight text-foreground">
+            SyncSpace
+          </span>
         </button>
 
-        <nav className="hidden items-center gap-1 lg:flex" aria-label="Landing page navigation">
+        <nav
+          className="hidden items-center gap-1 lg:flex"
+          aria-label="Landing page navigation"
+        >
           {NAV_LINKS.map((link) => (
             <button
               key={link.target}
@@ -104,11 +111,17 @@ export function Navbar({ onGetStarted, onLogin }: NavbarProps) {
           type="button"
           className="flex h-10 w-10 items-center justify-center rounded-md text-muted transition-colors hover:bg-surface hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 lg:hidden"
           onClick={() => setDrawerOpen((value) => !value)}
-          aria-label={drawerOpen ? "Close navigation menu" : "Open navigation menu"}
+          aria-label={
+            drawerOpen ? "Close navigation menu" : "Open navigation menu"
+          }
           aria-controls="landing-mobile-menu"
           aria-expanded={drawerOpen}
         >
-          {drawerOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          {drawerOpen ? (
+            <X className="h-5 w-5" />
+          ) : (
+            <Menu className="h-5 w-5" />
+          )}
         </button>
       </div>
 
@@ -135,10 +148,17 @@ export function Navbar({ onGetStarted, onLogin }: NavbarProps) {
               ))}
 
               <div className="mt-2 grid gap-2 border-t border-border pt-4">
-                <Button variant="secondary" className="w-full" onClick={() => navigateAndClose(onLogin)}>
+                <Button
+                  variant="secondary"
+                  className="w-full"
+                  onClick={() => navigateAndClose(onLogin)}
+                >
                   Log in
                 </Button>
-                <Button className="w-full" onClick={() => navigateAndClose(onGetStarted)}>
+                <Button
+                  className="w-full"
+                  onClick={() => navigateAndClose(onGetStarted)}
+                >
                   Get Started
                 </Button>
               </div>

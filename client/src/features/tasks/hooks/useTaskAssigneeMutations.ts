@@ -30,7 +30,11 @@ export function useAssignTaskMemberMutation(projectId: string) {
   const queryClient = useQueryClient();
   const projectListKey = taskQueryKeys.projectList(projectId);
 
-  return useMutation<TaskAssignee, ApiErrorShape, { taskId: string; userId: string }>({
+  return useMutation<
+    TaskAssignee,
+    ApiErrorShape,
+    { taskId: string; userId: string }
+  >({
     mutationFn: ({ taskId, userId }) => assignTaskMemberRequest(taskId, userId),
     onSuccess: (assignee, { taskId }) => {
       const preview: TaskAssigneePreview = {
@@ -42,21 +46,23 @@ export function useAssignTaskMemberMutation(projectId: string) {
 
       queryClient.setQueryData<Task[]>(projectListKey, (previous) =>
         previous?.map((task) =>
-          task._id === taskId ? addPreviewToTask(task, preview) : task
-        )
+          task._id === taskId ? addPreviewToTask(task, preview) : task,
+        ),
       );
 
       queryClient.setQueryData<Task>(
         taskQueryKeys.detail(projectId, taskId),
-        (previous) => (previous ? addPreviewToTask(previous, preview) : previous)
+        (previous) =>
+          previous ? addPreviewToTask(previous, preview) : previous,
       );
 
       queryClient.setQueryData<TaskAssignee[]>(
         taskQueryKeys.assignees(projectId, taskId),
         (previous) =>
-          previous && !previous.some((existing) => existing.user._id === assignee.user._id)
+          previous &&
+          !previous.some((existing) => existing.user._id === assignee.user._id)
             ? [...previous, assignee]
-            : previous
+            : previous,
       );
 
       void queryClient.invalidateQueries({ queryKey: projectListKey });
@@ -75,22 +81,25 @@ export function useRemoveTaskAssigneeMutation(projectId: string) {
   const projectListKey = taskQueryKeys.projectList(projectId);
 
   return useMutation<void, ApiErrorShape, { taskId: string; userId: string }>({
-    mutationFn: ({ taskId, userId }) => removeTaskAssigneeRequest(taskId, userId),
+    mutationFn: ({ taskId, userId }) =>
+      removeTaskAssigneeRequest(taskId, userId),
     onSuccess: (_data, { taskId, userId }) => {
       queryClient.setQueryData<Task[]>(projectListKey, (previous) =>
         previous?.map((task) =>
-          task._id === taskId ? removePreviewFromTask(task, userId) : task
-        )
+          task._id === taskId ? removePreviewFromTask(task, userId) : task,
+        ),
       );
 
       queryClient.setQueryData<Task>(
         taskQueryKeys.detail(projectId, taskId),
-        (previous) => (previous ? removePreviewFromTask(previous, userId) : previous)
+        (previous) =>
+          previous ? removePreviewFromTask(previous, userId) : previous,
       );
 
       queryClient.setQueryData<TaskAssignee[]>(
         taskQueryKeys.assignees(projectId, taskId),
-        (previous) => previous?.filter((assignee) => assignee.user._id !== userId)
+        (previous) =>
+          previous?.filter((assignee) => assignee.user._id !== userId),
       );
 
       void queryClient.invalidateQueries({ queryKey: projectListKey });

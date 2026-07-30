@@ -19,7 +19,7 @@ interface BackNavigation {
 function getBackNavigation(
   workspaceId: string | undefined,
   projectId: string | undefined,
-  member: MemberProfile | undefined
+  member: MemberProfile | undefined,
 ): BackNavigation {
   if (workspaceId && projectId) {
     return {
@@ -65,7 +65,7 @@ export function MemberProfilePage() {
   const memberProfileQuery = useMemberProfileQuery(
     userId,
     { workspaceId, projectId },
-    canFetch
+    canFetch,
   );
 
   if (isSelf) {
@@ -77,11 +77,7 @@ export function MemberProfilePage() {
         destination: "/dashboard",
         label: "Back to Dashboard",
       }
-    : getBackNavigation(
-        workspaceId,
-        projectId,
-        memberProfileQuery.data
-      );
+    : getBackNavigation(workspaceId, projectId, memberProfileQuery.data);
 
   return (
     <div className="mx-auto w-full max-w-5xl space-y-6">
@@ -114,7 +110,9 @@ export function MemberProfilePage() {
         />
       ) : null}
 
-      {canFetch && memberProfileQuery.isLoading ? <MemberProfilePageSkeleton /> : null}
+      {canFetch && memberProfileQuery.isLoading ? (
+        <MemberProfilePageSkeleton />
+      ) : null}
 
       {canFetch && memberProfileQuery.isError ? (
         <ProfileErrorState
@@ -122,7 +120,8 @@ export function MemberProfilePage() {
           message={
             memberProfileQuery.error.status === 404
               ? "This member profile is not available in the supplied context."
-              : memberProfileQuery.error.message || "Unable to load this member profile."
+              : memberProfileQuery.error.message ||
+                "Unable to load this member profile."
           }
           onRetry={() => {
             void memberProfileQuery.refetch();

@@ -1,5 +1,10 @@
 import { useMemo } from "react";
-import { NavLink, useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import {
+  NavLink,
+  useLocation,
+  useNavigate,
+  useSearchParams,
+} from "react-router-dom";
 import {
   Activity,
   Archive,
@@ -53,7 +58,9 @@ const PROJECT_HASH_TABS = [
 
 function useRouteContext(): { workspaceId?: string; projectId?: string } {
   const location = useLocation();
-  const match = location.pathname.match(/^\/workspaces\/([^/]+)(?:\/projects\/([^/]+))?/);
+  const match = location.pathname.match(
+    /^\/workspaces\/([^/]+)(?:\/projects\/([^/]+))?/,
+  );
   return { workspaceId: match?.[1], projectId: match?.[2] };
 }
 
@@ -63,21 +70,30 @@ interface WorkspaceSwitcherProps {
   onNavigate?: () => void;
 }
 
-export function WorkspaceSwitcher({ currentWorkspaceId, onCreateWorkspace, onNavigate }: WorkspaceSwitcherProps) {
+export function WorkspaceSwitcher({
+  currentWorkspaceId,
+  onCreateWorkspace,
+  onNavigate,
+}: WorkspaceSwitcherProps) {
   const navigate = useNavigate();
   const workspacesQuery = useWorkspacesQuery();
 
-  const allWorkspaces = useMemo(() => workspacesQuery.data ?? [], [workspacesQuery.data]);
+  const allWorkspaces = useMemo(
+    () => workspacesQuery.data ?? [],
+    [workspacesQuery.data],
+  );
   const activeWorkspaces = useMemo(
     () => allWorkspaces.filter((workspace) => !workspace.isArchived),
-    [allWorkspaces]
+    [allWorkspaces],
   );
   const archivedWorkspaces = useMemo(
     () => allWorkspaces.filter((workspace) => workspace.isArchived),
-    [allWorkspaces]
+    [allWorkspaces],
   );
 
-  const currentWorkspace = allWorkspaces.find((workspace) => workspace._id === currentWorkspaceId);
+  const currentWorkspace = allWorkspaces.find(
+    (workspace) => workspace._id === currentWorkspaceId,
+  );
 
   function navigateTo(path: string) {
     navigate(path);
@@ -98,7 +114,12 @@ export function WorkspaceSwitcher({ currentWorkspaceId, onCreateWorkspace, onNav
         >
           <span className="flex min-w-0 items-center gap-2.5">
             {currentWorkspace ? (
-              <Avatar src={currentWorkspace.avatar} name={currentWorkspace.name} size="sm" square />
+              <Avatar
+                src={currentWorkspace.avatar}
+                name={currentWorkspace.name}
+                size="sm"
+                square
+              />
             ) : (
               <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary/15 text-primary">
                 <LayoutGrid className="h-3.5 w-3.5" />
@@ -131,8 +152,16 @@ export function WorkspaceSwitcher({ currentWorkspaceId, onCreateWorkspace, onNav
               <DropdownMenuSeparator />
               <DropdownMenuLabel>Active</DropdownMenuLabel>
               {activeWorkspaces.slice(0, 8).map((workspace) => (
-                <DropdownMenuItem key={workspace._id} onClick={() => navigateTo(`/workspaces/${workspace._id}`)}>
-                  <Avatar src={workspace.avatar} name={workspace.name} size="sm" square />
+                <DropdownMenuItem
+                  key={workspace._id}
+                  onClick={() => navigateTo(`/workspaces/${workspace._id}`)}
+                >
+                  <Avatar
+                    src={workspace.avatar}
+                    name={workspace.name}
+                    size="sm"
+                    square
+                  />
                   <span className="truncate">{workspace.name}</span>
                 </DropdownMenuItem>
               ))}
@@ -149,7 +178,12 @@ export function WorkspaceSwitcher({ currentWorkspaceId, onCreateWorkspace, onNav
                   className="opacity-70"
                   onClick={() => navigateTo(`/workspaces/${workspace._id}`)}
                 >
-                  <Avatar src={workspace.avatar} name={workspace.name} size="sm" square />
+                  <Avatar
+                    src={workspace.avatar}
+                    name={workspace.name}
+                    size="sm"
+                    square
+                  />
                   <span className="truncate">{workspace.name}</span>
                 </DropdownMenuItem>
               ))}
@@ -178,7 +212,9 @@ export function AppSidebar({ onCreateWorkspace }: AppSidebarProps) {
 
   const activeTaskCount = useMemo(() => {
     if (!tasksQuery.data) return undefined;
-    return tasksQuery.data.filter((task) => !task.isArchived && !task.parentTask).length;
+    return tasksQuery.data.filter(
+      (task) => !task.isArchived && !task.parentTask,
+    ).length;
   }, [tasksQuery.data]);
 
   return (
@@ -187,10 +223,15 @@ export function AppSidebar({ onCreateWorkspace }: AppSidebarProps) {
         <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-secondary">
           <Sparkles className="h-4.5 w-4.5 text-white" />
         </div>
-        <span className="text-lg font-semibold tracking-tight text-foreground">SyncSpace</span>
+        <span className="text-lg font-semibold tracking-tight text-foreground">
+          SyncSpace
+        </span>
       </div>
 
-      <WorkspaceSwitcher currentWorkspaceId={workspaceId} onCreateWorkspace={onCreateWorkspace} />
+      <WorkspaceSwitcher
+        currentWorkspaceId={workspaceId}
+        onCreateWorkspace={onCreateWorkspace}
+      />
 
       {projectId && workspaceId ? (
         <ProjectContextNav
@@ -201,7 +242,10 @@ export function AppSidebar({ onCreateWorkspace }: AppSidebarProps) {
           activeTaskCount={activeTaskCount}
         />
       ) : workspaceId ? (
-        <WorkspaceContextNav workspaceId={workspaceId} activeHash={location.hash} />
+        <WorkspaceContextNav
+          workspaceId={workspaceId}
+          activeHash={location.hash}
+        />
       ) : (
         <DashboardNav />
       )}
@@ -221,27 +265,40 @@ function DashboardNav() {
   const invitationsQuery = useMyInvitationsQuery();
   const unreadCountQuery = useUnreadNotificationCountQuery();
 
-  const allWorkspaces = useMemo(() => workspacesQuery.data ?? [], [workspacesQuery.data]);
+  const allWorkspaces = useMemo(
+    () => workspacesQuery.data ?? [],
+    [workspacesQuery.data],
+  );
   const activeWorkspaces = useMemo(
     () => allWorkspaces.filter((workspace) => !workspace.isArchived),
-    [allWorkspaces]
+    [allWorkspaces],
   );
   const recentWorkspaces = useMemo(
     () =>
       [...activeWorkspaces]
-        .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
+        .sort(
+          (a, b) =>
+            new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
+        )
         .slice(0, MAX_SIDEBAR_WORKSPACES),
-    [activeWorkspaces]
+    [activeWorkspaces],
   );
 
   const pendingInvitationCount = invitationsQuery.data?.length ?? 0;
   const unreadNotificationCount = unreadCountQuery.data ?? 0;
 
   const isDashboardHome =
-    location.pathname === "/dashboard" && !searchParams.get("status") && !location.hash;
-  const isActiveFilter = location.pathname === "/dashboard" && searchParams.get("status") === "active";
-  const isArchivedFilter = location.pathname === "/dashboard" && searchParams.get("status") === "archived";
-  const isInvitationsHash = location.pathname === "/dashboard" && location.hash === "#invitations";
+    location.pathname === "/dashboard" &&
+    !searchParams.get("status") &&
+    !location.hash;
+  const isActiveFilter =
+    location.pathname === "/dashboard" &&
+    searchParams.get("status") === "active";
+  const isArchivedFilter =
+    location.pathname === "/dashboard" &&
+    searchParams.get("status") === "archived";
+  const isInvitationsHash =
+    location.pathname === "/dashboard" && location.hash === "#invitations";
   const isNotificationsActive = location.pathname === "/notifications";
 
   return (
@@ -252,7 +309,9 @@ function DashboardNav() {
           end
           className={cn(
             "flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-            isDashboardHome ? "bg-primary/15 text-primary" : "text-muted hover:bg-surface hover:text-foreground"
+            isDashboardHome
+              ? "bg-primary/15 text-primary"
+              : "text-muted hover:bg-surface hover:text-foreground",
           )}
         >
           <LayoutGrid className="h-4 w-4" />
@@ -263,7 +322,9 @@ function DashboardNav() {
           to="/dashboard?status=active"
           className={cn(
             "flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-            isActiveFilter ? "bg-primary/15 text-primary" : "text-muted hover:bg-surface hover:text-foreground"
+            isActiveFilter
+              ? "bg-primary/15 text-primary"
+              : "text-muted hover:bg-surface hover:text-foreground",
           )}
         >
           <Users className="h-4 w-4" />
@@ -274,7 +335,9 @@ function DashboardNav() {
           to="/dashboard?status=archived"
           className={cn(
             "flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-            isArchivedFilter ? "bg-primary/15 text-primary" : "text-muted hover:bg-surface hover:text-foreground"
+            isArchivedFilter
+              ? "bg-primary/15 text-primary"
+              : "text-muted hover:bg-surface hover:text-foreground",
           )}
         >
           <Archive className="h-4 w-4" />
@@ -285,7 +348,9 @@ function DashboardNav() {
           to="/dashboard#invitations"
           className={cn(
             "flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-            isInvitationsHash ? "bg-primary/15 text-primary" : "text-muted hover:bg-surface hover:text-foreground"
+            isInvitationsHash
+              ? "bg-primary/15 text-primary"
+              : "text-muted hover:bg-surface hover:text-foreground",
           )}
         >
           <Mail className="h-4 w-4" />
@@ -301,7 +366,9 @@ function DashboardNav() {
           to="/notifications"
           className={cn(
             "flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-            isNotificationsActive ? "bg-primary/15 text-primary" : "text-muted hover:bg-surface hover:text-foreground"
+            isNotificationsActive
+              ? "bg-primary/15 text-primary"
+              : "text-muted hover:bg-surface hover:text-foreground",
           )}
         >
           <Bell className="h-4 w-4" />
@@ -325,11 +392,18 @@ function DashboardNav() {
               className={({ isActive }) =>
                 cn(
                   "flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-colors",
-                  isActive ? "bg-surface text-foreground" : "text-muted hover:bg-surface hover:text-foreground"
+                  isActive
+                    ? "bg-surface text-foreground"
+                    : "text-muted hover:bg-surface hover:text-foreground",
                 )
               }
             >
-              <Avatar src={workspace.avatar} name={workspace.name} size="sm" square />
+              <Avatar
+                src={workspace.avatar}
+                name={workspace.name}
+                size="sm"
+                square
+              />
               <span className="truncate">{workspace.name}</span>
             </NavLink>
           ))}
@@ -338,7 +412,10 @@ function DashboardNav() {
             <p className="px-3 text-caption">No active workspaces yet.</p>
           )}
 
-          <NavLink to="/dashboard#workspaces" className="block px-3 py-2 text-xs font-medium text-primary hover:text-primary/80">
+          <NavLink
+            to="/dashboard#workspaces"
+            className="block px-3 py-2 text-xs font-medium text-primary hover:text-primary/80"
+          >
             All workspaces
           </NavLink>
         </div>
@@ -352,10 +429,15 @@ interface WorkspaceContextNavProps {
   activeHash: string;
 }
 
-function WorkspaceContextNav({ workspaceId, activeHash }: WorkspaceContextNavProps) {
+function WorkspaceContextNav({
+  workspaceId,
+  activeHash,
+}: WorkspaceContextNavProps) {
   const activeTab = activeHash ? activeHash.replace("#", "") : "overview";
   const workspacesQuery = useWorkspacesQuery();
-  const workspaceName = workspacesQuery.data?.find((workspace) => workspace._id === workspaceId)?.name;
+  const workspaceName = workspacesQuery.data?.find(
+    (workspace) => workspace._id === workspaceId,
+  )?.name;
 
   return (
     <nav className="flex-1 overflow-y-auto px-3 pt-4">
@@ -377,7 +459,9 @@ function WorkspaceContextNav({ workspaceId, activeHash }: WorkspaceContextNavPro
         </NavLink>
       </div>
 
-      <p className="mt-6 truncate px-3 text-caption uppercase tracking-wide">{workspaceName ?? "Workspace"}</p>
+      <p className="mt-6 truncate px-3 text-caption uppercase tracking-wide">
+        {workspaceName ?? "Workspace"}
+      </p>
       <div className="mt-1.5 space-y-0.5">
         {WORKSPACE_TABS.map((tab) => {
           const isActive = activeTab === tab.id;
@@ -389,7 +473,9 @@ function WorkspaceContextNav({ workspaceId, activeHash }: WorkspaceContextNavPro
               to={`/workspaces/${workspaceId}#${tab.id}`}
               className={cn(
                 "flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-                isActive ? "bg-primary/15 text-primary" : "text-muted hover:bg-surface hover:text-foreground"
+                isActive
+                  ? "bg-primary/15 text-primary"
+                  : "text-muted hover:bg-surface hover:text-foreground",
               )}
             >
               <Icon className="h-4 w-4" />
@@ -410,18 +496,32 @@ interface ProjectContextNavProps {
   activeTaskCount?: number;
 }
 
-function ProjectContextNav({ workspaceId, projectId, activeHash, activePathname, activeTaskCount }: ProjectContextNavProps) {
+function ProjectContextNav({
+  workspaceId,
+  projectId,
+  activeHash,
+  activePathname,
+  activeTaskCount,
+}: ProjectContextNavProps) {
   const activeTab = activeHash ? activeHash.replace("#", "") : "overview";
   const tasksPath = `/workspaces/${workspaceId}/projects/${projectId}/tasks`;
-  const isTasksRoute = activePathname === tasksPath || activePathname.startsWith(`${tasksPath}/`);
+  const isTasksRoute =
+    activePathname === tasksPath || activePathname.startsWith(`${tasksPath}/`);
   const documentsPath = `/workspaces/${workspaceId}/projects/${projectId}/documents`;
-  const isDocumentsRoute = activePathname === documentsPath || activePathname.startsWith(`${documentsPath}/`);
+  const isDocumentsRoute =
+    activePathname === documentsPath ||
+    activePathname.startsWith(`${documentsPath}/`);
   const discussionsPath = `/workspaces/${workspaceId}/projects/${projectId}/discussions`;
-  const isDiscussionsRoute = activePathname === discussionsPath || activePathname.startsWith(`${discussionsPath}/`);
-  const isProjectSubRoute = isTasksRoute || isDocumentsRoute || isDiscussionsRoute;
+  const isDiscussionsRoute =
+    activePathname === discussionsPath ||
+    activePathname.startsWith(`${discussionsPath}/`);
+  const isProjectSubRoute =
+    isTasksRoute || isDocumentsRoute || isDiscussionsRoute;
   const workspacesQuery = useWorkspacesQuery();
   const projectQuery = useProjectQuery(projectId);
-  const workspaceName = workspacesQuery.data?.find((workspace) => workspace._id === workspaceId)?.name;
+  const workspaceName = workspacesQuery.data?.find(
+    (workspace) => workspace._id === workspaceId,
+  )?.name;
 
   return (
     <nav className="flex-1 overflow-y-auto px-3 pt-4">
@@ -443,7 +543,9 @@ function ProjectContextNav({ workspaceId, projectId, activeHash, activePathname,
         </NavLink>
       </div>
 
-      <p className="mt-6 truncate px-3 text-caption uppercase tracking-wide">{workspaceName ?? "Workspace"}</p>
+      <p className="mt-6 truncate px-3 text-caption uppercase tracking-wide">
+        {workspaceName ?? "Workspace"}
+      </p>
       <div className="mt-1.5 space-y-0.5">
         <NavLink
           to={`/workspaces/${workspaceId}#overview`}
@@ -471,7 +573,7 @@ function ProjectContextNav({ workspaceId, projectId, activeHash, activePathname,
             "flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
             !isProjectSubRoute && activeTab === "overview"
               ? "bg-primary/15 text-primary"
-              : "text-muted hover:bg-surface hover:text-foreground"
+              : "text-muted hover:bg-surface hover:text-foreground",
           )}
         >
           <LayoutGrid className="h-4 w-4" />
@@ -482,7 +584,9 @@ function ProjectContextNav({ workspaceId, projectId, activeHash, activePathname,
           to={`/workspaces/${workspaceId}/projects/${projectId}/tasks`}
           className={cn(
             "flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-            isTasksRoute ? "bg-primary/15 text-primary" : "text-muted hover:bg-surface hover:text-foreground"
+            isTasksRoute
+              ? "bg-primary/15 text-primary"
+              : "text-muted hover:bg-surface hover:text-foreground",
           )}
         >
           <CheckSquare className="h-4 w-4" />
@@ -498,7 +602,9 @@ function ProjectContextNav({ workspaceId, projectId, activeHash, activePathname,
           to={`/workspaces/${workspaceId}/projects/${projectId}/documents`}
           className={cn(
             "flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-            isDocumentsRoute ? "bg-primary/15 text-primary" : "text-muted hover:bg-surface hover:text-foreground"
+            isDocumentsRoute
+              ? "bg-primary/15 text-primary"
+              : "text-muted hover:bg-surface hover:text-foreground",
           )}
         >
           <FileText className="h-4 w-4" />
@@ -509,7 +615,9 @@ function ProjectContextNav({ workspaceId, projectId, activeHash, activePathname,
           to={`/workspaces/${workspaceId}/projects/${projectId}/discussions`}
           className={cn(
             "flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-            isDiscussionsRoute ? "bg-primary/15 text-primary" : "text-muted hover:bg-surface hover:text-foreground"
+            isDiscussionsRoute
+              ? "bg-primary/15 text-primary"
+              : "text-muted hover:bg-surface hover:text-foreground",
           )}
         >
           <MessageSquare className="h-4 w-4" />
@@ -526,7 +634,9 @@ function ProjectContextNav({ workspaceId, projectId, activeHash, activePathname,
               to={`/workspaces/${workspaceId}/projects/${projectId}#${tab.id}`}
               className={cn(
                 "flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-                isActive ? "bg-primary/15 text-primary" : "text-muted hover:bg-surface hover:text-foreground"
+                isActive
+                  ? "bg-primary/15 text-primary"
+                  : "text-muted hover:bg-surface hover:text-foreground",
               )}
             >
               <Icon className="h-4 w-4" />

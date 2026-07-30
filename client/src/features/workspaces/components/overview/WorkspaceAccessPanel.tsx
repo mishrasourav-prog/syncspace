@@ -23,10 +23,16 @@ interface WorkspaceAccessPanelProps {
 }
 
 function scrollToMembers() {
-  document.getElementById("members")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  document
+    .getElementById("members")
+    ?.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
-export function WorkspaceAccessPanel({ workspace, onInvite, onEdit }: WorkspaceAccessPanelProps) {
+export function WorkspaceAccessPanel({
+  workspace,
+  onInvite,
+  onEdit,
+}: WorkspaceAccessPanelProps) {
   const canInvite = canInviteWorkspaceMember(workspace);
   const canEdit = canEditWorkspace(workspace);
   const invitableRoles = getInvitableWorkspaceRoles(workspace);
@@ -46,7 +52,9 @@ export function WorkspaceAccessPanel({ workspace, onInvite, onEdit }: WorkspaceA
 
       <div className="grid grid-cols-1 gap-x-6 gap-y-3 sm:grid-cols-2 lg:grid-cols-3">
         <InfoRow label="Your role">
-          <Badge variant={roleBadgeVariant[workspace.role]}>{workspace.role}</Badge>
+          <Badge variant={roleBadgeVariant[workspace.role]}>
+            {workspace.role}
+          </Badge>
         </InfoRow>
 
         <InfoRow label="Workspace status">
@@ -56,7 +64,9 @@ export function WorkspaceAccessPanel({ workspace, onInvite, onEdit }: WorkspaceA
         </InfoRow>
 
         <InfoRow label="You can invite">
-          <Badge variant={canInvite ? "success" : "neutral"}>{canInvite ? "Yes" : "No"}</Badge>
+          <Badge variant={canInvite ? "success" : "neutral"}>
+            {canInvite ? "Yes" : "No"}
+          </Badge>
         </InfoRow>
 
         <InfoRow label="Permitted invite roles">
@@ -74,17 +84,27 @@ export function WorkspaceAccessPanel({ workspace, onInvite, onEdit }: WorkspaceA
         </InfoRow>
 
         <InfoRow label="Default invite role">
-          <span className="text-sm text-foreground">{workspace.settings.defaultRole}</span>
+          <span className="text-sm text-foreground">
+            {workspace.settings.defaultRole}
+          </span>
         </InfoRow>
 
         <InfoRow label="Guest invitations">
-          <Badge variant={workspace.settings.allowGuestInvites ? "success" : "neutral"}>
+          <Badge
+            variant={
+              workspace.settings.allowGuestInvites ? "success" : "neutral"
+            }
+          >
             {workspace.settings.allowGuestInvites ? "Enabled" : "Disabled"}
           </Badge>
         </InfoRow>
 
         <InfoRow label="Member invitations">
-          <Badge variant={workspace.settings.allowMemberInvites ? "success" : "neutral"}>
+          <Badge
+            variant={
+              workspace.settings.allowMemberInvites ? "success" : "neutral"
+            }
+          >
             {workspace.settings.allowMemberInvites ? "Enabled" : "Disabled"}
           </Badge>
         </InfoRow>

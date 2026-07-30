@@ -15,7 +15,11 @@ interface LoginPageProps {
   onNavigateToForgotPassword?: () => void;
 }
 
-export function LoginPage({ onSuccess, onNavigateToSignup, onNavigateToForgotPassword }: LoginPageProps) {
+export function LoginPage({
+  onSuccess,
+  onNavigateToSignup,
+  onNavigateToForgotPassword,
+}: LoginPageProps) {
   const [showPassword, setShowPassword] = useState(false);
   const loginMutation = useLoginMutation();
 
@@ -27,7 +31,6 @@ export function LoginPage({ onSuccess, onNavigateToSignup, onNavigateToForgotPas
 
   const onSubmit = (values: LoginFormValues) => {
     loginMutation.mutate(values, { onSuccess: () => onSuccess?.() });
-    
   };
 
   return (
@@ -37,7 +40,8 @@ export function LoginPage({ onSuccess, onNavigateToSignup, onNavigateToForgotPas
 
       {loginMutation.isError && (
         <div className="mb-4 rounded-md border border-danger/30 bg-danger/10 px-3 py-2 text-xs text-danger">
-          {loginMutation.error?.message ?? "Unable to log in. Please try again."}
+          {loginMutation.error?.message ??
+            "Unable to log in. Please try again."}
         </div>
       )}
 
@@ -67,7 +71,11 @@ export function LoginPage({ onSuccess, onNavigateToSignup, onNavigateToForgotPas
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-foreground transition-colors duration-150"
                 aria-label={showPassword ? "Hide password" : "Show password"}
               >
-                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                {showPassword ? (
+                  <EyeOff className="w-4 h-4" />
+                ) : (
+                  <Eye className="w-4 h-4" />
+                )}
               </button>
             }
             {...register("password")}
@@ -84,7 +92,11 @@ export function LoginPage({ onSuccess, onNavigateToSignup, onNavigateToForgotPas
           </button>
         </div>
 
-        <Button type="submit" className="w-full" disabled={loginMutation.isPending}>
+        <Button
+          type="submit"
+          className="w-full"
+          disabled={loginMutation.isPending}
+        >
           {loginMutation.isPending ? "Logging in..." : "Log in"}
           {!loginMutation.isPending && <ArrowRight className="w-3.5 h-3.5" />}
         </Button>

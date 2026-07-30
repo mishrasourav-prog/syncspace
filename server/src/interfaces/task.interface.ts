@@ -1,120 +1,108 @@
-
-
-import { TaskPriority , TaskStatus , TaskType } from "../modules/tasks/task.model";
+import {
+  TaskPriority,
+  TaskStatus,
+  TaskType,
+} from "../modules/tasks/task.model";
 export interface ITaskAssigneePreview {
+  _id: string;
 
-    _id: string;
+  name: string;
 
-    name: string;
+  username: string;
 
-    username: string;
-
-    avatar?: string;
-
+  avatar?: string;
 }
 
 export interface ITaskResponse {
+  _id: string;
 
-    _id: string;
+  project: string;
 
-    project: string;
+  title: string;
 
-    title: string;
+  description: string;
 
-    description: string;
+  status: TaskStatus;
 
-    status: TaskStatus;
+  priority: TaskPriority;
 
-    priority: TaskPriority;
+  createdBy: string;
 
-    createdBy: string;
+  updatedBy?: string;
 
-    updatedBy?: string;
+  completedBy?: string;
 
-    completedBy?: string;
+  startDate?: Date;
 
-    startDate?: Date;
+  dueDate?: Date;
 
-    dueDate?: Date;
+  completedAt?: Date;
 
-    completedAt?: Date;
+  type?: TaskType;
 
-    type?:TaskType;
+  parentTask?: string;
 
-    parentTask?: string;
+  position: number;
 
-    position: number;
+  assignees: ITaskAssigneePreview[];
 
-    assignees: ITaskAssigneePreview[];
+  isArchived: boolean;
 
-    isArchived: boolean;
+  createdAt: Date;
 
-    createdAt: Date;
-
-    updatedAt: Date;
+  updatedAt: Date;
 }
 
 export interface ITasksResponse {
-
-    tasks: ITaskResponse[];
-
+  tasks: ITaskResponse[];
 }
 
 export interface ICreateTask {
+  title: string;
 
-    title: string;
+  description?: string;
 
-    description?: string;
+  priority?: TaskPriority;
 
-    priority?: TaskPriority;
+  startDate?: Date;
 
-    startDate?: Date;
+  dueDate?: Date;
 
-    dueDate?: Date;
+  parentTask?: string;
 
-    parentTask?: string;
-
-    type?:TaskType
-
+  type?: TaskType;
 }
 
 export interface IUpdateTask {
+  title?: string;
 
-    title?: string;
+  description?: string;
 
-    description?: string;
+  priority?: TaskPriority;
 
-    priority?: TaskPriority;
+  startDate?: Date | null;
 
-    startDate?: Date | null;
+  dueDate?: Date | null;
 
-    dueDate?: Date | null;
+  parentTask?: string | null;
 
-    parentTask?: string | null;
-
-    type?:TaskType;
-
+  type?: TaskType;
 }
 
 export interface IUpdateTaskStatus {
-    status: TaskStatus;
+  status: TaskStatus;
 }
 
 export interface ITaskReorderColumnInput {
-    status: TaskStatus;
+  status: TaskStatus;
 
-    /*
-    Task IDs must be supplied in the exact order
-    in which they should appear in this column.
-    */
-    taskIds: string[];
+  taskIds: string[];
 }
 
 export interface IReorderProjectTasksInput {
-    columns:
-        ITaskReorderColumnInput[];
+  columns: ITaskReorderColumnInput[];
 }
 
 export interface IReorderProjectTasksResponse {
-    updatedTaskCount: number;
+  updatedTaskCount: number;
 }

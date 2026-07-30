@@ -1,145 +1,113 @@
-import {
-    model,
-    Schema,
-    Types,
-} from "mongoose";
+import { model, Schema, Types } from "mongoose";
 
 export interface IDiscussionReply {
-    workspace: Types.ObjectId;
+  workspace: Types.ObjectId;
 
-    project: Types.ObjectId;
+  project: Types.ObjectId;
 
-    discussion: Types.ObjectId;
+  discussion: Types.ObjectId;
 
-    author: Types.ObjectId;
+  author: Types.ObjectId;
 
-    body: string;
+  body: string;
 
-    isDeleted: boolean;
+  isDeleted: boolean;
 
-    deletedAt?: Date | null;
+  deletedAt?: Date | null;
 
-    deletedBy?: Types.ObjectId | null;
+  deletedBy?: Types.ObjectId | null;
 
-    createdAt: Date;
+  createdAt: Date;
 
-    updatedAt: Date;
+  updatedAt: Date;
 }
 
-const discussionReplySchema =
-    new Schema<IDiscussionReply>(
-        {
-            workspace: {
-                type:
-                    Schema.Types.ObjectId,
+const discussionReplySchema = new Schema<IDiscussionReply>(
+  {
+    workspace: {
+      type: Schema.Types.ObjectId,
 
-                ref:
-                    "Workspace",
+      ref: "Workspace",
 
-                required:
-                    true,
-            },
+      required: true,
+    },
 
-            project: {
-                type:
-                    Schema.Types.ObjectId,
+    project: {
+      type: Schema.Types.ObjectId,
 
-                ref:
-                    "Project",
+      ref: "Project",
 
-                required:
-                    true,
-            },
+      required: true,
+    },
 
-            discussion: {
-                type:
-                    Schema.Types.ObjectId,
+    discussion: {
+      type: Schema.Types.ObjectId,
 
-                ref:
-                    "Discussion",
+      ref: "Discussion",
 
-                required:
-                    true,
-            },
+      required: true,
+    },
 
-            author: {
-                type:
-                    Schema.Types.ObjectId,
+    author: {
+      type: Schema.Types.ObjectId,
 
-                ref:
-                    "User",
+      ref: "User",
 
-                required:
-                    true,
-            },
+      required: true,
+    },
 
-            body: {
-                type:
-                    String,
+    body: {
+      type: String,
 
-                required:
-                    true,
+      required: true,
 
-                trim:
-                    true,
+      trim: true,
 
-                maxlength:
-                    5000,
-            },
+      maxlength: 5000,
+    },
 
-            isDeleted: {
-                type:
-                    Boolean,
+    isDeleted: {
+      type: Boolean,
 
-                default:
-                    false,
+      default: false,
 
-                required:
-                    true,
-            },
+      required: true,
+    },
 
-            deletedAt: {
-                type:
-                    Date,
+    deletedAt: {
+      type: Date,
 
-                default:
-                    null,
-            },
+      default: null,
+    },
 
-            deletedBy: {
-                type:
-                    Schema.Types.ObjectId,
+    deletedBy: {
+      type: Schema.Types.ObjectId,
 
-                ref:
-                    "User",
+      ref: "User",
 
-                default:
-                    null,
-            },
-        },
-        {
-            timestamps:
-                true,
+      default: null,
+    },
+  },
+  {
+    timestamps: true,
 
-            versionKey:
-                false,
-        }
-    );
+    versionKey: false,
+  },
+);
 
 discussionReplySchema.index({
-    discussion: 1,
-    _id: 1,
+  discussion: 1,
+  _id: 1,
 });
 
 discussionReplySchema.index({
-    author: 1,
-    createdAt: -1,
+  author: 1,
+  createdAt: -1,
 });
 
-const DiscussionReply =
-    model<IDiscussionReply>(
-        "DiscussionReply",
-        discussionReplySchema
-    );
+const DiscussionReply = model<IDiscussionReply>(
+  "DiscussionReply",
+  discussionReplySchema,
+);
 
 export default DiscussionReply;

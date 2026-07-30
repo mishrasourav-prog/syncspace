@@ -1,4 +1,14 @@
-import { Archive, Calendar, FolderKanban, MoreHorizontal, Pencil, RotateCcw, LogOut, UserPlus, Users } from "lucide-react";
+import {
+  Archive,
+  Calendar,
+  FolderKanban,
+  MoreHorizontal,
+  Pencil,
+  RotateCcw,
+  LogOut,
+  UserPlus,
+  Users,
+} from "lucide-react";
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -11,7 +21,10 @@ import {
 import { useAuthStore } from "@/app/store";
 import { formatDate } from "@/lib/date";
 import type { WorkspaceSummary } from "@/features/workspaces/types/workspace.types";
-import type { ProjectMember, ProjectRole } from "@/features/project-members/types/projectMember.types";
+import type {
+  ProjectMember,
+  ProjectRole,
+} from "@/features/project-members/types/projectMember.types";
 import {
   canArchiveProject,
   canEditProject,
@@ -38,13 +51,29 @@ interface ProjectHeaderProps {
   onLeave: () => void;
 }
 
-export function ProjectHeader({ project, workspace, role, members, onInvite, onEdit, onArchive, onRestore, onLeave }: ProjectHeaderProps) {
+export function ProjectHeader({
+  project,
+  workspace,
+  role,
+  members,
+  onInvite,
+  onEdit,
+  onArchive,
+  onRestore,
+  onLeave,
+}: ProjectHeaderProps) {
   const currentUserId = useAuthStore((state) => state.user?._id);
   const showInvite = canInviteProjectMember(project, workspace, role);
   const showEdit = canEditProject(project, workspace, role);
   const showArchive = canArchiveProject(project, workspace, role);
   const showRestore = canRestoreProject(project, workspace, role);
-  const showLeave = canLeaveProject(project, workspace, role, members, currentUserId);
+  const showLeave = canLeaveProject(
+    project,
+    workspace,
+    role,
+    members,
+    currentUserId,
+  );
   const hasOverflowActions = showArchive || showRestore || showLeave;
 
   const previewMembers = members.slice(0, 5);
@@ -68,7 +97,9 @@ export function ProjectHeader({ project, workspace, role, members, onInvite, onE
               </Badge>
             </div>
 
-            <p className="mt-2 max-w-2xl text-body">{project.description || "No description provided."}</p>
+            <p className="mt-2 max-w-2xl text-body">
+              {project.description || "No description provided."}
+            </p>
 
             <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-caption">
               <span className="flex items-center gap-1.5">

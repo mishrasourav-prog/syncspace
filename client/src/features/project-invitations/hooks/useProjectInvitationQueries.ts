@@ -10,11 +10,14 @@ import type { ProjectInvitation } from "../types/projectInvitation.types";
 
 export function useProjectInvitationsQuery(
   projectId: string | undefined,
-  enabled = true
+  enabled = true,
 ) {
   return useQuery<ProjectInvitation[], ApiErrorShape>({
     queryKey: projectInvitationQueryKeys.list(projectId ?? ""),
-    queryFn: () => (projectId ? getPendingProjectInvitationsRequest(projectId) : Promise.resolve([])),
+    queryFn: () =>
+      projectId
+        ? getPendingProjectInvitationsRequest(projectId)
+        : Promise.resolve([]),
     enabled: Boolean(projectId) && enabled,
     refetchOnWindowFocus: true,
     refetchInterval: 30_000,

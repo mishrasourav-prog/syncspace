@@ -8,584 +8,346 @@ import { ProjectRole } from "../../interfaces/projectMember.interface";
 import { WorkspaceRole } from "../workspace-member/workspace-member.model";
 import { IUpdateProject } from "../../interfaces/project.interface";
 import ApiError from "../../utils/ApiError";
-import { ICreateProject , IProjectResponse , IWorkspaceProjectsResponse } from "../../interfaces/project.interface";
+import {
+  ICreateProject,
+  IProjectResponse,
+  IWorkspaceProjectsResponse,
+} from "../../interfaces/project.interface";
 
 import slugify from "slugify";
 
-
 export class ProjectService {
-private async generateUniqueSlug(
+  private async generateUniqueSlug(
     workspaceId: string,
-    name: string
-): Promise<string> {
-
+    name: string,
+  ): Promise<string> {
     const baseSlug = slugify(name, {
-        lower: true,
-        strict: true,
-        trim: true,
+      lower: true,
+      strict: true,
+      trim: true,
     });
 
     let slug = baseSlug;
     let counter = 1;
 
     while (
-        await Project.exists({
-            workspace: workspaceId,
-            slug,
-        })
+      await Project.exists({
+        workspace: workspaceId,
+        slug,
+      })
     ) {
-        slug = `${baseSlug}-${counter++}`;
+      slug = `${baseSlug}-${counter++}`;
     }
 
     return slug;
-}
+  }
 
-private mapProject(
-    project: IProjectDocument
-): IProjectResponse {
-
+  private mapProject(project: IProjectDocument): IProjectResponse {
     return {
-        _id: project._id.toString(),
+      _id: project._id.toString(),
 
-        workspace: project.workspace.toString(),
+      workspace: project.workspace.toString(),
 
-        name: project.name,
+      name: project.name,
 
-        slug: project.slug,
+      slug: project.slug,
 
-        description: project.description,
+      description: project.description,
 
-        icon: project.icon,
+      icon: project.icon,
 
-        createdBy: project.createdBy.toString(),
+      createdBy: project.createdBy.toString(),
 
-        settings: {
-            allowMemberInvites:
-                project.settings.allowMemberInvites,
+      settings: {
+        allowMemberInvites: project.settings.allowMemberInvites,
 
-            allowTaskCreation:
-                project.settings.allowTaskCreation,
+        allowTaskCreation: project.settings.allowTaskCreation,
 
-            allowDocumentCreation:
-                project.settings.allowDocumentCreation,
+        allowDocumentCreation: project.settings.allowDocumentCreation,
 
-            allowFileUploads:
-                project.settings.allowFileUploads,
-        },
+        allowFileUploads: project.settings.allowFileUploads,
+      },
 
-        isArchived: project.isArchived,
+      isArchived: project.isArchived,
 
-        createdAt: project.createdAt,
+      createdAt: project.createdAt,
 
-        updatedAt: project.updatedAt,
+      updatedAt: project.updatedAt,
     };
-}
+  }
 
-async createProject(
+  async createProject(
     workspaceId: string,
     userId: string,
-    data: ICreateProject
-): Promise<IProjectResponse> {
-
+    data: ICreateProject,
+  ): Promise<IProjectResponse> {
     const session = await mongoose.startSession();
 
     try {
+      session.startTransaction();
 
-        session.startTransaction();
+      const workspace = await Workspace.findById(workspaceId).session(session);
 
-        /*
-        |--------------------------------------------------------------------------
-        | Verify Workspace
-        |--------------------------------------------------------------------------
-        */
+      if (!workspace) {
+        throw new ApiError(404, "Workspace not found.");
+      }
 
-        const workspace = await Workspace.findById(workspaceId).session(session);
-
-        if (!workspace) {
-            throw new ApiError(404, "Workspace not found.");
-        }
-
-        if (workspace.isArchived) {
-            throw new ApiError(
-                409,
-                "Cannot create a project inside an archived workspace."
-            );
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | Verify Permission
-        |--------------------------------------------------------------------------
-        */
-
-        const workspaceMember = await WorkspaceMember.findOne({
-            workspace: workspaceId,
-            user: userId,
-        }).session(session);
-
-        if (!workspaceMember) {
-            throw new ApiError(
-                403,
-                "You are not a member of this workspace."
-            );
-        }
-
-        if (
-            workspaceMember.role !== WorkspaceRole.OWNER &&
-            workspaceMember.role !== WorkspaceRole.ADMIN
-        ) {
-            throw new ApiError(
-                403,
-                "You do not have permission to create projects."
-            );
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | Generate Slug
-        |--------------------------------------------------------------------------
-        */
-
-        const slug = await this.generateUniqueSlug(
-            workspaceId,
-            data.name
+      if (workspace.isArchived) {
+        throw new ApiError(
+          409,
+          "Cannot create a project inside an archived workspace.",
         );
+      }
 
-        /*
-        |--------------------------------------------------------------------------
-        | Create Project
-        |--------------------------------------------------------------------------
-        */
+      const workspaceMember = await WorkspaceMember.findOne({
+        workspace: workspaceId,
+        user: userId,
+      }).session(session);
 
-        const project = new Project({
-            workspace: workspaceId,
+      if (!workspaceMember) {
+        throw new ApiError(403, "You are not a member of this workspace.");
+      }
 
-            name: data.name,
+      if (
+        workspaceMember.role !== WorkspaceRole.OWNER &&
+        workspaceMember.role !== WorkspaceRole.ADMIN
+      ) {
+        throw new ApiError(
+          403,
+          "You do not have permission to create projects.",
+        );
+      }
 
-            slug,
+      const slug = await this.generateUniqueSlug(workspaceId, data.name);
 
-            description: data.description ?? "",
+      const project = new Project({
+        workspace: workspaceId,
 
-            icon: data.icon ?? "📁",
+        name: data.name,
 
-            createdBy: userId,
-        });
+        slug,
 
-        await project.save({ session });
+        description: data.description ?? "",
 
-        /*
-        |--------------------------------------------------------------------------
-        | Create First Project Member
-        |--------------------------------------------------------------------------
-        */
+        icon: data.icon ?? "📁",
 
-        const projectMember = new ProjectMember({
-            project: project._id,
+        createdBy: userId,
+      });
 
-            user: userId,
+      await project.save({ session });
 
-            role: ProjectRole.ADMIN
-        });
+      const projectMember = new ProjectMember({
+        project: project._id,
 
-        await projectMember.save({ session });
+        user: userId,
 
-        /*
-        |--------------------------------------------------------------------------
-        | Commit Transaction
-        |--------------------------------------------------------------------------
-        */
+        role: ProjectRole.ADMIN,
+      });
 
-        await session.commitTransaction();
+      await projectMember.save({ session });
 
-        return this.mapProject(project);
+      await session.commitTransaction();
 
+      return this.mapProject(project);
     } catch (error) {
+      await session.abortTransaction();
 
-        await session.abortTransaction();
-
-        throw error;
-
+      throw error;
     } finally {
-
-        await session.endSession();
-
+      await session.endSession();
     }
-}
+  }
 
-async getWorkspaceProjects(
+  async getWorkspaceProjects(
     workspaceId: string,
-    userId: string
-): Promise<IWorkspaceProjectsResponse> {
-
-    /*
-    |--------------------------------------------------------------------------
-    | Verify Workspace
-    |--------------------------------------------------------------------------
-    */
-
+    userId: string,
+  ): Promise<IWorkspaceProjectsResponse> {
     const workspace = await Workspace.findById(workspaceId);
 
     if (!workspace) {
-        throw new ApiError(
-            404,
-            "Workspace not found."
-        );
+      throw new ApiError(404, "Workspace not found.");
     }
 
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Verify Membership
-    |--------------------------------------------------------------------------
-    */
-
-    const workspaceMember =
-        await WorkspaceMember.findOne({
-            workspace: workspaceId,
-            user: userId,
-        });
-
-    if (!workspaceMember) {
-        throw new ApiError(
-            403,
-            "You are not a member of this workspace."
-        );
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | Fetch Projects
-    |--------------------------------------------------------------------------
-    */
-
-    const projects = await Project.find({
-        workspace: workspaceId,
-    }).sort({
-        createdAt: -1,
-        _id:1
+    const workspaceMember = await WorkspaceMember.findOne({
+      workspace: workspaceId,
+      user: userId,
     });
 
-    /*
-    |--------------------------------------------------------------------------
-    | Return Response
-    |--------------------------------------------------------------------------
-    */
+    if (!workspaceMember) {
+      throw new ApiError(403, "You are not a member of this workspace.");
+    }
+
+    const projects = await Project.find({
+      workspace: workspaceId,
+    }).sort({
+      createdAt: -1,
+      _id: 1,
+    });
 
     return {
-        projects: projects.map((project) =>
-            this.mapProject(project)
-        ),
+      projects: projects.map((project) => this.mapProject(project)),
     };
-}
+  }
 
-
-async getProject(
+  async getProject(
     projectId: string,
-    userId: string
-): Promise<IProjectResponse> {
-
-    /*
-    |--------------------------------------------------------------------------
-    | Verify Project
-    |--------------------------------------------------------------------------
-    */
-
+    userId: string,
+  ): Promise<IProjectResponse> {
     const project = await Project.findById(projectId);
 
     if (!project) {
-        throw new ApiError(
-            404,
-            "Project not found."
-        );
+      throw new ApiError(404, "Project not found.");
     }
 
-   
-
-    /*
-    |--------------------------------------------------------------------------
-    | Verify Membership
-    |--------------------------------------------------------------------------
-    */
-
     const member = await ProjectMember.findOne({
-        project: projectId,
-        user: userId,
+      project: projectId,
+      user: userId,
     });
 
     if (!member) {
-        throw new ApiError(
-            403,
-            "You are not a member of this project."
-        );
+      throw new ApiError(403, "You are not a member of this project.");
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | Return Response
-    |--------------------------------------------------------------------------
-    */
-
     return this.mapProject(project);
+  }
 
-}
-
-
-async updateProject(
+  async updateProject(
     projectId: string,
     userId: string,
-    data: IUpdateProject
-): Promise<IProjectResponse> {
-
-    /*
-    |--------------------------------------------------------------------------
-    | Verify Project
-    |--------------------------------------------------------------------------
-    */
-
+    data: IUpdateProject,
+  ): Promise<IProjectResponse> {
     const project = await Project.findById(projectId);
 
     if (!project) {
-        throw new ApiError(
-            404,
-            "Project not found."
-        );
+      throw new ApiError(404, "Project not found.");
     }
 
     if (project.isArchived) {
-        throw new ApiError(
-            404,
-            "Project not found."
-        );
+      throw new ApiError(404, "Project not found.");
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | Verify Permission
-    |--------------------------------------------------------------------------
-    */
-
     const member = await ProjectMember.findOne({
-        project: projectId,
-        user: userId,
+      project: projectId,
+      user: userId,
     });
 
     if (!member) {
-        throw new ApiError(
-            403,
-            "You are not a member of this project."
-        );
+      throw new ApiError(403, "You are not a member of this project.");
     }
 
     if (member.role !== ProjectRole.ADMIN) {
-        throw new ApiError(
-            403,
-            "Only project admins can update projects."
-        );
+      throw new ApiError(403, "Only project admins can update projects.");
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | Update Name & Slug
-    |--------------------------------------------------------------------------
-    */
+    if (data.name !== undefined && data.name !== project.name) {
+      project.name = data.name;
 
-    if (
-        data.name !== undefined &&
-        data.name !== project.name
-    ) {
-
-        project.name = data.name;
-
-        project.slug =
-            await this.generateUniqueSlug(
-                project.workspace.toString(),
-                data.name
-            );
-
+      project.slug = await this.generateUniqueSlug(
+        project.workspace.toString(),
+        data.name,
+      );
     }
-
-    /*
-    |--------------------------------------------------------------------------
-    | Update Description
-    |--------------------------------------------------------------------------
-    */
 
     if (data.description !== undefined) {
-        project.description = data.description;
+      project.description = data.description;
     }
-
-    /*
-    |--------------------------------------------------------------------------
-    | Update Icon
-    |--------------------------------------------------------------------------
-    */
 
     if (data.icon !== undefined) {
-        project.icon = data.icon;
+      project.icon = data.icon;
     }
-
-    /*
-    |--------------------------------------------------------------------------
-    | Save Changes
-    |--------------------------------------------------------------------------
-    */
 
     await project.save();
 
-    /*
-    |--------------------------------------------------------------------------
-    | Return Response
-    |--------------------------------------------------------------------------
-    */
-
     return this.mapProject(project);
+  }
 
-}
-
-async archiveProject(
-    projectId: string,
-    userId: string
-): Promise<void> {
-    const project =
-        await Project.findById(
-            projectId
-        );
+  async archiveProject(projectId: string, userId: string): Promise<void> {
+    const project = await Project.findById(projectId);
 
     if (!project) {
-        throw new ApiError(
-            404,
-            "Project not found."
-        );
+      throw new ApiError(404, "Project not found.");
     }
 
-    const member =
-        await ProjectMember.findOne({
-            project: projectId,
-            user: userId,
-        });
+    const member = await ProjectMember.findOne({
+      project: projectId,
+      user: userId,
+    });
 
     if (!member) {
-        throw new ApiError(
-            403,
-            "You are not a member of this project."
-        );
+      throw new ApiError(403, "You are not a member of this project.");
     }
 
-    if (
-        member.role !==
-        ProjectRole.ADMIN
-    ) {
-        throw new ApiError(
-            403,
-            "Only project admins can archive projects."
-        );
+    if (member.role !== ProjectRole.ADMIN) {
+      throw new ApiError(403, "Only project admins can archive projects.");
     }
 
-    const workspace =
-        await Workspace.findById(
-            project.workspace
-        )
-            .select("_id isArchived")
-            .lean();
+    const workspace = await Workspace.findById(project.workspace)
+      .select("_id isArchived")
+      .lean();
 
     if (!workspace) {
-        throw new ApiError(
-            404,
-            "Workspace not found."
-        );
+      throw new ApiError(404, "Workspace not found.");
     }
 
     if (workspace.isArchived) {
-        throw new ApiError(
-            409,
-            "Projects cannot be archived while the workspace is archived."
-        );
+      throw new ApiError(
+        409,
+        "Projects cannot be archived while the workspace is archived.",
+      );
     }
 
     if (project.isArchived) {
-        throw new ApiError(
-            409,
-            "Project is already archived."
-        );
+      throw new ApiError(409, "Project is already archived.");
     }
 
     project.isArchived = true;
 
     await project.save();
-}
+  }
 
-async restoreProject(
-    projectId: string,
-    userId: string
-): Promise<void> {
-    const project =
-        await Project.findById(
-            projectId
-        );
+  async restoreProject(projectId: string, userId: string): Promise<void> {
+    const project = await Project.findById(projectId);
 
     if (!project) {
-        throw new ApiError(
-            404,
-            "Project not found."
-        );
+      throw new ApiError(404, "Project not found.");
     }
 
-    const member =
-        await ProjectMember.findOne({
-            project: projectId,
-            user: userId,
-        });
+    const member = await ProjectMember.findOne({
+      project: projectId,
+      user: userId,
+    });
 
     if (!member) {
-        throw new ApiError(
-            403,
-            "You are not a member of this project."
-        );
+      throw new ApiError(403, "You are not a member of this project.");
     }
 
-    if (
-        member.role !==
-        ProjectRole.ADMIN
-    ) {
-        throw new ApiError(
-            403,
-            "Only project admins can restore projects."
-        );
+    if (member.role !== ProjectRole.ADMIN) {
+      throw new ApiError(403, "Only project admins can restore projects.");
     }
 
-    const workspace =
-        await Workspace.findById(
-            project.workspace
-        )
-            .select("_id isArchived")
-            .lean();
+    const workspace = await Workspace.findById(project.workspace)
+      .select("_id isArchived")
+      .lean();
 
     if (!workspace) {
-        throw new ApiError(
-            404,
-            "Workspace not found."
-        );
+      throw new ApiError(404, "Workspace not found.");
     }
 
     if (workspace.isArchived) {
-        throw new ApiError(
-            409,
-            "Restore the workspace before restoring this project."
-        );
+      throw new ApiError(
+        409,
+        "Restore the workspace before restoring this project.",
+      );
     }
 
     if (!project.isArchived) {
-        throw new ApiError(
-            409,
-            "Project is already active."
-        );
+      throw new ApiError(409, "Project is already active.");
     }
 
     project.isArchived = false;
 
     await project.save();
-}
+  }
 }
 
 export default new ProjectService();

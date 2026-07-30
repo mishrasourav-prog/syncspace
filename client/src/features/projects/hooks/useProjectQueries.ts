@@ -1,6 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import type { ApiErrorShape } from "@/lib/axios";
-import { getProjectRequest, getWorkspaceProjectsRequest } from "../api/project.api";
+import {
+  getProjectRequest,
+  getWorkspaceProjectsRequest,
+} from "../api/project.api";
 import { projectQueryKeys } from "../project.queryKeys";
 import type { Project } from "../types/project.types";
 

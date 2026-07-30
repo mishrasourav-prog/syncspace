@@ -8,7 +8,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useCreateDiscussionMutation } from "../hooks/useDiscussionMutations";
-import { createDiscussionSchema, type CreateDiscussionFormValues } from "../schemas/discussion.schemas";
+import {
+  createDiscussionSchema,
+  type CreateDiscussionFormValues,
+} from "../schemas/discussion.schemas";
 
 interface CreateDiscussionDialogProps {
   workspaceId: string;
@@ -17,7 +20,12 @@ interface CreateDiscussionDialogProps {
   onClose: () => void;
 }
 
-export function CreateDiscussionDialog({ workspaceId, projectId, open, onClose }: CreateDiscussionDialogProps) {
+export function CreateDiscussionDialog({
+  workspaceId,
+  projectId,
+  open,
+  onClose,
+}: CreateDiscussionDialogProps) {
   const createMutation = useCreateDiscussionMutation(projectId);
   const navigate = useNavigate();
 
@@ -43,9 +51,12 @@ export function CreateDiscussionDialog({ workspaceId, projectId, open, onClose }
         toast.success("Discussion started.");
         reset();
         onClose();
-        navigate(`/workspaces/${workspaceId}/projects/${projectId}/discussions/${createdDiscussion._id}`);
+        navigate(
+          `/workspaces/${workspaceId}/projects/${projectId}/discussions/${createdDiscussion._id}`,
+        );
       },
-      onError: (error) => toast.error(error.message ?? "Unable to start this discussion."),
+      onError: (error) =>
+        toast.error(error.message ?? "Unable to start this discussion."),
     });
   }
 
@@ -68,16 +79,33 @@ export function CreateDiscussionDialog({ workspaceId, projectId, open, onClose }
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
         <div className="mb-4">
           <Label htmlFor="discussion-create-title">Title</Label>
-          <Input id="discussion-create-title" autoFocus maxLength={200} error={errors.title?.message} {...register("title")} />
+          <Input
+            id="discussion-create-title"
+            autoFocus
+            maxLength={200}
+            error={errors.title?.message}
+            {...register("title")}
+          />
         </div>
 
         <div className="mb-4">
           <Label htmlFor="discussion-create-body">Message</Label>
-          <Textarea id="discussion-create-body" rows={7} maxLength={10_000} error={errors.body?.message} {...register("body")} />
+          <Textarea
+            id="discussion-create-body"
+            rows={7}
+            maxLength={10_000}
+            error={errors.body?.message}
+            {...register("body")}
+          />
         </div>
 
         <DialogFooter>
-          <Button type="button" variant="secondary" onClick={handleClose} disabled={createMutation.isPending}>
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={handleClose}
+            disabled={createMutation.isPending}
+          >
             Cancel
           </Button>
           <Button type="submit" disabled={createMutation.isPending}>

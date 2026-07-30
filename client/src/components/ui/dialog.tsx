@@ -12,7 +12,7 @@ interface DialogProps {
   description?: string;
   children: React.ReactNode;
   className?: string;
-  /** Disable click-outside-to-close for destructive/important flows. */
+
   disableOutsideClose?: boolean;
 }
 
@@ -48,10 +48,6 @@ export function Dialog({
   const titleId = React.useId();
   const descriptionId = React.useId();
 
-  /*
-   * Keep the newest callback without making the focus-management effect
-   * restart whenever the parent creates a new onClose function.
-   */
   React.useEffect(() => {
     onCloseRef.current = onClose;
   }, [onClose]);
@@ -66,10 +62,6 @@ export function Dialog({
         ? document.activeElement
         : null;
 
-    /*
-     * Prefer the first form control. The close button appears before the form
-     * in the DOM, so using one broad query would focus Close instead.
-     */
     const frameId = window.requestAnimationFrame(() => {
       const panel = panelRef.current;
 
@@ -77,31 +69,21 @@ export function Dialog({
         return;
       }
 
-      const preferredElement =
-        panel.querySelector<HTMLElement>(
-          PREFERRED_INITIAL_FOCUS_SELECTOR,
-        );
+      const preferredElement = panel.querySelector<HTMLElement>(
+        PREFERRED_INITIAL_FOCUS_SELECTOR,
+      );
 
       const fallbackElement =
-        panel.querySelector<HTMLElement>(
-          FOCUSABLE_SELECTOR,
-        );
+        panel.querySelector<HTMLElement>(FOCUSABLE_SELECTOR);
 
-      (
-        preferredElement ??
-        fallbackElement ??
-        panel
-      ).focus();
+      (preferredElement ?? fallbackElement ?? panel).focus();
     });
 
-    const originalOverflow =
-      document.body.style.overflow;
+    const originalOverflow = document.body.style.overflow;
 
     document.body.style.overflow = "hidden";
 
-    function handleKeyDown(
-      event: KeyboardEvent,
-    ) {
+    function handleKeyDown(event: KeyboardEvent) {
       const panel = panelRef.current;
 
       if (!panel) {
@@ -119,14 +101,11 @@ export function Dialog({
       }
 
       const focusableElements = Array.from(
-        panel.querySelectorAll<HTMLElement>(
-          FOCUSABLE_SELECTOR,
-        ),
+        panel.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR),
       ).filter((element) => {
         return (
           !element.hasAttribute("disabled") &&
-          element.getAttribute("aria-hidden") !==
-            "true" &&
+          element.getAttribute("aria-hidden") !== "true" &&
           element.offsetParent !== null
         );
       });
@@ -137,47 +116,30 @@ export function Dialog({
         return;
       }
 
-      const firstElement =
-        focusableElements[0];
+      const firstElement = focusableElements[0];
 
-      const lastElement =
-        focusableElements[
-          focusableElements.length - 1
-        ];
+      const lastElement = focusableElements[focusableElements.length - 1];
 
-      if (
-        event.shiftKey &&
-        document.activeElement === firstElement
-      ) {
+      if (event.shiftKey && document.activeElement === firstElement) {
         event.preventDefault();
         lastElement?.focus();
         return;
       }
 
-      if (
-        !event.shiftKey &&
-        document.activeElement === lastElement
-      ) {
+      if (!event.shiftKey && document.activeElement === lastElement) {
         event.preventDefault();
         firstElement?.focus();
       }
     }
 
-    document.addEventListener(
-      "keydown",
-      handleKeyDown,
-    );
+    document.addEventListener("keydown", handleKeyDown);
 
     return () => {
       window.cancelAnimationFrame(frameId);
 
-      document.removeEventListener(
-        "keydown",
-        handleKeyDown,
-      );
+      document.removeEventListener("keydown", handleKeyDown);
 
-      document.body.style.overflow =
-        originalOverflow;
+      document.body.style.overflow = originalOverflow;
 
       previouslyFocusedRef.current?.focus();
     };
@@ -193,11 +155,7 @@ export function Dialog({
             exit={{ opacity: 0 }}
             transition={{ duration: 0.15 }}
             className="absolute inset-0 bg-background/80 backdrop-blur-sm"
-            onClick={
-              disableOutsideClose
-                ? undefined
-                : onClose
-            }
+            onClick={disableOutsideClose ? undefined : onClose}
             aria-hidden="true"
           />
 
@@ -206,11 +164,7 @@ export function Dialog({
             role="dialog"
             aria-modal="true"
             aria-labelledby={titleId}
-            aria-describedby={
-              description
-                ? descriptionId
-                : undefined
-            }
+            aria-describedby={description ? descriptionId : undefined}
             tabIndex={-1}
             initial={{
               opacity: 0,
@@ -239,18 +193,12 @@ export function Dialog({
           >
             <div className="mb-4 flex items-start justify-between gap-4">
               <div>
-                <h2
-                  id={titleId}
-                  className="text-h2 text-foreground"
-                >
+                <h2 id={titleId} className="text-h2 text-foreground">
                   {title}
                 </h2>
 
                 {description && (
-                  <p
-                    id={descriptionId}
-                    className="mt-1 text-caption"
-                  >
+                  <p id={descriptionId} className="mt-1 text-caption">
                     {description}
                   </p>
                 )}

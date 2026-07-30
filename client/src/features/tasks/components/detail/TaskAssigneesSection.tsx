@@ -13,7 +13,12 @@ interface TaskAssigneesSectionProps {
   canManage: boolean;
 }
 
-export function TaskAssigneesSection({ task, projectId, members, canManage }: TaskAssigneesSectionProps) {
+export function TaskAssigneesSection({
+  task,
+  projectId,
+  members,
+  canManage,
+}: TaskAssigneesSectionProps) {
   const assigneesQuery = useTaskAssigneesQuery(projectId, task._id);
 
   const assigneeDetails = useMemo(() => {
@@ -40,7 +45,9 @@ export function TaskAssigneesSection({ task, projectId, members, canManage }: Ta
           projectId={projectId}
           members={members}
           canManage={canManage}
-          assigneeDetails={assigneesQuery.isSuccess ? assigneeDetails : undefined}
+          assigneeDetails={
+            assigneesQuery.isSuccess ? assigneeDetails : undefined
+          }
         />
       )}
 

@@ -25,7 +25,10 @@ import {
 } from "../task.permissions";
 import { canUpdateWorkItemStatus } from "@/features/projects/project.permissions";
 import { EditTaskDialog } from "../components/EditTaskDialog";
-import { TaskArchiveDialogs, type TaskActionTarget } from "../components/TaskArchiveDialogs";
+import {
+  TaskArchiveDialogs,
+  type TaskActionTarget,
+} from "../components/TaskArchiveDialogs";
 import { CreateSubtaskDialog } from "../components/CreateSubtaskDialog";
 import { TaskSiblingNavigation } from "../components/detail/TaskSiblingNavigation";
 import { TaskDetailHeader } from "../components/detail/TaskDetailHeader";
@@ -69,7 +72,9 @@ function TaskDetailSkeleton() {
 }
 
 function sortByPosition(tasks: Task[]): Task[] {
-  return [...tasks].sort((a, b) => (a.position - b.position) || a._id.localeCompare(b._id));
+  return [...tasks].sort(
+    (a, b) => a.position - b.position || a._id.localeCompare(b._id),
+  );
 }
 
 export function TaskDetailPage() {
@@ -91,9 +96,12 @@ export function TaskDetailPage() {
   const updateStatusMutation = useUpdateTaskStatusMutation(projectId ?? "");
 
   const [isEditOpen, setIsEditOpen] = useState(false);
-  const [taskActionTarget, setTaskActionTarget] = useState<TaskActionTarget | null>(null);
+  const [taskActionTarget, setTaskActionTarget] =
+    useState<TaskActionTarget | null>(null);
   const [isCreateSubtaskOpen, setIsCreateSubtaskOpen] = useState(false);
-  const [pendingSubtaskId, setPendingSubtaskId] = useState<string | undefined>(undefined);
+  const [pendingSubtaskId, setPendingSubtaskId] = useState<string | undefined>(
+    undefined,
+  );
 
   const hasShownMismatchToast = useRef(false);
   const hasShownProjectInaccessibleToast = useRef(false);
@@ -107,29 +115,48 @@ export function TaskDetailPage() {
     hasShownTaskInaccessibleToast.current = false;
   }, [workspaceId, projectId, taskId]);
 
-  const isTaskInaccessible = taskQuery.isError && (taskQuery.error?.status === 403 || taskQuery.error?.status === 404);
+  const isTaskInaccessible =
+    taskQuery.isError &&
+    (taskQuery.error?.status === 403 || taskQuery.error?.status === 404);
   const isProjectInaccessible =
-    projectQuery.isError && (projectQuery.error?.status === 403 || projectQuery.error?.status === 404);
+    projectQuery.isError &&
+    (projectQuery.error?.status === 403 || projectQuery.error?.status === 404);
 
-  // Task 403/404 -> back to Tasks & Issues.
   useEffect(() => {
-    if (!isTaskInaccessible || hasShownTaskInaccessibleToast.current || !workspaceId || !projectId) return;
+    if (
+      !isTaskInaccessible ||
+      hasShownTaskInaccessibleToast.current ||
+      !workspaceId ||
+      !projectId
+    )
+      return;
     hasShownTaskInaccessibleToast.current = true;
-    toast.error(taskQuery.error?.status === 403 ? "You do not have access to this task." : "This task no longer exists.");
-    navigate(`/workspaces/${workspaceId}/projects/${projectId}/tasks`, { replace: true });
+    toast.error(
+      taskQuery.error?.status === 403
+        ? "You do not have access to this task."
+        : "This task no longer exists.",
+    );
+    navigate(`/workspaces/${workspaceId}/projects/${projectId}/tasks`, {
+      replace: true,
+    });
   }, [isTaskInaccessible, taskQuery.error, navigate, workspaceId, projectId]);
 
-  // Project 403/404 -> back to workspace projects.
   useEffect(() => {
-    if (!isProjectInaccessible || hasShownProjectInaccessibleToast.current || !workspaceId) return;
+    if (
+      !isProjectInaccessible ||
+      hasShownProjectInaccessibleToast.current ||
+      !workspaceId
+    )
+      return;
     hasShownProjectInaccessibleToast.current = true;
     toast.error(
-      projectQuery.error?.status === 403 ? "You do not have access to this project." : "This project is no longer accessible."
+      projectQuery.error?.status === 403
+        ? "You do not have access to this project."
+        : "This project is no longer accessible.",
     );
     navigate(`/workspaces/${workspaceId}#projects`, { replace: true });
   }, [isProjectInaccessible, projectQuery.error, navigate, workspaceId]);
 
-  // Workspace 404 -> dashboard.
   useEffect(() => {
     if (
       !workspaceQuery.isError ||
@@ -142,16 +169,22 @@ export function TaskDetailPage() {
     hasShownWorkspaceNotFoundToast.current = true;
     toast.error("This workspace is no longer accessible.");
     navigate("/dashboard", { replace: true });
-  }, [workspaceQuery.isError, workspaceQuery.error, isProjectInaccessible, navigate]);
+  }, [
+    workspaceQuery.isError,
+    workspaceQuery.error,
+    isProjectInaccessible,
+    navigate,
+  ]);
 
-  // URL mismatch: project must belong to workspace; task must belong to project.
   useEffect(() => {
     const project = projectQuery.data;
     const task = taskQuery.data;
     if (!workspaceId || !projectId) return;
 
-    const projectMismatch = projectQuery.isSuccess && project && project.workspace !== workspaceId;
-    const taskMismatch = taskQuery.isSuccess && task && task.project !== projectId;
+    const projectMismatch =
+      projectQuery.isSuccess && project && project.workspace !== workspaceId;
+    const taskMismatch =
+      taskQuery.isSuccess && task && task.project !== projectId;
 
     if (!projectMismatch && !taskMismatch) {
       hasShownMismatchToast.current = false;
@@ -161,12 +194,23 @@ export function TaskDetailPage() {
     hasShownMismatchToast.current = true;
 
     toast.error(
-      projectMismatch ? "This project does not belong to the selected workspace." : "This task does not belong to this project."
+      projectMismatch
+        ? "This project does not belong to the selected workspace."
+        : "This task does not belong to this project.",
     );
-    navigate(`/workspaces/${workspaceId}/projects/${projectId}/tasks`, { replace: true });
-  }, [workspaceId, projectId, projectQuery.isSuccess, projectQuery.data, taskQuery.isSuccess, taskQuery.data, navigate]);
+    navigate(`/workspaces/${workspaceId}/projects/${projectId}/tasks`, {
+      replace: true,
+    });
+  }, [
+    workspaceId,
+    projectId,
+    projectQuery.isSuccess,
+    projectQuery.data,
+    taskQuery.isSuccess,
+    taskQuery.data,
+    navigate,
+  ]);
 
-  // Realtime: join the project room and refresh on real server events only.
   useEffect(() => {
     if (
       !projectId ||
@@ -182,67 +226,114 @@ export function TaskDetailPage() {
 
     socket.emit("project:join", projectId, () => undefined);
 
-    function handleStatusChanged(payload: { projectId: string; taskId: string }) {
+    function handleStatusChanged(payload: {
+      projectId: string;
+      taskId: string;
+    }) {
       if (payload.projectId !== projectId) return;
-      void queryClient.invalidateQueries({ queryKey: taskQueryKeys.projectList(projectId) });
+      void queryClient.invalidateQueries({
+        queryKey: taskQueryKeys.projectList(projectId),
+      });
       if (payload.taskId === taskId) {
-        void queryClient.invalidateQueries({ queryKey: taskQueryKeys.detail(projectId, taskId) });
+        void queryClient.invalidateQueries({
+          queryKey: taskQueryKeys.detail(projectId, taskId),
+        });
       }
-      void queryClient.invalidateQueries({ queryKey: activityQueryKeys.project(projectId) });
+      void queryClient.invalidateQueries({
+        queryKey: activityQueryKeys.project(projectId),
+      });
     }
 
     function handleAssigned(payload: { projectId: string; taskId: string }) {
       if (payload.projectId !== projectId) return;
-      void queryClient.invalidateQueries({ queryKey: taskQueryKeys.projectList(projectId) });
+      void queryClient.invalidateQueries({
+        queryKey: taskQueryKeys.projectList(projectId),
+      });
       if (payload.taskId === taskId) {
-        void queryClient.invalidateQueries({ queryKey: taskQueryKeys.detail(projectId, taskId) });
-        void queryClient.invalidateQueries({ queryKey: taskQueryKeys.assignees(projectId, taskId) });
+        void queryClient.invalidateQueries({
+          queryKey: taskQueryKeys.detail(projectId, taskId),
+        });
+        void queryClient.invalidateQueries({
+          queryKey: taskQueryKeys.assignees(projectId, taskId),
+        });
       }
     }
 
     function handleUpdated(payload: { projectId: string; taskId: string }) {
       if (payload.projectId !== projectId) return;
-      void queryClient.invalidateQueries({ queryKey: taskQueryKeys.projectList(projectId) });
+      void queryClient.invalidateQueries({
+        queryKey: taskQueryKeys.projectList(projectId),
+      });
       if (payload.taskId === taskId) {
-        void queryClient.invalidateQueries({ queryKey: taskQueryKeys.detail(projectId, taskId) });
+        void queryClient.invalidateQueries({
+          queryKey: taskQueryKeys.detail(projectId, taskId),
+        });
       }
     }
 
     function handleUnassigned(payload: { projectId: string; taskId: string }) {
       if (payload.projectId !== projectId) return;
-      void queryClient.invalidateQueries({ queryKey: taskQueryKeys.projectList(projectId) });
+      void queryClient.invalidateQueries({
+        queryKey: taskQueryKeys.projectList(projectId),
+      });
       if (payload.taskId === taskId) {
-        void queryClient.invalidateQueries({ queryKey: taskQueryKeys.detail(projectId, taskId) });
-        void queryClient.invalidateQueries({ queryKey: taskQueryKeys.assignees(projectId, taskId) });
+        void queryClient.invalidateQueries({
+          queryKey: taskQueryKeys.detail(projectId, taskId),
+        });
+        void queryClient.invalidateQueries({
+          queryKey: taskQueryKeys.assignees(projectId, taskId),
+        });
       }
     }
 
-    function handleCommentChanged(payload: { projectId: string; taskId: string }) {
+    function handleCommentChanged(payload: {
+      projectId: string;
+      taskId: string;
+    }) {
       if (payload.projectId !== projectId || payload.taskId !== taskId) return;
-      void queryClient.invalidateQueries({ queryKey: taskCommentQueryKeys.task(projectId, taskId) });
+      void queryClient.invalidateQueries({
+        queryKey: taskCommentQueryKeys.task(projectId, taskId),
+      });
     }
 
-    function handleAssignmentRequestChanged(payload: { projectId: string; taskId: string }) {
+    function handleAssignmentRequestChanged(payload: {
+      projectId: string;
+      taskId: string;
+    }) {
       if (payload.projectId !== projectId || payload.taskId !== taskId) return;
-      void queryClient.invalidateQueries({ queryKey: taskQueryKeys.assignmentRequests(projectId, taskId) });
-      void queryClient.invalidateQueries({ queryKey: taskQueryKeys.assignees(projectId, taskId) });
-      void queryClient.invalidateQueries({ queryKey: taskQueryKeys.detail(projectId, taskId) });
-      void queryClient.invalidateQueries({ queryKey: taskQueryKeys.projectList(projectId) });
+      void queryClient.invalidateQueries({
+        queryKey: taskQueryKeys.assignmentRequests(projectId, taskId),
+      });
+      void queryClient.invalidateQueries({
+        queryKey: taskQueryKeys.assignees(projectId, taskId),
+      });
+      void queryClient.invalidateQueries({
+        queryKey: taskQueryKeys.detail(projectId, taskId),
+      });
+      void queryClient.invalidateQueries({
+        queryKey: taskQueryKeys.projectList(projectId),
+      });
     }
 
     function handleCreated(payload: { projectId: string }) {
       if (payload.projectId !== projectId) return;
-      void queryClient.invalidateQueries({ queryKey: taskQueryKeys.projectList(projectId) });
+      void queryClient.invalidateQueries({
+        queryKey: taskQueryKeys.projectList(projectId),
+      });
     }
 
     function handleReordered(payload: { projectId: string }) {
       if (payload.projectId !== projectId) return;
-      void queryClient.invalidateQueries({ queryKey: taskQueryKeys.projectList(projectId) });
+      void queryClient.invalidateQueries({
+        queryKey: taskQueryKeys.projectList(projectId),
+      });
     }
 
     function handleActivity(payload: { projectId: string }) {
       if (payload.projectId !== projectId) return;
-      void queryClient.invalidateQueries({ queryKey: activityQueryKeys.project(projectId) });
+      void queryClient.invalidateQueries({
+        queryKey: activityQueryKeys.project(projectId),
+      });
     }
 
     socket.on("task:status-changed", handleStatusChanged);
@@ -251,7 +342,10 @@ export function TaskDetailPage() {
     socket.on("task:unassigned", handleUnassigned);
     socket.on("task:comment-changed", handleCommentChanged);
     socket.on("task:assignment-requested", handleAssignmentRequestChanged);
-    socket.on("task:assignment-request-accepted", handleAssignmentRequestChanged);
+    socket.on(
+      "task:assignment-request-accepted",
+      handleAssignmentRequestChanged,
+    );
     socket.on("task:created", handleCreated);
     socket.on("tasks:reordered", handleReordered);
     socket.on("activity:new", handleActivity);
@@ -263,33 +357,58 @@ export function TaskDetailPage() {
       socket.off("task:unassigned", handleUnassigned);
       socket.off("task:comment-changed", handleCommentChanged);
       socket.off("task:assignment-requested", handleAssignmentRequestChanged);
-      socket.off("task:assignment-request-accepted", handleAssignmentRequestChanged);
+      socket.off(
+        "task:assignment-request-accepted",
+        handleAssignmentRequestChanged,
+      );
       socket.off("task:created", handleCreated);
       socket.off("tasks:reordered", handleReordered);
       socket.off("activity:new", handleActivity);
       socket.emit("project:leave", projectId, () => undefined);
     };
-  }, [projectId, workspaceId, taskId, projectQuery.isSuccess, projectQuery.data, taskQuery.isSuccess, taskQuery.data, queryClient]);
+  }, [
+    projectId,
+    workspaceId,
+    taskId,
+    projectQuery.isSuccess,
+    projectQuery.data,
+    taskQuery.isSuccess,
+    taskQuery.data,
+    queryClient,
+  ]);
 
   if (!workspaceId || !projectId || !taskId) return null;
 
-  if (workspaceQuery.isLoading || projectQuery.isLoading || taskQuery.isLoading || membersQuery.isLoading) {
+  if (
+    workspaceQuery.isLoading ||
+    projectQuery.isLoading ||
+    taskQuery.isLoading ||
+    membersQuery.isLoading
+  ) {
     return <TaskDetailSkeleton />;
   }
 
   if (isTaskInaccessible || isProjectInaccessible) return null;
 
-  if (workspaceQuery.isError && workspaceQuery.error?.status === 404) return null;
+  if (workspaceQuery.isError && workspaceQuery.error?.status === 404)
+    return null;
 
   if (taskQuery.isError) {
     return (
       <div className="rounded-xl border border-danger/30 bg-danger/5 px-6 py-10 text-center">
-        <p className="text-body">{taskQuery.error?.message ?? "Unable to load this task."}</p>
+        <p className="text-body">
+          {taskQuery.error?.message ?? "Unable to load this task."}
+        </p>
         <div className="mt-4 flex justify-center gap-2">
           <Button variant="secondary" onClick={() => void taskQuery.refetch()}>
             Retry
           </Button>
-          <Button variant="secondary" onClick={() => navigate(`/workspaces/${workspaceId}/projects/${projectId}/tasks`)}>
+          <Button
+            variant="secondary"
+            onClick={() =>
+              navigate(`/workspaces/${workspaceId}/projects/${projectId}/tasks`)
+            }
+          >
             Back to Tasks &amp; Issues
           </Button>
         </div>
@@ -301,7 +420,9 @@ export function TaskDetailPage() {
     return (
       <div className="rounded-xl border border-danger/30 bg-danger/5 px-6 py-10 text-center">
         <p className="text-body">
-          {projectQuery.error?.message ?? workspaceQuery.error?.message ?? "Unable to load this task's project."}
+          {projectQuery.error?.message ??
+            workspaceQuery.error?.message ??
+            "Unable to load this task's project."}
         </p>
         <div className="mt-4 flex justify-center gap-2">
           <Button
@@ -326,18 +447,37 @@ export function TaskDetailPage() {
   const members = membersQuery.data ?? [];
   const role = deriveProjectRole(members, currentUserId);
   const allTasks = projectTasksQuery.data ?? [];
-  const subtasks = sortByPosition(allTasks.filter((candidate) => candidate.parentTask === task._id));
+  const subtasks = sortByPosition(
+    allTasks.filter((candidate) => candidate.parentTask === task._id),
+  );
 
   const parentTask = !task.parentTask
     ? null
-    : allTasks.find((candidate) => candidate._id === task.parentTask) ??
-      (projectTasksQuery.isLoading ? undefined : null);
+    : (allTasks.find((candidate) => candidate._id === task.parentTask) ??
+      (projectTasksQuery.isLoading ? undefined : null));
 
   const canEdit = canEditTask(task, project, workspace, role);
   const canChangeStatus = canChangeTaskStatus(task, project, workspace, role);
-  const canManageAssignees = canManageTaskAssignees(task, project, workspace, role);
-  const canArchive = canArchiveTask(task, project, workspace, role, currentUserId);
-  const canRestore = canRestoreTask(task, project, workspace, role, currentUserId);
+  const canManageAssignees = canManageTaskAssignees(
+    task,
+    project,
+    workspace,
+    role,
+  );
+  const canArchive = canArchiveTask(
+    task,
+    project,
+    workspace,
+    role,
+    currentUserId,
+  );
+  const canRestore = canRestoreTask(
+    task,
+    project,
+    workspace,
+    role,
+    currentUserId,
+  );
   const canAddSubtask = canCreateSubtask(task, project, workspace, role);
 
   function handleStatusChange(status: TaskStatus) {
@@ -346,8 +486,9 @@ export function TaskDetailPage() {
       { taskId: task!._id, status },
       {
         onSuccess: () => toast.success("Status updated."),
-        onError: (error) => toast.error(error.message ?? "Unable to update status."),
-      }
+        onError: (error) =>
+          toast.error(error.message ?? "Unable to update status."),
+      },
     );
   }
 
@@ -356,12 +497,16 @@ export function TaskDetailPage() {
 
     setPendingSubtaskId(subtask._id);
     updateStatusMutation.mutate(
-      { taskId: subtask._id, status: subtask.status === "DONE" ? "TODO" : "DONE" },
+      {
+        taskId: subtask._id,
+        status: subtask.status === "DONE" ? "TODO" : "DONE",
+      },
       {
         onSuccess: () => toast.success("Subtask updated."),
-        onError: (error) => toast.error(error.message ?? "Unable to update subtask."),
+        onError: (error) =>
+          toast.error(error.message ?? "Unable to update subtask."),
         onSettled: () => setPendingSubtaskId(undefined),
-      }
+      },
     );
   }
 
@@ -386,8 +531,16 @@ export function TaskDetailPage() {
       {membersQuery.isError && (
         <div className="rounded-lg border border-warning/30 bg-warning/10 px-4 py-3 text-sm text-warning">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <span>Member roles and names could not be loaded. Role-dependent actions are disabled.</span>
-            <Button type="button" size="sm" variant="secondary" onClick={() => void membersQuery.refetch()}>
+            <span>
+              Member roles and names could not be loaded. Role-dependent actions
+              are disabled.
+            </span>
+            <Button
+              type="button"
+              size="sm"
+              variant="secondary"
+              onClick={() => void membersQuery.refetch()}
+            >
               Retry
             </Button>
           </div>
@@ -420,19 +573,30 @@ export function TaskDetailPage() {
         <div className="space-y-5 xl:col-span-8">
           <section className="space-y-6 rounded-xl border border-border bg-surface/60 p-5 shadow-soft sm:p-6">
             <TaskDescriptionPanel description={task.description} />
-            <TaskAssigneesSection task={task} projectId={projectId} members={members} canManage={canManageAssignees} />
+            <TaskAssigneesSection
+              task={task}
+              projectId={projectId}
+              members={members}
+              canManage={canManageAssignees}
+            />
             <TaskAssignmentRequestsPanel
               projectId={projectId}
               task={task}
               role={role}
               currentUserId={currentUserId}
-              canMutate={!task.isArchived && !project.isArchived && !workspace.isArchived}
+              canMutate={
+                !task.isArchived && !project.isArchived && !workspace.isArchived
+              }
             />
             <TaskSubtasksSection
               subtasks={subtasks}
               workspaceId={workspaceId}
               projectId={projectId}
-              canToggleStatus={canUpdateWorkItemStatus(project, workspace, role)}
+              canToggleStatus={canUpdateWorkItemStatus(
+                project,
+                workspace,
+                role,
+              )}
               canCreateSubtask={canAddSubtask}
               isLoading={projectTasksQuery.isLoading}
               isError={projectTasksQuery.isError}
@@ -501,7 +665,11 @@ export function TaskDetailPage() {
         }}
       />
 
-      <TaskArchiveDialogs target={taskActionTarget} projectId={projectId} onClose={() => setTaskActionTarget(null)} />
+      <TaskArchiveDialogs
+        target={taskActionTarget}
+        projectId={projectId}
+        onClose={() => setTaskActionTarget(null)}
+      />
 
       {canAddSubtask && (
         <CreateSubtaskDialog

@@ -10,7 +10,10 @@ interface WorkspaceActivityFeedProps {
   projects: Project[];
 }
 
-export function WorkspaceActivityFeed({ workspaceId, projects }: WorkspaceActivityFeedProps) {
+export function WorkspaceActivityFeed({
+  workspaceId,
+  projects,
+}: WorkspaceActivityFeedProps) {
   const activitiesQuery = useWorkspaceActivitiesQuery(workspaceId);
   const activities = activitiesQuery.data ?? [];
 
@@ -36,7 +39,9 @@ export function WorkspaceActivityFeed({ workspaceId, projects }: WorkspaceActivi
         onRetry={() => activitiesQuery.refetch()}
         activities={activities}
         initialVisible={INITIAL_VISIBLE}
-        getSecondaryLabel={(activity) => projectNameById.get(activity.project) ?? null}
+        getSecondaryLabel={(activity) =>
+          projectNameById.get(activity.project) ?? null
+        }
       />
     </section>
   );

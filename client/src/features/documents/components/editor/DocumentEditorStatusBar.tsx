@@ -37,10 +37,14 @@ export function DocumentEditorStatusBar({
           aria-pressed={isFocusMode}
           className={cn(
             "flex items-center gap-1.5 rounded-md px-2 py-1 transition-colors hover:bg-border/50 hover:text-foreground",
-            isFocusMode && "bg-primary/15 text-primary"
+            isFocusMode && "bg-primary/15 text-primary",
           )}
         >
-          {isFocusMode ? <Minimize2 className="h-3.5 w-3.5" /> : <Maximize2 className="h-3.5 w-3.5" />}
+          {isFocusMode ? (
+            <Minimize2 className="h-3.5 w-3.5" />
+          ) : (
+            <Maximize2 className="h-3.5 w-3.5" />
+          )}
           Focus mode
         </button>
 

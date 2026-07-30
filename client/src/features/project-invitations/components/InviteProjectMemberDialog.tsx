@@ -8,7 +8,10 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useInviteProjectMemberMutation } from "../hooks/useProjectInvitationMutations";
-import { inviteProjectMemberSchema, type InviteProjectMemberFormValues } from "../schemas/projectInvitation.schemas";
+import {
+  inviteProjectMemberSchema,
+  type InviteProjectMemberFormValues,
+} from "../schemas/projectInvitation.schemas";
 
 interface InviteProjectMemberDialogProps {
   projectId: string;
@@ -17,7 +20,12 @@ interface InviteProjectMemberDialogProps {
   onClose: () => void;
 }
 
-export function InviteProjectMemberDialog({ projectId, projectName, open, onClose }: InviteProjectMemberDialogProps) {
+export function InviteProjectMemberDialog({
+  projectId,
+  projectName,
+  open,
+  onClose,
+}: InviteProjectMemberDialogProps) {
   const inviteMutation = useInviteProjectMemberMutation(projectId);
 
   const {
@@ -35,7 +43,6 @@ export function InviteProjectMemberDialog({ projectId, projectName, open, onClos
       reset({ email: "", role: "member" });
       inviteMutation.reset();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
   function handleClose() {
@@ -84,7 +91,9 @@ export function InviteProjectMemberDialog({ projectId, projectName, open, onClos
             id="project-invite-role"
             className={cn(
               "w-full rounded-md border bg-background px-3 py-2.5 text-sm text-foreground outline-none transition-colors duration-200",
-              errors.role ? "border-danger focus:border-danger" : "border-border focus:border-muted/60"
+              errors.role
+                ? "border-danger focus:border-danger"
+                : "border-border focus:border-muted/60",
             )}
             {...register("role")}
           >
@@ -94,7 +103,12 @@ export function InviteProjectMemberDialog({ projectId, projectName, open, onClos
         </div>
 
         <DialogFooter>
-          <Button type="button" variant="secondary" onClick={handleClose} disabled={inviteMutation.isPending}>
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={handleClose}
+            disabled={inviteMutation.isPending}
+          >
             Cancel
           </Button>
           <Button type="submit" disabled={inviteMutation.isPending}>

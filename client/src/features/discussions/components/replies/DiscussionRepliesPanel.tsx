@@ -1,6 +1,9 @@
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import type { InfiniteData, UseInfiniteQueryResult } from "@tanstack/react-query";
+import type {
+  InfiniteData,
+  UseInfiniteQueryResult,
+} from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { ApiErrorShape } from "@/lib/axios";
@@ -65,7 +68,13 @@ export function DiscussionRepliesPanel({
     if (hasMore && !isFetchingNextPage) {
       void fetchNextPage();
     }
-  }, [location.hash, replies.length, hasMore, isFetchingNextPage, fetchNextPage]);
+  }, [
+    location.hash,
+    replies.length,
+    hasMore,
+    isFetchingNextPage,
+    fetchNextPage,
+  ]);
 
   const disabledReason = discussion.isLocked
     ? "This discussion is locked. New replies can't be added."
@@ -122,7 +131,9 @@ export function DiscussionRepliesPanel({
         !repliesQuery.isError &&
         replies.length === 0 && (
           <p className="text-sm text-muted">
-            {canReply ? "No replies yet. Be the first to reply." : "No replies yet."}
+            {canReply
+              ? "No replies yet. Be the first to reply."
+              : "No replies yet."}
           </p>
         )}
 
@@ -139,14 +150,14 @@ export function DiscussionRepliesPanel({
                 discussion,
                 project,
                 workspace,
-                currentUser?._id
+                currentUser?._id,
               )}
               canDelete={canDeleteReply(
                 reply,
                 project,
                 workspace,
                 role,
-                currentUser?._id
+                currentUser?._id,
               )}
             />
           ))}

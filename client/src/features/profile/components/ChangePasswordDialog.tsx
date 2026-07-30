@@ -111,9 +111,13 @@ export function ChangePasswordDialog({
         description="This account does not use a local SyncSpace password."
       >
         <div className="flex gap-3 rounded-lg border border-border bg-background/40 p-3">
-          <ShieldAlert className="mt-0.5 h-5 w-5 shrink-0 text-secondary" aria-hidden />
+          <ShieldAlert
+            className="mt-0.5 h-5 w-5 shrink-0 text-secondary"
+            aria-hidden
+          />
           <p className="text-body">
-            Your password is managed by your authentication provider. Update it from your provider account.
+            Your password is managed by your authentication provider. Update it
+            from your provider account.
           </p>
         </div>
         <DialogFooter>
@@ -145,7 +149,11 @@ export function ChangePasswordDialog({
               <PasswordToggle
                 visible={showCurrent}
                 onToggle={() => setShowCurrent((value) => !value)}
-                label={showCurrent ? "Hide current password" : "Show current password"}
+                label={
+                  showCurrent
+                    ? "Hide current password"
+                    : "Show current password"
+                }
               />
             }
           />
@@ -168,7 +176,10 @@ export function ChangePasswordDialog({
           />
         </FormField>
 
-        <FormField label="Confirm New Password" htmlFor="change-password-confirm">
+        <FormField
+          label="Confirm New Password"
+          htmlFor="change-password-confirm"
+        >
           <Input
             id="change-password-confirm"
             type={showConfirm ? "text" : "password"}
@@ -179,16 +190,23 @@ export function ChangePasswordDialog({
               <PasswordToggle
                 visible={showConfirm}
                 onToggle={() => setShowConfirm((value) => !value)}
-                label={showConfirm ? "Hide password confirmation" : "Show password confirmation"}
+                label={
+                  showConfirm
+                    ? "Hide password confirmation"
+                    : "Show password confirmation"
+                }
               />
             }
           />
         </FormField>
 
         <div className="rounded-lg border border-border bg-background/35 px-3 py-2.5">
-          <p className="text-xs font-medium text-foreground">Password requirements</p>
+          <p className="text-xs font-medium text-foreground">
+            Password requirements
+          </p>
           <p className="mt-1 text-xs leading-5 text-muted">
-            8–128 characters with uppercase, lowercase, a number, and one of @ $ ! % * ? &amp;.
+            8–128 characters with uppercase, lowercase, a number, and one of @ $
+            ! % * ? &amp;.
           </p>
         </div>
 
@@ -197,7 +215,8 @@ export function ChangePasswordDialog({
             role="alert"
             className="mt-4 rounded-md border border-danger/30 bg-danger/10 px-3 py-2 text-xs text-danger"
           >
-            {changePasswordMutation.error.message || "Unable to change the password."}
+            {changePasswordMutation.error.message ||
+              "Unable to change the password."}
           </p>
         ) : null}
 

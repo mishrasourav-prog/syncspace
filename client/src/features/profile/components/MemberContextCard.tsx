@@ -35,7 +35,9 @@ export function MemberContextCard({ context }: MemberContextCardProps) {
       <h2 id="member-context-heading" className="text-h3 text-foreground">
         Shared Context
       </h2>
-      <p className="mt-1 text-caption">Roles shown here apply only to the shared workspace or project.</p>
+      <p className="mt-1 text-caption">
+        Roles shown here apply only to the shared workspace or project.
+      </p>
 
       <div className="mt-4 space-y-3">
         {context.workspace ? (
@@ -45,12 +47,16 @@ export function MemberContextCard({ context }: MemberContextCardProps) {
                 <Users className="h-4 w-4" aria-hidden />
               </span>
               <div className="min-w-0 flex-1">
-                <p className="text-xs font-medium uppercase tracking-wide text-muted">Workspace</p>
+                <p className="text-xs font-medium uppercase tracking-wide text-muted">
+                  Workspace
+                </p>
                 <p className="mt-1 truncate text-sm font-semibold text-foreground">
                   {context.workspace.name}
                 </p>
               </div>
-              <Badge variant="primary">{WORKSPACE_ROLE_LABEL[context.workspace.role]}</Badge>
+              <Badge variant="primary">
+                {WORKSPACE_ROLE_LABEL[context.workspace.role]}
+              </Badge>
             </div>
 
             <div className="mt-3 flex flex-col gap-2 border-t border-border/60 pt-3 text-xs text-muted sm:flex-row sm:items-center sm:justify-between">
@@ -73,12 +79,16 @@ export function MemberContextCard({ context }: MemberContextCardProps) {
                 <FolderKanban className="h-4 w-4" aria-hidden />
               </span>
               <div className="min-w-0 flex-1">
-                <p className="text-xs font-medium uppercase tracking-wide text-muted">Project</p>
+                <p className="text-xs font-medium uppercase tracking-wide text-muted">
+                  Project
+                </p>
                 <p className="mt-1 truncate text-sm font-semibold text-foreground">
                   {context.project.name}
                 </p>
               </div>
-              <Badge variant="secondary">{PROJECT_ROLE_LABEL[context.project.role]}</Badge>
+              <Badge variant="secondary">
+                {PROJECT_ROLE_LABEL[context.project.role]}
+              </Badge>
             </div>
 
             <div className="mt-3 flex flex-col gap-2 border-t border-border/60 pt-3 text-xs text-muted sm:flex-row sm:items-center sm:justify-between">

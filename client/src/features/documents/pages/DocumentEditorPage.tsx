@@ -21,12 +21,18 @@ import { socket, type DocumentSocketPayload } from "@/realtime/socket";
 import { useWorkspaceQuery } from "@/features/workspaces/hooks/useWorkspaceQueries";
 import { useProjectQuery } from "@/features/projects/hooks/useProjectQueries";
 import { useProjectMembersQuery } from "@/features/project-members/hooks/useProjectMemberQueries";
-import { canInviteProjectMember, deriveProjectRole } from "@/features/projects/project.permissions";
+import {
+  canInviteProjectMember,
+  deriveProjectRole,
+} from "@/features/projects/project.permissions";
 import { InviteProjectMemberDialog } from "@/features/project-invitations/components/InviteProjectMemberDialog";
 import { activityQueryKeys } from "@/features/activity/activity.queryKeys";
 import type { Project } from "@/features/projects/types/project.types";
 import type { WorkspaceSummary } from "@/features/workspaces/types/workspace.types";
-import type { ProjectMember, ProjectRole } from "@/features/project-members/types/projectMember.types";
+import type {
+  ProjectMember,
+  ProjectRole,
+} from "@/features/project-members/types/projectMember.types";
 
 import { getDocumentByIdRequest } from "../api/document.api";
 import { useDocumentQuery } from "../hooks/useDocumentQueries";
@@ -63,9 +69,15 @@ import {
   readDocumentDraft,
   writeDocumentDraft,
 } from "../document.draftStorage";
-import type { ProjectDocument, UpdateDocumentPayload } from "../types/document.types";
+import type {
+  ProjectDocument,
+  UpdateDocumentPayload,
+} from "../types/document.types";
 
-import { DocumentEditorHeader, type DocumentSaveState } from "../components/editor/DocumentEditorHeader";
+import {
+  DocumentEditorHeader,
+  type DocumentSaveState,
+} from "../components/editor/DocumentEditorHeader";
 import { DocumentEditorReadOnlyBanner } from "../components/editor/DocumentEditorReadOnlyBanner";
 import { DocumentEditorToolbar } from "../components/editor/DocumentEditorToolbar";
 import { DocumentEditor } from "../components/editor/DocumentEditor";
@@ -130,11 +142,16 @@ function DocumentEditorWorkspace({
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
-  const canEditBase = canEditDocumentContent(document, project, workspace, role);
+  const canEditBase = canEditDocumentContent(
+    document,
+    project,
+    workspace,
+    role,
+  );
 
   const normalized = useMemo(
     () => normalizeDocumentContent(document.content),
-    [document.content]
+    [document.content],
   );
 
   const recoveredDraft = useMemo(
@@ -142,14 +159,15 @@ function DocumentEditorWorkspace({
       canEditBase
         ? readDocumentDraft(currentUserId, document._id, document.revision)
         : null,
-    [canEditBase, currentUserId, document._id, document.revision]
+    [canEditBase, currentUserId, document._id, document.revision],
   );
 
-  const initialEditorContent = recoveredDraft?.content ?? normalized.editorContent;
+  const initialEditorContent =
+    recoveredDraft?.content ?? normalized.editorContent;
   const draft = useDocumentEditorDraft(
     document,
     normalized.editorContent,
-    recoveredDraft?.title
+    recoveredDraft?.title,
   );
 
   const [mode, setMode] = useState<"editing" | "preview">("editing");
@@ -161,11 +179,12 @@ function DocumentEditorWorkspace({
   const [isReloadingLatest, setIsReloadingLatest] = useState(false);
   const [reloadError, setReloadError] = useState<string | null>(null);
   const [isLegacyDialogOpen, setIsLegacyDialogOpen] = useState(false);
-  const [hasConfirmedLegacyConversion, setHasConfirmedLegacyConversion] = useState(false);
+  const [hasConfirmedLegacyConversion, setHasConfirmedLegacyConversion] =
+    useState(false);
   const [isInviteOpen, setIsInviteOpen] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [hasRecoveredLocalDraft, setHasRecoveredLocalDraft] = useState(
-    () => Boolean(recoveredDraft)
+  const [hasRecoveredLocalDraft, setHasRecoveredLocalDraft] = useState(() =>
+    Boolean(recoveredDraft),
   );
   const [, setRenderTick] = useState(0);
 
@@ -174,9 +193,11 @@ function DocumentEditorWorkspace({
   const restoreMutation = useRestoreDocumentMutation(projectId);
   const createMutation = useCreateDocumentMutation(projectId);
 
-  const isLegacyBlocked = normalized.isUnsupportedLegacyContent && !hasConfirmedLegacyConversion;
+  const isLegacyBlocked =
+    normalized.isUnsupportedLegacyContent && !hasConfirmedLegacyConversion;
   const canWrite = canEditBase && !isLegacyBlocked && !hasRemoteUpdate;
-  const editorEditable = canWrite && !updateMutation.isPending && mode === "editing";
+  const editorEditable =
+    canWrite && !updateMutation.isPending && mode === "editing";
 
   const editor = useEditor(
     {
@@ -186,7 +207,10 @@ function DocumentEditorWorkspace({
         Link.configure({
           openOnClick: false,
           autolink: false,
-          HTMLAttributes: { rel: "noopener noreferrer nofollow", target: "_blank" },
+          HTMLAttributes: {
+            rel: "noopener noreferrer nofollow",
+            target: "_blank",
+          },
         }),
         Placeholder.configure({ placeholder: "Start writing…" }),
         TaskList,
@@ -201,9 +225,8 @@ function DocumentEditorWorkspace({
       onUpdate: () => setRenderTick((tick) => tick + 1),
       onSelectionUpdate: () => setRenderTick((tick) => tick + 1),
     },
-    // The parent is also keyed by document ID, so editor state never leaks
-    // from one document route into another.
-    [document._id]
+
+    [document._id],
   );
 
   useEffect(() => {
@@ -251,21 +274,43 @@ function DocumentEditorWorkspace({
 
   const unsavedGuard = useUnsavedChangesGuard(isDirty);
 
-  const canArchive = canArchiveDocument(document, project, workspace, role, currentUserId);
-  const canRestore = canRestoreDocument(document, project, workspace, role, currentUserId);
+  const canArchive = canArchiveDocument(
+    document,
+    project,
+    workspace,
+    role,
+    currentUserId,
+  );
+  const canRestore = canRestoreDocument(
+    document,
+    project,
+    workspace,
+    role,
+    currentUserId,
+  );
   const canDuplicate = canCreateDocument(project, workspace, role);
   const canInvite = canInviteProjectMember(project, workspace, role);
-  const canDownloadHtml = !normalized.isUnsupportedLegacyContent || hasConfirmedLegacyConversion;
+  const canDownloadHtml =
+    !normalized.isUnsupportedLegacyContent || hasConfirmedLegacyConversion;
   const canPersistDraft = canWrite && isDirty && !updateMutation.isPending;
 
-  const readOnlyBanner = getDocumentEditorReadOnlyBanner(document, project, workspace);
-  const { words, characters } = countWordsAndCharacters(editor?.getText() ?? "");
+  const readOnlyBanner = getDocumentEditorReadOnlyBanner(
+    document,
+    project,
+    workspace,
+  );
+  const { words, characters } = countWordsAndCharacters(
+    editor?.getText() ?? "",
+  );
 
   const acceptLatestDocument = useCallback(
     (latest: ProjectDocument): void => {
       const latestNormalized = normalizeDocumentContent(latest.content);
 
-      queryClient.setQueryData(documentQueryKeys.detail(projectId, latest._id), latest);
+      queryClient.setQueryData(
+        documentQueryKeys.detail(projectId, latest._id),
+        latest,
+      );
       draft.acceptServerDocument(latest, latestNormalized.editorContent);
       editor?.commands.setContent(latestNormalized.editorContent);
 
@@ -277,7 +322,7 @@ function DocumentEditorWorkspace({
       setHasRecoveredLocalDraft(false);
       clearDocumentDraft(currentUserId, latest._id);
     },
-    [currentUserId, draft, editor, projectId, queryClient]
+    [currentUserId, draft, editor, projectId, queryClient],
   );
 
   function persistSave(onSaved?: () => void) {
@@ -290,16 +335,17 @@ function DocumentEditorWorkspace({
 
     if (!canWrite) return;
 
-    // Capture the exact snapshot submitted to the server. The editor is
-    // temporarily made read-only while the mutation is pending, and the
-    // success handler still compares against the latest live values so even
-    // an input event that lands before React re-renders cannot be lost.
     const submittedContent = editor.getJSON();
     const submittedTitle = draft.draftTitle.trim() || "Untitled document";
-    const payload: UpdateDocumentPayload = { expectedRevision: draft.snapshot.revision };
+    const payload: UpdateDocumentPayload = {
+      expectedRevision: draft.snapshot.revision,
+    };
 
     if (draft.isTitleDirty) payload.title = submittedTitle;
-    if (hasConfirmedLegacyConversion || draft.isContentDirty(submittedContent)) {
+    if (
+      hasConfirmedLegacyConversion ||
+      draft.isContentDirty(submittedContent)
+    ) {
       payload.content = submittedContent;
     }
 
@@ -314,22 +360,22 @@ function DocumentEditorWorkspace({
       { documentId: document._id, payload },
       {
         onSuccess: (updated) => {
-          const acceptedContent = normalizeDocumentContent(updated.content).editorContent;
-          const latestTitle = draftTitleRef.current.trim() || "Untitled document";
+          const acceptedContent = normalizeDocumentContent(
+            updated.content,
+          ).editorContent;
+          const latestTitle =
+            draftTitleRef.current.trim() || "Untitled document";
           const latestContent = editor.getJSON();
           const hasNewerLocalEdits =
             latestTitle !== submittedTitle ||
             !areDocumentContentsEqual(latestContent, submittedContent);
 
           if (hasNewerLocalEdits) {
-            // Advance the revision baseline without replacing the visible
-            // draft. The newer title/content remains dirty and can be saved
-            // safely against the freshly returned revision.
             draft.acceptSavedSnapshot(updated, acceptedContent);
-            toast.success("Saved the submitted changes. Newer edits remain unsaved.");
+            toast.success(
+              "Saved the submitted changes. Newer edits remain unsaved.",
+            );
           } else {
-            // No newer input exists, so it is safe to accept any normalized
-            // title/content returned by the server and complete navigation.
             draft.acceptServerDocument(updated, acceptedContent);
             editor.commands.setContent(acceptedContent, false);
             clearDocumentDraft(currentUserId, document._id);
@@ -357,7 +403,7 @@ function DocumentEditorWorkspace({
           setSaveError(message);
           toast.error(message);
         },
-      }
+      },
     );
   }
 
@@ -383,9 +429,14 @@ function DocumentEditorWorkspace({
     try {
       const latest = await getDocumentByIdRequest(document._id);
       acceptLatestDocument(latest);
-      toast.info("Loaded the latest server revision. Your previous local draft was discarded.");
+      toast.info(
+        "Loaded the latest server revision. Your previous local draft was discarded.",
+      );
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Unable to reload the latest document revision.";
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Unable to reload the latest document revision.";
       setReloadError(message);
     } finally {
       setIsReloadingLatest(false);
@@ -393,49 +444,69 @@ function DocumentEditorWorkspace({
   }
 
   function handleDownloadDraft() {
-    downloadLocalDraft(document._id, draft.draftTitle, liveContent, draft.snapshot.revision);
+    downloadLocalDraft(
+      document._id,
+      draft.draftTitle,
+      liveContent,
+      draft.snapshot.revision,
+    );
   }
 
   function handleArchive() {
     if (isDirty) {
-      toast.error("Save or discard your changes before archiving this document.");
+      toast.error(
+        "Save or discard your changes before archiving this document.",
+      );
       return;
     }
 
     archiveMutation.mutate(document._id, {
       onSuccess: () => toast.success("Document archived."),
-      onError: (error) => toast.error(error.message ?? "Unable to archive this document."),
+      onError: (error) =>
+        toast.error(error.message ?? "Unable to archive this document."),
     });
   }
 
   function handleRestore() {
     restoreMutation.mutate(document._id, {
       onSuccess: () => toast.success("Document restored."),
-      onError: (error) => toast.error(error.message ?? "Unable to restore this document."),
+      onError: (error) =>
+        toast.error(error.message ?? "Unable to restore this document."),
     });
   }
 
   function handleDuplicate() {
-    if (!canDuplicate || createMutation.isPending || updateMutation.isPending) return;
+    if (!canDuplicate || createMutation.isPending || updateMutation.isPending)
+      return;
 
     const content =
-      normalized.isUnsupportedLegacyContent && !hasConfirmedLegacyConversion ? document.content : liveContent;
+      normalized.isUnsupportedLegacyContent && !hasConfirmedLegacyConversion
+        ? document.content
+        : liveContent;
 
     createMutation.mutate(
-      { title: `${draft.draftTitle.trim() || "Untitled document"} (copy)`, content },
+      {
+        title: `${draft.draftTitle.trim() || "Untitled document"} (copy)`,
+        content,
+      },
       {
         onSuccess: (created) => {
           toast.success("Document duplicated.");
-          unsavedGuard.guardedNavigate(`/workspaces/${workspaceId}/projects/${projectId}/documents/${created._id}`);
+          unsavedGuard.guardedNavigate(
+            `/workspaces/${workspaceId}/projects/${projectId}/documents/${created._id}`,
+          );
         },
-        onError: (error) => toast.error(error.message ?? "Unable to duplicate this document."),
-      }
+        onError: (error) =>
+          toast.error(error.message ?? "Unable to duplicate this document."),
+      },
     );
   }
 
   function handleDownloadHtml() {
     if (!editor || !canDownloadHtml) {
-      toast.error("HTML export is unavailable until this legacy document is converted.");
+      toast.error(
+        "HTML export is unavailable until this legacy document is converted.",
+      );
       return;
     }
 
@@ -444,13 +515,17 @@ function DocumentEditorWorkspace({
 
   function handleDownloadPdf() {
     if (!editor || !canDownloadHtml) {
-      toast.error("PDF export is unavailable until this legacy document is converted.");
+      toast.error(
+        "PDF export is unavailable until this legacy document is converted.",
+      );
       return;
     }
 
     const opened = downloadDocumentAsPdf(draft.draftTitle, editor.getHTML());
     if (!opened) {
-      toast.error("The PDF window was blocked. Allow pop-ups for SyncSpace and try again.");
+      toast.error(
+        "The PDF window was blocked. Allow pop-ups for SyncSpace and try again.",
+      );
       return;
     }
 
@@ -459,7 +534,9 @@ function DocumentEditorWorkspace({
 
   function handleDownloadJson() {
     const content =
-      normalized.isUnsupportedLegacyContent && !hasConfirmedLegacyConversion ? document.content : liveContent;
+      normalized.isUnsupportedLegacyContent && !hasConfirmedLegacyConversion
+        ? document.content
+        : liveContent;
     downloadDocumentAsJson(document, draft.draftTitle, content);
   }
 
@@ -484,7 +561,11 @@ function DocumentEditorWorkspace({
       acceptLatestDocument(latest);
       toast.success("Document refreshed.");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Unable to refresh this document.");
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Unable to refresh this document.",
+      );
     } finally {
       setIsRefreshing(false);
     }
@@ -507,11 +588,15 @@ function DocumentEditorWorkspace({
   }
 
   function handleBackToDocuments() {
-    unsavedGuard.guardedNavigate(`/workspaces/${workspaceId}/projects/${projectId}/documents`);
+    unsavedGuard.guardedNavigate(
+      `/workspaces/${workspaceId}/projects/${projectId}/documents`,
+    );
   }
 
   function handleShowMembers() {
-    unsavedGuard.guardedNavigate(`/workspaces/${workspaceId}/projects/${projectId}#members`);
+    unsavedGuard.guardedNavigate(
+      `/workspaces/${workspaceId}/projects/${projectId}#members`,
+    );
   }
 
   function handleConfirmLegacyConvert() {
@@ -532,9 +617,6 @@ function DocumentEditorWorkspace({
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-    // `persistSave` intentionally uses the latest editor/draft values represented
-    // by these dependencies rather than being memoized around stale content.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [canPersistDraft, draft.draftTitle, draft.snapshot.revision, liveContent]);
 
   useEffect(() => {
@@ -560,8 +642,14 @@ function DocumentEditorWorkspace({
     function handleDocumentEvent(payload: DocumentSocketPayload) {
       if (payload.projectId !== projectId) return;
 
-      void queryClient.invalidateQueries({ queryKey: activityQueryKeys.project(projectId) });
-      if (payload.documentId !== document._id || payload.actorId === currentUserId) return;
+      void queryClient.invalidateQueries({
+        queryKey: activityQueryKeys.project(projectId),
+      });
+      if (
+        payload.documentId !== document._id ||
+        payload.actorId === currentUserId
+      )
+        return;
 
       const localDraftIsDirty = isDirtyRef.current;
       if (localDraftIsDirty) {
@@ -572,7 +660,9 @@ function DocumentEditorWorkspace({
         setReloadError(null);
 
         if (shouldNotify) {
-          toast.info("A newer server revision is available. Your local draft has been preserved.");
+          toast.info(
+            "A newer server revision is available. Your local draft has been preserved.",
+          );
         }
       }
 
@@ -581,13 +671,18 @@ function DocumentEditorWorkspace({
           if (isDirtyRef.current) {
             const shouldNotify = !hasRemoteUpdateRef.current;
             hasRemoteUpdateRef.current = true;
-            queryClient.setQueryData(documentQueryKeys.detail(projectId, document._id), latest);
+            queryClient.setQueryData(
+              documentQueryKeys.detail(projectId, document._id),
+              latest,
+            );
             setHasRemoteUpdate(true);
             setIsConflictOpen(true);
             setReloadError(null);
 
             if (shouldNotify) {
-              toast.info("A newer server revision is available. Your local draft has been preserved.");
+              toast.info(
+                "A newer server revision is available. Your local draft has been preserved.",
+              );
             }
             return;
           }
@@ -595,7 +690,9 @@ function DocumentEditorWorkspace({
           acceptLatestDocument(latest);
         })
         .catch(() => {
-          void queryClient.invalidateQueries({ queryKey: documentQueryKeys.detail(projectId, document._id) });
+          void queryClient.invalidateQueries({
+            queryKey: documentQueryKeys.detail(projectId, document._id),
+          });
         });
     }
 
@@ -609,33 +706,51 @@ function DocumentEditorWorkspace({
       socket.off("document:restored", handleDocumentEvent);
       socket.emit("project:leave", projectId, () => undefined);
     };
-  }, [acceptLatestDocument, currentUserId, document._id, projectId, queryClient]);
+  }, [
+    acceptLatestDocument,
+    currentUserId,
+    document._id,
+    projectId,
+    queryClient,
+  ]);
 
-
-  const saveState: DocumentSaveState = hasRemoteUpdate || isConflictOpen
-    ? "conflict"
-    : !canEditBase || isLegacyBlocked
-      ? "read-only"
-      : updateMutation.isPending
-        ? "saving"
-        : saveError
-          ? "error"
-          : isDirty
-            ? "unsaved"
-            : "saved";
+  const saveState: DocumentSaveState =
+    hasRemoteUpdate || isConflictOpen
+      ? "conflict"
+      : !canEditBase || isLegacyBlocked
+        ? "read-only"
+        : updateMutation.isPending
+          ? "saving"
+          : saveError
+            ? "error"
+            : isDirty
+              ? "unsaved"
+              : "saved";
 
   return (
     <div
       className={`min-w-0 space-y-5 overflow-x-hidden ${
-        isFullscreen ? "fixed inset-0 z-[70] overflow-y-auto bg-background p-2 sm:p-6" : ""
+        isFullscreen
+          ? "fixed inset-0 z-[70] overflow-y-auto bg-background p-2 sm:p-6"
+          : ""
       }`}
     >
-      {readOnlyBanner && <DocumentEditorReadOnlyBanner message={readOnlyBanner} />}
+      {readOnlyBanner && (
+        <DocumentEditorReadOnlyBanner message={readOnlyBanner} />
+      )}
 
       {hasRecoveredLocalDraft && (
         <div className="flex flex-col gap-2 rounded-lg border border-primary/30 bg-primary/10 px-4 py-3 text-sm text-foreground sm:flex-row sm:items-center sm:justify-between">
-          <span>Recovered unsaved changes from this browser. Save them to persist across devices.</span>
-          <Button type="button" size="sm" variant="secondary" onClick={handleDiscardRecoveredDraft}>
+          <span>
+            Recovered unsaved changes from this browser. Save them to persist
+            across devices.
+          </span>
+          <Button
+            type="button"
+            size="sm"
+            variant="secondary"
+            onClick={handleDiscardRecoveredDraft}
+          >
             Discard recovered draft
           </Button>
         </div>
@@ -643,9 +758,17 @@ function DocumentEditorWorkspace({
 
       {isLegacyBlocked && (
         <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-warning/30 bg-warning/10 px-4 py-2.5 text-sm text-warning">
-          <span>This document uses an unsupported legacy content format and is shown read-only.</span>
+          <span>
+            This document uses an unsupported legacy content format and is shown
+            read-only.
+          </span>
           {canEditBase && (
-            <Button type="button" size="sm" variant="secondary" onClick={() => setIsLegacyDialogOpen(true)}>
+            <Button
+              type="button"
+              size="sm"
+              variant="secondary"
+              onClick={() => setIsLegacyDialogOpen(true)}
+            >
               Convert to rich text
             </Button>
           )}
@@ -654,8 +777,16 @@ function DocumentEditorWorkspace({
 
       {hasRemoteUpdate && !isConflictOpen && (
         <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-danger/30 bg-danger/10 px-4 py-2.5 text-sm text-danger">
-          <span>A newer server revision is available. Saving is paused so your local draft cannot overwrite it.</span>
-          <Button type="button" size="sm" variant="secondary" onClick={() => setIsConflictOpen(true)}>
+          <span>
+            A newer server revision is available. Saving is paused so your local
+            draft cannot overwrite it.
+          </span>
+          <Button
+            type="button"
+            size="sm"
+            variant="secondary"
+            onClick={() => setIsConflictOpen(true)}
+          >
             Review conflict
           </Button>
         </div>
@@ -664,8 +795,16 @@ function DocumentEditorWorkspace({
       {membersError && (
         <div className="rounded-lg border border-warning/30 bg-warning/10 px-4 py-3 text-sm text-warning">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <span>Project member details could not be loaded. Admin-only actions remain disabled until they are available.</span>
-            <Button type="button" size="sm" variant="secondary" onClick={onRetryMembers}>
+            <span>
+              Project member details could not be loaded. Admin-only actions
+              remain disabled until they are available.
+            </span>
+            <Button
+              type="button"
+              size="sm"
+              variant="secondary"
+              onClick={onRetryMembers}
+            >
               Retry
             </Button>
           </div>
@@ -705,7 +844,9 @@ function DocumentEditorWorkspace({
       />
 
       <div className="grid min-w-0 grid-cols-1 gap-5 xl:grid-cols-12">
-        <div className={`min-w-0 ${isFocusMode ? "xl:col-span-12" : "xl:col-span-8"}`}>
+        <div
+          className={`min-w-0 ${isFocusMode ? "xl:col-span-12" : "xl:col-span-8"}`}
+        >
           {mode === "editing" && editor && (
             <DocumentEditorToolbar
               editor={editor}
@@ -721,7 +862,9 @@ function DocumentEditorWorkspace({
             isFocusMode={isFocusMode}
             onToggleFocusMode={() => setIsFocusMode((value) => !value)}
             onShowHelp={() =>
-              toast.info("Shortcuts: Ctrl/Cmd+B bold, Ctrl/Cmd+I italic, Ctrl/Cmd+S save, Ctrl/Cmd+Z undo.")
+              toast.info(
+                "Shortcuts: Ctrl/Cmd+B bold, Ctrl/Cmd+I italic, Ctrl/Cmd+S save, Ctrl/Cmd+Z undo.",
+              )
             }
           />
         </div>
@@ -757,7 +900,10 @@ function DocumentEditorWorkspace({
               canInvite={canInvite}
               onInvite={() => setIsInviteOpen(true)}
             />
-            <DocumentActivityPanel projectId={projectId} documentId={document._id} />
+            <DocumentActivityPanel
+              projectId={projectId}
+              documentId={document._id}
+            />
           </div>
         )}
       </div>
@@ -778,7 +924,9 @@ function DocumentEditorWorkspace({
         errorMessage={saveError}
         onStay={unsavedGuard.cancelNavigation}
         onDiscardAndLeave={handleDiscardAndLeave}
-        onSaveAndLeave={() => persistSave(() => unsavedGuard.navigateToPendingAfterSave())}
+        onSaveAndLeave={() =>
+          persistSave(() => unsavedGuard.navigateToPendingAfterSave())
+        }
       />
 
       <DocumentLegacyContentDialog
@@ -824,24 +972,50 @@ export function DocumentEditorPage() {
   }, [workspaceId, projectId, documentId]);
 
   const isDocumentInaccessible =
-    documentQuery.isError && (documentQuery.error?.status === 403 || documentQuery.error?.status === 404);
+    documentQuery.isError &&
+    (documentQuery.error?.status === 403 ||
+      documentQuery.error?.status === 404);
   const isProjectInaccessible =
-    projectQuery.isError && (projectQuery.error?.status === 403 || projectQuery.error?.status === 404);
+    projectQuery.isError &&
+    (projectQuery.error?.status === 403 || projectQuery.error?.status === 404);
 
   useEffect(() => {
-    if (!isDocumentInaccessible || hasShownDocumentInaccessibleToast.current || !workspaceId || !projectId) return;
+    if (
+      !isDocumentInaccessible ||
+      hasShownDocumentInaccessibleToast.current ||
+      !workspaceId ||
+      !projectId
+    )
+      return;
     hasShownDocumentInaccessibleToast.current = true;
     toast.error(
-      documentQuery.error?.status === 403 ? "You do not have access to this document." : "This document no longer exists."
+      documentQuery.error?.status === 403
+        ? "You do not have access to this document."
+        : "This document no longer exists.",
     );
-    navigate(`/workspaces/${workspaceId}/projects/${projectId}/documents`, { replace: true });
-  }, [isDocumentInaccessible, documentQuery.error, navigate, workspaceId, projectId]);
+    navigate(`/workspaces/${workspaceId}/projects/${projectId}/documents`, {
+      replace: true,
+    });
+  }, [
+    isDocumentInaccessible,
+    documentQuery.error,
+    navigate,
+    workspaceId,
+    projectId,
+  ]);
 
   useEffect(() => {
-    if (!isProjectInaccessible || hasShownProjectInaccessibleToast.current || !workspaceId) return;
+    if (
+      !isProjectInaccessible ||
+      hasShownProjectInaccessibleToast.current ||
+      !workspaceId
+    )
+      return;
     hasShownProjectInaccessibleToast.current = true;
     toast.error(
-      projectQuery.error?.status === 403 ? "You do not have access to this project." : "This project is no longer accessible."
+      projectQuery.error?.status === 403
+        ? "You do not have access to this project."
+        : "This project is no longer accessible.",
     );
     navigate(`/workspaces/${workspaceId}#projects`, { replace: true });
   }, [isProjectInaccessible, projectQuery.error, navigate, workspaceId]);
@@ -858,15 +1032,22 @@ export function DocumentEditorPage() {
     hasShownWorkspaceNotFoundToast.current = true;
     toast.error("This workspace is no longer accessible.");
     navigate("/dashboard", { replace: true });
-  }, [workspaceQuery.isError, workspaceQuery.error, isProjectInaccessible, navigate]);
+  }, [
+    workspaceQuery.isError,
+    workspaceQuery.error,
+    isProjectInaccessible,
+    navigate,
+  ]);
 
   useEffect(() => {
     const project = projectQuery.data;
     const doc = documentQuery.data;
     if (!workspaceId || !projectId) return;
 
-    const projectMismatch = projectQuery.isSuccess && project && project.workspace !== workspaceId;
-    const documentMismatch = documentQuery.isSuccess && doc && doc.project !== projectId;
+    const projectMismatch =
+      projectQuery.isSuccess && project && project.workspace !== workspaceId;
+    const documentMismatch =
+      documentQuery.isSuccess && doc && doc.project !== projectId;
 
     if (!projectMismatch && !documentMismatch) {
       hasShownMismatchToast.current = false;
@@ -878,29 +1059,57 @@ export function DocumentEditorPage() {
     toast.error(
       projectMismatch
         ? "This project does not belong to the selected workspace."
-        : "This document does not belong to this project."
+        : "This document does not belong to this project.",
     );
-    navigate(`/workspaces/${workspaceId}/projects/${projectId}/documents`, { replace: true });
-  }, [workspaceId, projectId, projectQuery.isSuccess, projectQuery.data, documentQuery.isSuccess, documentQuery.data, navigate]);
+    navigate(`/workspaces/${workspaceId}/projects/${projectId}/documents`, {
+      replace: true,
+    });
+  }, [
+    workspaceId,
+    projectId,
+    projectQuery.isSuccess,
+    projectQuery.data,
+    documentQuery.isSuccess,
+    documentQuery.data,
+    navigate,
+  ]);
 
   if (!workspaceId || !projectId || !documentId) return null;
 
-  if (workspaceQuery.isLoading || projectQuery.isLoading || documentQuery.isLoading || membersQuery.isLoading) {
+  if (
+    workspaceQuery.isLoading ||
+    projectQuery.isLoading ||
+    documentQuery.isLoading ||
+    membersQuery.isLoading
+  ) {
     return <DocumentEditorSkeleton />;
   }
 
   if (isDocumentInaccessible || isProjectInaccessible) return null;
-  if (workspaceQuery.isError && workspaceQuery.error?.status === 404) return null;
+  if (workspaceQuery.isError && workspaceQuery.error?.status === 404)
+    return null;
 
   if (documentQuery.isError) {
     return (
       <div className="rounded-xl border border-danger/30 bg-danger/5 px-6 py-10 text-center">
-        <p className="text-body">{documentQuery.error?.message ?? "Unable to load this document."}</p>
+        <p className="text-body">
+          {documentQuery.error?.message ?? "Unable to load this document."}
+        </p>
         <div className="mt-4 flex justify-center gap-2">
-          <Button variant="secondary" onClick={() => void documentQuery.refetch()}>
+          <Button
+            variant="secondary"
+            onClick={() => void documentQuery.refetch()}
+          >
             Retry
           </Button>
-          <Button variant="secondary" onClick={() => navigate(`/workspaces/${workspaceId}/projects/${projectId}/documents`)}>
+          <Button
+            variant="secondary"
+            onClick={() =>
+              navigate(
+                `/workspaces/${workspaceId}/projects/${projectId}/documents`,
+              )
+            }
+          >
             Back to Documents
           </Button>
         </div>
@@ -912,7 +1121,9 @@ export function DocumentEditorPage() {
     return (
       <div className="rounded-xl border border-danger/30 bg-danger/5 px-6 py-10 text-center">
         <p className="text-body">
-          {projectQuery.error?.message ?? workspaceQuery.error?.message ?? "Unable to load this document's project."}
+          {projectQuery.error?.message ??
+            workspaceQuery.error?.message ??
+            "Unable to load this document's project."}
         </p>
         <div className="mt-4 flex justify-center gap-2">
           <Button
@@ -935,7 +1146,9 @@ export function DocumentEditorPage() {
   if (!document || !project || !workspace) return null;
 
   const members = membersQuery.data ?? [];
-  const role = deriveProjectRole(members, currentUserId) ?? (membersQuery.isError ? "member" : undefined);
+  const role =
+    deriveProjectRole(members, currentUserId) ??
+    (membersQuery.isError ? "member" : undefined);
 
   return (
     <DocumentEditorWorkspace

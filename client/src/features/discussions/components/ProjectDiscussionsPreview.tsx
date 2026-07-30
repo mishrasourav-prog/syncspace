@@ -44,7 +44,10 @@ export function ProjectDiscussionsPreview({
       className="scroll-mt-24 rounded-xl border border-border bg-surface/60 p-4 shadow-soft"
     >
       <div className="mb-3 flex items-center justify-between gap-2">
-        <h2 id="project-discussions-heading" className="text-h3 text-foreground">
+        <h2
+          id="project-discussions-heading"
+          className="text-h3 text-foreground"
+        >
           Discussions
           {!discussionsQuery.isLoading && !discussionsQuery.isError && (
             <span className="ml-2 text-caption">{countLabel}</span>

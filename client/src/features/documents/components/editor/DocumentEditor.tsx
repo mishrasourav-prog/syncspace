@@ -22,8 +22,7 @@ export function DocumentEditor({ editor, mode }: DocumentEditorProps) {
       <div className="min-w-0 overflow-x-auto">
         <div
           className={`${EDITOR_FRAME_CLASS} rounded-t-xl`}
-          // This HTML is generated from the configured Tiptap schema, never
-          // from an arbitrary server HTML string.
+
           dangerouslySetInnerHTML={{ __html: editor.getHTML() }}
         />
       </div>
@@ -32,7 +31,10 @@ export function DocumentEditor({ editor, mode }: DocumentEditorProps) {
 
   return (
     <div className="min-w-0 overflow-x-auto">
-      <EditorContent editor={editor} className={`${EDITOR_FRAME_CLASS} border-t-0`} />
+      <EditorContent
+        editor={editor}
+        className={`${EDITOR_FRAME_CLASS} border-t-0`}
+      />
     </div>
   );
 }

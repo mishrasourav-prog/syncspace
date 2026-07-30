@@ -31,7 +31,8 @@ const FAQ_ITEMS = [
   },
   {
     question: "Does SyncSpace support offline work?",
-    answer: "No. SyncSpace currently requires an active connection to fetch and synchronize workspace data.",
+    answer:
+      "No. SyncSpace currently requires an active connection to fetch and synchronize workspace data.",
   },
 ] as const;
 
@@ -39,13 +40,21 @@ export function FAQ() {
   const [openIndex, setOpenIndex] = useState<number>(0);
 
   return (
-    <section id="faq" className="scroll-mt-20 border-t border-border px-4 py-16 sm:px-6 sm:py-20 lg:py-28">
+    <section
+      id="faq"
+      className="scroll-mt-20 border-t border-border px-4 py-16 sm:px-6 sm:py-20 lg:py-28"
+    >
       <div className="mx-auto max-w-3xl">
         <Reveal className="mb-10 text-center sm:mb-12">
-          <span className="text-xs font-medium uppercase tracking-wide text-secondary">FAQ</span>
-          <h2 className="mt-3 text-h1 text-foreground">Questions, answered honestly.</h2>
+          <span className="text-xs font-medium uppercase tracking-wide text-secondary">
+            FAQ
+          </span>
+          <h2 className="mt-3 text-h1 text-foreground">
+            Questions, answered honestly.
+          </h2>
           <p className="mx-auto mt-4 max-w-xl text-sm leading-relaxed text-muted">
-            The answers below describe the capabilities that are available in the current application.
+            The answers below describe the capabilities that are available in
+            the current application.
           </p>
         </Reveal>
 
@@ -63,7 +72,9 @@ export function FAQ() {
                     aria-expanded={isOpen}
                     aria-controls={panelId}
                   >
-                    <span className="text-sm font-medium text-foreground">{item.question}</span>
+                    <span className="text-sm font-medium text-foreground">
+                      {item.question}
+                    </span>
                     <ChevronDown
                       className={`h-4 w-4 shrink-0 text-muted transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`}
                     />
@@ -77,7 +88,9 @@ export function FAQ() {
                         exit={{ height: 0, opacity: 0 }}
                         transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
                       >
-                        <p className="px-4 pb-4 text-sm leading-relaxed text-muted sm:px-5 sm:pb-5">{item.answer}</p>
+                        <p className="px-4 pb-4 text-sm leading-relaxed text-muted sm:px-5 sm:pb-5">
+                          {item.answer}
+                        </p>
                       </motion.div>
                     ) : null}
                   </AnimatePresence>

@@ -1,7 +1,10 @@
 import { Avatar } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatDateTime, formatRelativeTime } from "@/lib/date";
-import { getActivityActionCopy, getActivityActionIcon } from "@/features/activity/activity.display";
+import {
+  getActivityActionCopy,
+  getActivityActionIcon,
+} from "@/features/activity/activity.display";
 import { useProjectActivitiesQuery } from "@/features/activity/hooks/useActivityQueries";
 
 interface DiscussionActivityRailProps {
@@ -21,7 +24,10 @@ const SUPPORTED_DISCUSSION_ACTIVITY = new Set([
   "discussion.reply_deleted",
 ]);
 
-export function DiscussionActivityRail({ projectId, discussionId }: DiscussionActivityRailProps) {
+export function DiscussionActivityRail({
+  projectId,
+  discussionId,
+}: DiscussionActivityRailProps) {
   const activitiesQuery = useProjectActivitiesQuery(projectId);
 
   const discussionActivities = (activitiesQuery.data ?? [])
@@ -40,7 +46,9 @@ export function DiscussionActivityRail({ projectId, discussionId }: DiscussionAc
   return (
     <section className="rounded-xl border border-border bg-surface/60 p-4 shadow-soft">
       <h2 className="text-h3 mb-1 text-foreground">Recent Activity</h2>
-      <p className="mb-3 text-[11px] text-muted/80">Recent activity from the latest project events.</p>
+      <p className="mb-3 text-[11px] text-muted/80">
+        Recent activity from the latest project events.
+      </p>
 
       {activitiesQuery.isLoading && (
         <div className="space-y-3">
@@ -69,38 +77,55 @@ export function DiscussionActivityRail({ projectId, discussionId }: DiscussionAc
         </div>
       )}
 
-      {!activitiesQuery.isLoading && !activitiesQuery.isError && discussionActivities.length === 0 && (
-        <p className="text-sm text-muted">No recent activity is available for this discussion.</p>
-      )}
+      {!activitiesQuery.isLoading &&
+        !activitiesQuery.isError &&
+        discussionActivities.length === 0 && (
+          <p className="text-sm text-muted">
+            No recent activity is available for this discussion.
+          </p>
+        )}
 
-      {!activitiesQuery.isLoading && !activitiesQuery.isError && discussionActivities.length > 0 && (
-        <ul className="space-y-3">
-          {discussionActivities.map((activity) => {
-            const Icon = getActivityActionIcon(activity.action);
+      {!activitiesQuery.isLoading &&
+        !activitiesQuery.isError &&
+        discussionActivities.length > 0 && (
+          <ul className="space-y-3">
+            {discussionActivities.map((activity) => {
+              const Icon = getActivityActionIcon(activity.action);
 
-            return (
-              <li key={activity._id} className="flex gap-2.5">
-                {activity.actor ? (
-                  <Avatar src={activity.actor.avatar} name={activity.actor.name} size="sm" />
-                ) : (
-                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-border/50 text-muted">
-                    <Icon className="h-3.5 w-3.5" />
-                  </span>
-                )}
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm text-foreground">
-                    <span className="font-medium">{activity.actor?.name ?? "System"}</span>{" "}
-                    <span className="text-muted">{getActivityActionCopy(activity.action)}</span>
-                  </p>
-                  <p className="mt-0.5 text-[11px] text-muted/70" title={formatDateTime(activity.createdAt)}>
-                    {formatRelativeTime(activity.createdAt)}
-                  </p>
-                </div>
-              </li>
-            );
-          })}
-        </ul>
-      )}
+              return (
+                <li key={activity._id} className="flex gap-2.5">
+                  {activity.actor ? (
+                    <Avatar
+                      src={activity.actor.avatar}
+                      name={activity.actor.name}
+                      size="sm"
+                    />
+                  ) : (
+                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-border/50 text-muted">
+                      <Icon className="h-3.5 w-3.5" />
+                    </span>
+                  )}
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm text-foreground">
+                      <span className="font-medium">
+                        {activity.actor?.name ?? "System"}
+                      </span>{" "}
+                      <span className="text-muted">
+                        {getActivityActionCopy(activity.action)}
+                      </span>
+                    </p>
+                    <p
+                      className="mt-0.5 text-[11px] text-muted/70"
+                      title={formatDateTime(activity.createdAt)}
+                    >
+                      {formatRelativeTime(activity.createdAt)}
+                    </p>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        )}
     </section>
   );
 }

@@ -1,10 +1,6 @@
-import {
-  Router,
-} from "express";
+import { Router } from "express";
 
-import {
-  authenticateUser,
-} from "../../middlewares/auth.middleware";
+import { authenticateUser } from "../../middlewares/auth.middleware";
 
 import {
   archiveWorkspace,
@@ -18,58 +14,35 @@ import {
   updateWorkspace,
 } from "./workspace.controller";
 
-import {
-  uploadWorkspaceAvatar,
-} from "./workspace.upload";
+import { uploadWorkspaceAvatar } from "./workspace.upload";
 
-const router =
-  Router();
+const router = Router();
 
-router.use(
-  authenticateUser
-);
+router.use(authenticateUser);
 
-router.post(
-  "/",
-  createWorkspace
-);
+router.post("/", createWorkspace);
 
-router.get(
-  "/",
-  getUserWorkspaces
-);
+router.get("/", getUserWorkspaces);
 
 router.post(
   "/:workspaceId/avatar",
   authorizeWorkspaceAvatarManagement,
   uploadWorkspaceAvatar,
-  replaceWorkspaceAvatar
+  replaceWorkspaceAvatar,
 );
 
 router.delete(
   "/:workspaceId/avatar",
   authorizeWorkspaceAvatarManagement,
-  removeWorkspaceAvatar
+  removeWorkspaceAvatar,
 );
 
-router.get(
-  "/:workspaceId",
-  getWorkspace
-);
+router.get("/:workspaceId", getWorkspace);
 
-router.patch(
-  "/:workspaceId",
-  updateWorkspace
-);
+router.patch("/:workspaceId", updateWorkspace);
 
-router.patch(
-  "/:workspaceId/archive",
-  archiveWorkspace
-);
+router.patch("/:workspaceId/archive", archiveWorkspace);
 
-router.patch(
-  "/:workspaceId/restore",
-  restoreWorkspace
-);
+router.patch("/:workspaceId/restore", restoreWorkspace);
 
 export default router;

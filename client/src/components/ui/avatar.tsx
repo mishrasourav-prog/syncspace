@@ -47,7 +47,7 @@ export function Avatar({
         "relative flex shrink-0 items-center justify-center overflow-hidden bg-gradient-to-br from-primary/25 to-secondary/25 font-semibold text-foreground",
         square ? "rounded-lg" : "rounded-full",
         sizeClasses[size],
-        className
+        className,
       )}
       {...props}
     >

@@ -1,109 +1,55 @@
-import {
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
-import {
-  useNavigate,
-  useParams,
-  useSearchParams,
-} from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 
-import {
-  useQueryClient,
-} from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 
-import {
-  FileText,
-  Plus,
-} from "lucide-react";
+import { FileText, Plus } from "lucide-react";
 
-import {
-  toast,
-} from "sonner";
+import { toast } from "sonner";
 
-import {
-  useAuthStore,
-} from "@/app/store";
+import { useAuthStore } from "@/app/store";
 
-import {
-  Button,
-} from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 
-import {
-  Skeleton,
-} from "@/components/ui/skeleton";
+import { Skeleton } from "@/components/ui/skeleton";
 
-import {
-  useProjectMembersQuery,
-} from "@/features/project-members/hooks/useProjectMemberQueries";
+import { useProjectMembersQuery } from "@/features/project-members/hooks/useProjectMemberQueries";
 
-import {
-  ProjectReadOnlyBanner,
-} from "@/features/projects/components/overview/ProjectReadOnlyBanner";
+import { ProjectReadOnlyBanner } from "@/features/projects/components/overview/ProjectReadOnlyBanner";
 
-import {
-  deriveProjectRole,
-} from "@/features/projects/project.permissions";
+import { deriveProjectRole } from "@/features/projects/project.permissions";
 
-import {
-  useProjectQuery,
-} from "@/features/projects/hooks/useProjectQueries";
+import { useProjectQuery } from "@/features/projects/hooks/useProjectQueries";
 
-import {
-  useWorkspaceQuery,
-} from "@/features/workspaces/hooks/useWorkspaceQueries";
+import { useWorkspaceQuery } from "@/features/workspaces/hooks/useWorkspaceQueries";
 
-import {
-  socket,
-} from "@/realtime/socket";
+import { socket } from "@/realtime/socket";
 
-import {
-  CreateDocumentDialog,
-} from "../components/CreateDocumentDialog";
+import { CreateDocumentDialog } from "../components/CreateDocumentDialog";
 
 import {
   DocumentArchiveDialogs,
   type DocumentActionTarget,
 } from "../components/DocumentArchiveDialogs";
 
-import {
-  DocumentFilterToolbar,
-} from "../components/DocumentFilterToolbar";
+import { DocumentFilterToolbar } from "../components/DocumentFilterToolbar";
 
-import {
-  DocumentFiltersRail,
-} from "../components/DocumentFiltersRail";
+import { DocumentFiltersRail } from "../components/DocumentFiltersRail";
 
-import {
-  DocumentGridView,
-} from "../components/DocumentGridView";
+import { DocumentGridView } from "../components/DocumentGridView";
 
-import {
-  DocumentListView,
-} from "../components/DocumentListView";
+import { DocumentListView } from "../components/DocumentListView";
 
-import {
-  DocumentQuickActionsRail,
-} from "../components/DocumentQuickActionsRail";
+import { DocumentQuickActionsRail } from "../components/DocumentQuickActionsRail";
 
-import {
-  DocumentStateTabs,
-} from "../components/DocumentStateTabs";
+import { DocumentStateTabs } from "../components/DocumentStateTabs";
 
-import {
-  DocumentSummaryRail,
-} from "../components/DocumentSummaryRail";
+import { DocumentSummaryRail } from "../components/DocumentSummaryRail";
 
-import {
-  DocumentViewSwitcher,
-} from "../components/DocumentViewSwitcher";
+import { DocumentViewSwitcher } from "../components/DocumentViewSwitcher";
 
-import {
-  RenameDocumentDialog,
-} from "../components/RenameDocumentDialog";
+import { RenameDocumentDialog } from "../components/RenameDocumentDialog";
 
 import {
   applyClientDocumentFilters,
@@ -127,17 +73,11 @@ import {
   getDocumentsReadOnlyReason,
 } from "../document.permissions";
 
-import {
-  documentQueryKeys,
-} from "../document.queryKeys";
+import { documentQueryKeys } from "../document.queryKeys";
 
-import {
-  useProjectDocumentsInfiniteQuery,
-} from "../hooks/useDocumentQueries";
+import { useProjectDocumentsInfiniteQuery } from "../hooks/useDocumentQueries";
 
-import type {
-  ProjectDocument,
-} from "../types/document.types";
+import type { ProjectDocument } from "../types/document.types";
 
 function ProjectDocumentsSkeleton() {
   return (
@@ -148,46 +88,20 @@ function ProjectDocumentsSkeleton() {
       </div>
 
       <div className="flex flex-wrap gap-2">
-        {
-          Array.from({
-            length:
-              4,
-          }).map(
-            (
-              _,
-              index
-            ) => (
-              <Skeleton
-                key={
-                  index
-                }
-                className="h-9 w-28"
-              />
-            )
-          )
-        }
+        {Array.from({
+          length: 4,
+        }).map((_, index) => (
+          <Skeleton key={index} className="h-9 w-28" />
+        ))}
       </div>
 
       <div className="grid min-w-0 grid-cols-1 gap-5 xl:grid-cols-12">
         <div className="space-y-2 xl:col-span-9">
-          {
-            Array.from({
-              length:
-                6,
-            }).map(
-              (
-                _,
-                index
-              ) => (
-                <Skeleton
-                  key={
-                    index
-                  }
-                  className="h-20 w-full rounded-lg"
-                />
-              )
-            )
-          }
+          {Array.from({
+            length: 6,
+          }).map((_, index) => (
+            <Skeleton key={index} className="h-20 w-full rounded-lg" />
+          ))}
         </div>
 
         <div className="space-y-4 xl:col-span-3">
@@ -209,18 +123,9 @@ function QueryErrorPanel({
 }) {
   return (
     <div className="flex flex-col items-center gap-3 rounded-xl border border-danger/30 bg-danger/5 px-6 py-10 text-center">
-      <p className="text-body">
-        {
-          message
-        }
-      </p>
+      <p className="text-body">{message}</p>
 
-      <Button
-        variant="secondary"
-        onClick={
-          onRetry
-        }
-      >
+      <Button variant="secondary" onClick={onRetry}>
         Retry
       </Button>
     </div>
@@ -228,887 +133,430 @@ function QueryErrorPanel({
 }
 
 export function ProjectDocumentsPage() {
-  const {
-    workspaceId,
+  const { workspaceId, projectId } = useParams<{
+    workspaceId: string;
+    projectId: string;
+  }>();
+
+  const navigate = useNavigate();
+
+  const queryClient = useQueryClient();
+
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const currentUserId = useAuthStore((state) => state.user?._id);
+
+  const [now] = useState(() => Date.now());
+
+  const workspaceQuery = useWorkspaceQuery(workspaceId);
+
+  const projectQuery = useProjectQuery(projectId);
+
+  const membersQuery = useProjectMembersQuery(projectId);
+
+  const filters = useMemo(
+    () => parseDocumentFilters(searchParams),
+    [searchParams],
+  );
+
+  const isProjectRouteValid = Boolean(
+    projectId &&
+    workspaceId &&
+    projectQuery.isSuccess &&
+    workspaceQuery.isSuccess &&
+    projectQuery.data?.workspace === workspaceId,
+  );
+
+  const activeDocsQuery = useProjectDocumentsInfiniteQuery(
     projectId,
-  } =
-    useParams<{
-      workspaceId: string;
-      projectId: string;
-    }>();
+    false,
+    filters.q,
+    isProjectRouteValid,
+  );
 
-  const navigate =
-    useNavigate();
+  const archivedDocsQuery = useProjectDocumentsInfiniteQuery(
+    projectId,
+    true,
+    filters.q,
+    isProjectRouteValid,
+  );
 
-  const queryClient =
-    useQueryClient();
+  const [createOpen, setCreateOpen] = useState(false);
 
-  const [
-    searchParams,
-    setSearchParams,
-  ] =
-    useSearchParams();
+  const [renaming, setRenaming] = useState<ProjectDocument | null>(null);
 
-  const currentUserId =
-    useAuthStore(
-      (
-        state
-      ) =>
-        state.user?._id
-    );
+  const [actionTarget, setActionTarget] = useState<DocumentActionTarget | null>(
+    null,
+  );
 
-  const [
-    now,
-  ] =
-    useState(
-      () =>
-        Date.now()
-    );
+  const hasShownInaccessibleToast = useRef(false);
 
-  const workspaceQuery =
-    useWorkspaceQuery(
-      workspaceId
-    );
+  const hasShownWorkspaceNotFoundToast = useRef(false);
 
-  const projectQuery =
-    useProjectQuery(
-      projectId
-    );
-
-  const membersQuery =
-    useProjectMembersQuery(
-      projectId
-    );
-
-  const filters =
-    useMemo(
-      () =>
-        parseDocumentFilters(
-          searchParams
-        ),
-      [
-        searchParams,
-      ]
-    );
-
-  const isProjectRouteValid =
-    Boolean(
-      projectId &&
-        workspaceId &&
-        projectQuery.isSuccess &&
-        workspaceQuery.isSuccess &&
-        projectQuery.data
-          ?.workspace ===
-          workspaceId
-    );
-
-  const activeDocsQuery =
-    useProjectDocumentsInfiniteQuery(
-      projectId,
-      false,
-      filters.q,
-      isProjectRouteValid
-    );
-
-  const archivedDocsQuery =
-    useProjectDocumentsInfiniteQuery(
-      projectId,
-      true,
-      filters.q,
-      isProjectRouteValid
-    );
-
-  const [
-    createOpen,
-    setCreateOpen,
-  ] =
-    useState(
-      false
-    );
-
-  const [
-    renaming,
-    setRenaming,
-  ] =
-    useState<ProjectDocument | null>(
-      null
-    );
-
-  const [
-    actionTarget,
-    setActionTarget,
-  ] =
-    useState<DocumentActionTarget | null>(
-      null
-    );
-
-  const hasShownInaccessibleToast =
-    useRef(
-      false
-    );
-
-  const hasShownWorkspaceNotFoundToast =
-    useRef(
-      false
-    );
-
-  const hasHandledWorkspaceMismatch =
-    useRef(
-      false
-    );
+  const hasHandledWorkspaceMismatch = useRef(false);
 
   const isProjectInaccessible =
     projectQuery.isError &&
-    (
-      projectQuery.error
-        ?.status ===
-        403 ||
-      projectQuery.error
-        ?.status ===
-        404
+    (projectQuery.error?.status === 403 || projectQuery.error?.status === 404);
+
+  useEffect(() => {
+    hasShownInaccessibleToast.current = false;
+    hasShownWorkspaceNotFoundToast.current = false;
+    hasHandledWorkspaceMismatch.current = false;
+  }, [workspaceId, projectId]);
+
+  useEffect(() => {
+    if (!projectId || !isProjectRouteValid) {
+      return;
+    }
+
+    socket.emit("project:join", projectId, () => undefined);
+
+    const handleDocumentChanged = (payload: { projectId: string }): void => {
+      if (payload.projectId !== projectId) {
+        return;
+      }
+
+      void queryClient.invalidateQueries({
+        queryKey: documentQueryKeys.project(projectId),
+      });
+    };
+
+    socket.on("document:created", handleDocumentChanged);
+    socket.on("document:updated", handleDocumentChanged);
+    socket.on("document:archived", handleDocumentChanged);
+    socket.on("document:restored", handleDocumentChanged);
+
+    return () => {
+      socket.off("document:created", handleDocumentChanged);
+      socket.off("document:updated", handleDocumentChanged);
+      socket.off("document:archived", handleDocumentChanged);
+      socket.off("document:restored", handleDocumentChanged);
+
+      socket.emit("project:leave", projectId, () => undefined);
+    };
+  }, [projectId, isProjectRouteValid, queryClient]);
+
+  useEffect(() => {
+    if (!isProjectInaccessible || hasShownInaccessibleToast.current) {
+      return;
+    }
+
+    hasShownInaccessibleToast.current = true;
+
+    toast.error(
+      projectQuery.error?.status === 403
+        ? "You do not have access to this project."
+        : "This project is no longer accessible.",
     );
 
-  useEffect(
-    () => {
-      hasShownInaccessibleToast.current =
-        false;
-      hasShownWorkspaceNotFoundToast.current =
-        false;
-      hasHandledWorkspaceMismatch.current =
-        false;
-    },
-    [
-      workspaceId,
-      projectId,
-    ]
-  );
-
-  useEffect(
-    () => {
-      if (
-        !projectId ||
-        !isProjectRouteValid
-      ) {
-        return;
-      }
-
-      socket.emit(
-        "project:join",
-        projectId,
-        () => undefined
-      );
-
-      const handleDocumentChanged =
-        (
-          payload: {
-            projectId: string;
-          }
-        ): void => {
-          if (
-            payload.projectId !==
-            projectId
-          ) {
-            return;
-          }
-
-          void queryClient.invalidateQueries({
-            queryKey:
-              documentQueryKeys.project(
-                projectId
-              ),
-          });
-        };
-
-      socket.on(
-        "document:created",
-        handleDocumentChanged
-      );
-      socket.on(
-        "document:updated",
-        handleDocumentChanged
-      );
-      socket.on(
-        "document:archived",
-        handleDocumentChanged
-      );
-      socket.on(
-        "document:restored",
-        handleDocumentChanged
-      );
-
-      return () => {
-        socket.off(
-          "document:created",
-          handleDocumentChanged
-        );
-        socket.off(
-          "document:updated",
-          handleDocumentChanged
-        );
-        socket.off(
-          "document:archived",
-          handleDocumentChanged
-        );
-        socket.off(
-          "document:restored",
-          handleDocumentChanged
-        );
-
-        socket.emit(
-          "project:leave",
-          projectId,
-          () => undefined
-        );
-      };
-    },
-    [
-      projectId,
-      isProjectRouteValid,
-      queryClient,
-    ]
-  );
-
-  useEffect(
-    () => {
-      if (
-        !isProjectInaccessible ||
-        hasShownInaccessibleToast.current
-      ) {
-        return;
-      }
-
-      hasShownInaccessibleToast.current =
-        true;
-
-      toast.error(
-        projectQuery.error
-          ?.status ===
-          403
-          ? "You do not have access to this project."
-          : "This project is no longer accessible."
-      );
-
-      navigate(
-        workspaceId
-          ? `/workspaces/${workspaceId}#projects`
-          : "/dashboard",
-        {
-          replace:
-            true,
-        }
-      );
-    },
-    [
-      isProjectInaccessible,
-      projectQuery.error,
-      navigate,
-      workspaceId,
-    ]
-  );
-
-  useEffect(
-    () => {
-      if (
-        !workspaceQuery.isError ||
-        workspaceQuery.error
-          ?.status !==
-          404 ||
-        isProjectInaccessible ||
-        hasShownWorkspaceNotFoundToast.current
-      ) {
-        return;
-      }
-
-      hasShownWorkspaceNotFoundToast.current =
-        true;
-
-      toast.error(
-        "This workspace is no longer accessible."
-      );
-
-      navigate(
-        "/dashboard",
-        {
-          replace:
-            true,
-        }
-      );
-    },
-    [
-      workspaceQuery.isError,
-      workspaceQuery.error,
-      isProjectInaccessible,
-      navigate,
-    ]
-  );
-
-  useEffect(
-    () => {
-      const project =
-        projectQuery.data;
-
-      if (
-        !workspaceId ||
-        !projectQuery.isSuccess ||
-        !project
-      ) {
-        return;
-      }
-
-      if (
-        project.workspace ===
-        workspaceId
-      ) {
-        hasHandledWorkspaceMismatch.current =
-          false;
-        return;
-      }
-
-      if (
-        hasHandledWorkspaceMismatch.current
-      ) {
-        return;
-      }
-
-      hasHandledWorkspaceMismatch.current =
-        true;
-
-      toast.error(
-        "This project does not belong to the selected workspace."
-      );
-
-      navigate(
-        `/workspaces/${workspaceId}#projects`,
-        {
-          replace:
-            true,
-        }
-      );
-    },
-    [
-      workspaceId,
-      projectQuery.isSuccess,
-      projectQuery.data,
-      navigate,
-    ]
-  );
-
-  function updateParams(
-    mutator: (
-      next: URLSearchParams
-    ) => void
-  ): void {
-    const next =
-      new URLSearchParams(
-        searchParams
-      );
-
-    mutator(
-      next
-    );
-
-    setSearchParams(
-      next,
+    navigate(
+      workspaceId ? `/workspaces/${workspaceId}#projects` : "/dashboard",
       {
-        replace:
-          true,
-      }
+        replace: true,
+      },
     );
+  }, [isProjectInaccessible, projectQuery.error, navigate, workspaceId]);
+
+  useEffect(() => {
+    if (
+      !workspaceQuery.isError ||
+      workspaceQuery.error?.status !== 404 ||
+      isProjectInaccessible ||
+      hasShownWorkspaceNotFoundToast.current
+    ) {
+      return;
+    }
+
+    hasShownWorkspaceNotFoundToast.current = true;
+
+    toast.error("This workspace is no longer accessible.");
+
+    navigate("/dashboard", {
+      replace: true,
+    });
+  }, [
+    workspaceQuery.isError,
+    workspaceQuery.error,
+    isProjectInaccessible,
+    navigate,
+  ]);
+
+  useEffect(() => {
+    const project = projectQuery.data;
+
+    if (!workspaceId || !projectQuery.isSuccess || !project) {
+      return;
+    }
+
+    if (project.workspace === workspaceId) {
+      hasHandledWorkspaceMismatch.current = false;
+      return;
+    }
+
+    if (hasHandledWorkspaceMismatch.current) {
+      return;
+    }
+
+    hasHandledWorkspaceMismatch.current = true;
+
+    toast.error("This project does not belong to the selected workspace.");
+
+    navigate(`/workspaces/${workspaceId}#projects`, {
+      replace: true,
+    });
+  }, [workspaceId, projectQuery.isSuccess, projectQuery.data, navigate]);
+
+  function updateParams(mutator: (next: URLSearchParams) => void): void {
+    const next = new URLSearchParams(searchParams);
+
+    mutator(next);
+
+    setSearchParams(next, {
+      replace: true,
+    });
   }
 
-  function setSearch(
-    value: string
-  ): void {
-    updateParams(
-      (
-        next
-      ) => {
-        if (
-          value
-        ) {
-          next.set(
-            "q",
-            value
-          );
-        } else {
-          next.delete(
-            "q"
-          );
-        }
+  function setSearch(value: string): void {
+    updateParams((next) => {
+      if (value) {
+        next.set("q", value);
+      } else {
+        next.delete("q");
       }
-    );
+    });
   }
 
-  function setView(
-    view: DocumentView
-  ): void {
-    updateParams(
-      (
-        next
-      ) => {
-        if (
-          view ===
-          "list"
-        ) {
-          next.delete(
-            "view"
-          );
-        } else {
-          next.set(
-            "view",
-            view
-          );
-        }
+  function setView(view: DocumentView): void {
+    updateParams((next) => {
+      if (view === "list") {
+        next.delete("view");
+      } else {
+        next.set("view", view);
       }
-    );
+    });
   }
 
-  function setStateFilter(
-    state: DocumentState
-  ): void {
-    updateParams(
-      (
-        next
-      ) => {
-        if (
-          state ===
-          "all"
-        ) {
-          next.delete(
-            "state"
-          );
-        } else {
-          next.set(
-            "state",
-            state
-          );
-        }
+  function setStateFilter(state: DocumentState): void {
+    updateParams((next) => {
+      if (state === "all") {
+        next.delete("state");
+      } else {
+        next.set("state", state);
       }
-    );
+    });
   }
 
-  function setSort(
-    sort: DocumentSort
-  ): void {
-    updateParams(
-      (
-        next
-      ) => {
-        if (
-          sort ===
-          "newest"
-        ) {
-          next.delete(
-            "sort"
-          );
-        } else {
-          next.set(
-            "sort",
-            sort
-          );
-        }
+  function setSort(sort: DocumentSort): void {
+    updateParams((next) => {
+      if (sort === "newest") {
+        next.delete("sort");
+      } else {
+        next.set("sort", sort);
       }
-    );
+    });
   }
 
-  function setCreator(
-    creator: string | null
-  ): void {
-    updateParams(
-      (
-        next
-      ) => {
-        if (
-          creator
-        ) {
-          next.set(
-            "creator",
-            creator
-          );
-        } else {
-          next.delete(
-            "creator"
-          );
-        }
+  function setCreator(creator: string | null): void {
+    updateParams((next) => {
+      if (creator) {
+        next.set("creator", creator);
+      } else {
+        next.delete("creator");
       }
-    );
+    });
   }
 
-  function setUpdated(
-    updated: DocumentUpdatedFilter | null
-  ): void {
-    updateParams(
-      (
-        next
-      ) => {
-        if (
-          updated
-        ) {
-          next.set(
-            "updated",
-            updated
-          );
-        } else {
-          next.delete(
-            "updated"
-          );
-        }
+  function setUpdated(updated: DocumentUpdatedFilter | null): void {
+    updateParams((next) => {
+      if (updated) {
+        next.set("updated", updated);
+      } else {
+        next.delete("updated");
       }
-    );
+    });
   }
 
-  function setRevision(
-    revision: DocumentRevisionFilter
-  ): void {
-    updateParams(
-      (
-        next
-      ) => {
-        if (
-          revision ===
-          "any"
-        ) {
-          next.delete(
-            "revision"
-          );
-        } else {
-          next.set(
-            "revision",
-            revision
-          );
-        }
+  function setRevision(revision: DocumentRevisionFilter): void {
+    updateParams((next) => {
+      if (revision === "any") {
+        next.delete("revision");
+      } else {
+        next.set("revision", revision);
       }
-    );
+    });
   }
 
   function clearAllFilters(): void {
-    updateParams(
-      (
-        next
-      ) => {
-        next.delete(
-          "q"
-        );
-        next.delete(
-          "state"
-        );
-        next.delete(
-          "sort"
-        );
-        next.delete(
-          "creator"
-        );
-        next.delete(
-          "updated"
-        );
-        next.delete(
-          "revision"
-        );
-      }
-    );
+    updateParams((next) => {
+      next.delete("q");
+      next.delete("state");
+      next.delete("sort");
+      next.delete("creator");
+      next.delete("updated");
+      next.delete("revision");
+    });
   }
 
-  if (
-    !workspaceId ||
-    !projectId
-  ) {
+  if (!workspaceId || !projectId) {
     return null;
   }
 
-  if (
-    projectQuery.isLoading ||
-    workspaceQuery.isLoading
-  ) {
-    return (
-      <ProjectDocumentsSkeleton />
-    );
+  if (projectQuery.isLoading || workspaceQuery.isLoading) {
+    return <ProjectDocumentsSkeleton />;
   }
 
-  if (
-    projectQuery.isError
-  ) {
+  if (projectQuery.isError) {
     if (
-      projectQuery.error
-        ?.status ===
-        403 ||
-      projectQuery.error
-        ?.status ===
-        404
+      projectQuery.error?.status === 403 ||
+      projectQuery.error?.status === 404
     ) {
       return null;
     }
 
     return (
       <QueryErrorPanel
-        message={
-          projectQuery.error
-            ?.message ??
-          "Unable to load this project."
-        }
-        onRetry={
-          () => {
-            void projectQuery.refetch();
-          }
-        }
+        message={projectQuery.error?.message ?? "Unable to load this project."}
+        onRetry={() => {
+          void projectQuery.refetch();
+        }}
       />
     );
   }
 
-  if (
-    workspaceQuery.isError
-  ) {
-    if (
-      workspaceQuery.error
-        ?.status ===
-        404
-    ) {
+  if (workspaceQuery.isError) {
+    if (workspaceQuery.error?.status === 404) {
       return null;
     }
 
     return (
       <QueryErrorPanel
         message={
-          workspaceQuery.error
-            ?.message ??
+          workspaceQuery.error?.message ??
           "Unable to load this project's workspace."
         }
-        onRetry={
-          () => {
-            void workspaceQuery.refetch();
-          }
-        }
+        onRetry={() => {
+          void workspaceQuery.refetch();
+        }}
       />
     );
   }
 
-  const project =
-    projectQuery.data;
+  const project = projectQuery.data;
 
-  const workspace =
-    workspaceQuery.data;
+  const workspace = workspaceQuery.data;
 
-  if (
-    !project ||
-    !workspace
-  ) {
+  if (!project || !workspace) {
     return null;
   }
 
-  const members =
-    membersQuery.data ??
-    [];
+  const members = membersQuery.data ?? [];
 
-  const role =
-    deriveProjectRole(
-      members,
-      currentUserId
-    );
+  const role = deriveProjectRole(members, currentUserId);
 
-  const permissionsAvailable =
-    !membersQuery.isLoading &&
-    !membersQuery.isError;
+  const permissionsAvailable = !membersQuery.isLoading && !membersQuery.isError;
 
-  const baseReadOnlyReason =
-    getDocumentsReadOnlyReason(
-      project,
-      workspace
-    );
+  const baseReadOnlyReason = getDocumentsReadOnlyReason(project, workspace);
 
-  const permissionReason =
-    membersQuery.isError
-      ? "Document permissions could not be verified. Retry the member request."
-      : membersQuery.isLoading
-        ? "Checking document permissions."
-        : null;
+  const permissionReason = membersQuery.isError
+    ? "Document permissions could not be verified. Retry the member request."
+    : membersQuery.isLoading
+      ? "Checking document permissions."
+      : null;
 
-  const readOnlyReason =
-    baseReadOnlyReason ??
-    permissionReason;
+  const readOnlyReason = baseReadOnlyReason ?? permissionReason;
 
   const canCreate =
-    permissionsAvailable &&
-    canCreateDocument(
-      project,
-      workspace,
-      role
-    );
+    permissionsAvailable && canCreateDocument(project, workspace, role);
 
-  const activeDocuments =
-    deduplicateDocuments(
-      activeDocsQuery.data
-        ?.pages.flatMap(
-          (
-            page
-          ) =>
-            page.documents
-        ) ??
-        []
-    );
+  const activeDocuments = deduplicateDocuments(
+    activeDocsQuery.data?.pages.flatMap((page) => page.documents) ?? [],
+  );
 
-  const archivedDocuments =
-    deduplicateDocuments(
-      archivedDocsQuery.data
-        ?.pages.flatMap(
-          (
-            page
-          ) =>
-            page.documents
-        ) ??
-        []
-    );
+  const archivedDocuments = deduplicateDocuments(
+    archivedDocsQuery.data?.pages.flatMap((page) => page.documents) ?? [],
+  );
 
-  const activeHasMore =
-    activeDocsQuery.hasNextPage ??
-    false;
+  const activeHasMore = activeDocsQuery.hasNextPage ?? false;
 
-  const archivedHasMore =
-    archivedDocsQuery.hasNextPage ??
-    false;
+  const archivedHasMore = archivedDocsQuery.hasNextPage ?? false;
 
-  const activeUnavailable =
-    activeDocsQuery.isError;
+  const activeUnavailable = activeDocsQuery.isError;
 
-  const archivedUnavailable =
-    archivedDocsQuery.isError;
+  const archivedUnavailable = archivedDocsQuery.isError;
 
-  const tabCounts =
-    computeTabCountLabels({
-      activeLoadedCount:
-        activeDocuments.length,
-      activeHasMore,
-      activeLoading:
-        activeDocsQuery.isLoading,
-      activeUnavailable,
-      archivedLoadedCount:
-        archivedDocuments.length,
-      archivedHasMore,
-      archivedLoading:
-        archivedDocsQuery.isLoading,
-      archivedUnavailable,
-    });
+  const tabCounts = computeTabCountLabels({
+    activeLoadedCount: activeDocuments.length,
+    activeHasMore,
+    activeLoading: activeDocsQuery.isLoading,
+    activeUnavailable,
+    archivedLoadedCount: archivedDocuments.length,
+    archivedHasMore,
+    archivedLoading: archivedDocsQuery.isLoading,
+    archivedUnavailable,
+  });
 
   const bucketDocuments =
-    filters.state ===
-    "active"
+    filters.state === "active"
       ? activeDocuments
-      : filters.state ===
-          "archived"
+      : filters.state === "archived"
         ? archivedDocuments
-        : deduplicateDocuments([
-            ...activeDocuments,
-            ...archivedDocuments,
-          ]);
+        : deduplicateDocuments([...activeDocuments, ...archivedDocuments]);
 
-  const filteredDocuments =
-    sortDocuments(
-      applyClientDocumentFilters(
-        bucketDocuments,
-        filters,
-        now
-      ),
-      filters.sort
-    );
+  const filteredDocuments = sortDocuments(
+    applyClientDocumentFilters(bucketDocuments, filters, now),
+    filters.sort,
+  );
 
-  const activeFilterCount =
-    countActiveDocumentFilters(
-      filters
-    );
+  const activeFilterCount = countActiveDocumentFilters(filters);
 
   const hasAnyFilter =
-    Boolean(
-      filters.q.trim()
-    ) ||
-    activeFilterCount >
-      0 ||
-    filters.sort !==
-      "newest";
+    Boolean(filters.q.trim()) ||
+    activeFilterCount > 0 ||
+    filters.sort !== "newest";
 
   const selectedQueryLoading =
-    filters.state ===
-    "active"
+    filters.state === "active"
       ? activeDocsQuery.isLoading
-      : filters.state ===
-          "archived"
+      : filters.state === "archived"
         ? archivedDocsQuery.isLoading
-        : activeDocsQuery.isLoading &&
-          archivedDocsQuery.isLoading;
+        : activeDocsQuery.isLoading && archivedDocsQuery.isLoading;
 
   const selectedQueryUnavailable =
-    filters.state ===
-    "active"
+    filters.state === "active"
       ? activeUnavailable
-      : filters.state ===
-          "archived"
+      : filters.state === "archived"
         ? archivedUnavailable
-        : activeUnavailable &&
-          archivedUnavailable;
+        : activeUnavailable && archivedUnavailable;
 
   const partialDataWarning =
-    filters.state ===
-      "all" &&
-    activeUnavailable !==
-      archivedUnavailable;
+    filters.state === "all" && activeUnavailable !== archivedUnavailable;
 
   const selectedErrorMessage =
-    filters.state ===
-    "active"
-      ? activeDocsQuery.error
-          ?.message
-      : filters.state ===
-          "archived"
-        ? archivedDocsQuery.error
-            ?.message
-        : activeDocsQuery.error
-            ?.message ??
-          archivedDocsQuery.error
-            ?.message;
+    filters.state === "active"
+      ? activeDocsQuery.error?.message
+      : filters.state === "archived"
+        ? archivedDocsQuery.error?.message
+        : (activeDocsQuery.error?.message ?? archivedDocsQuery.error?.message);
 
   const canLoadMore =
-    filters.state ===
-    "active"
-      ? activeHasMore &&
-        !activeUnavailable
-      : filters.state ===
-          "archived"
-        ? archivedHasMore &&
-          !archivedUnavailable
-        : (
-            activeHasMore &&
-            !activeUnavailable
-          ) ||
-          (
-            archivedHasMore &&
-            !archivedUnavailable
-          );
+    filters.state === "active"
+      ? activeHasMore && !activeUnavailable
+      : filters.state === "archived"
+        ? archivedHasMore && !archivedUnavailable
+        : (activeHasMore && !activeUnavailable) ||
+          (archivedHasMore && !archivedUnavailable);
 
   const isLoadingMore =
-    (
-      filters.state !==
-        "archived" &&
-      activeDocsQuery.isFetchingNextPage
-    ) ||
-    (
-      filters.state !==
-        "active" &&
-      archivedDocsQuery.isFetchingNextPage
-    );
+    (filters.state !== "archived" && activeDocsQuery.isFetchingNextPage) ||
+    (filters.state !== "active" && archivedDocsQuery.isFetchingNextPage);
 
   function handleLoadMore(): void {
-    if (
-      filters.state !==
-        "archived" &&
-      activeHasMore &&
-      !activeUnavailable
-    ) {
+    if (filters.state !== "archived" && activeHasMore && !activeUnavailable) {
       void activeDocsQuery.fetchNextPage();
     }
 
-    if (
-      filters.state !==
-        "active" &&
-      archivedHasMore &&
-      !archivedUnavailable
-    ) {
+    if (filters.state !== "active" && archivedHasMore && !archivedUnavailable) {
       void archivedDocsQuery.fetchNextPage();
     }
   }
@@ -1119,71 +567,42 @@ export function ProjectDocumentsPage() {
   }
 
   const isRefreshing =
-    activeDocsQuery.isFetching ||
-    archivedDocsQuery.isFetching;
+    activeDocsQuery.isFetching || archivedDocsQuery.isFetching;
 
-  const allLoadedDocuments =
-    deduplicateDocuments([
-      ...activeDocuments,
-      ...archivedDocuments,
-    ]);
+  const allLoadedDocuments = deduplicateDocuments([
+    ...activeDocuments,
+    ...archivedDocuments,
+  ]);
 
   const mostRecentlyUpdated =
-    sortDocuments(
-      allLoadedDocuments,
-      "updated"
-    )[0] ??
-    null;
+    sortDocuments(allLoadedDocuments, "updated")[0] ?? null;
 
-  const sevenDaysAgo =
-    now -
-    7 *
-      86_400_000;
+  const sevenDaysAgo = now - 7 * 86_400_000;
 
-  const updatedInLastSevenDays =
-    allLoadedDocuments.filter(
-      (
-        document
-      ) =>
-        new Date(
-          document.updatedAt
-        ).getTime() >=
-        sevenDaysAgo
-    ).length;
+  const updatedInLastSevenDays = allLoadedDocuments.filter(
+    (document) => new Date(document.updatedAt).getTime() >= sevenDaysAgo,
+  ).length;
 
-  const hasAdvancedFilters =
-    Boolean(
-      filters.creator ||
-        filters.updated ||
-        filters.revision !==
-          "any"
-    );
+  const hasAdvancedFilters = Boolean(
+    filters.creator || filters.updated || filters.revision !== "any",
+  );
 
-  const emptyMessage =
-    filters.q.trim()
-      ? "No document titles match your search."
-      : hasAdvancedFilters
-        ? "No loaded documents match these filters."
-        : filters.state ===
-            "archived"
-          ? "No archived documents."
-          : filters.state ===
-              "active"
-            ? "No active documents yet."
-            : "No documents yet.";
+  const emptyMessage = filters.q.trim()
+    ? "No document titles match your search."
+    : hasAdvancedFilters
+      ? "No loaded documents match these filters."
+      : filters.state === "archived"
+        ? "No archived documents."
+        : filters.state === "active"
+          ? "No active documents yet."
+          : "No documents yet.";
 
   return (
     <main className="min-w-0 space-y-5 overflow-x-hidden">
       <ProjectReadOnlyBanner
-        project={
-          project
-        }
-        workspace={
-          workspace
-        }
-        role={
-          role
-        }
+        project={project}
+        workspace={workspace}
+        role={role}
       />
 
       <header className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
@@ -1193,9 +612,7 @@ export function ProjectDocumentsPage() {
           </span>
 
           <div className="min-w-0">
-            <h1 className="text-h1 text-foreground">
-              Documents
-            </h1>
+            <h1 className="text-h1 text-foreground">Documents</h1>
 
             <p className="mt-0.5 text-caption">
               Store, organize, and collaborate on project documents.
@@ -1204,20 +621,13 @@ export function ProjectDocumentsPage() {
         </div>
 
         <Button
-          onClick={
-            () =>
-              setCreateOpen(
-                true
-              )
-          }
-          disabled={
-            !canCreate
-          }
+          onClick={() => setCreateOpen(true)}
+          disabled={!canCreate}
           className="w-full sm:w-auto"
           title={
             !canCreate
-              ? readOnlyReason ??
-                "You do not have permission to create documents."
+              ? (readOnlyReason ??
+                "You do not have permission to create documents.")
               : undefined
           }
         >
@@ -1226,501 +636,271 @@ export function ProjectDocumentsPage() {
         </Button>
       </header>
 
-      {
-        membersQuery.isError && (
-          <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-warning/30 bg-warning/5 px-3 py-2 text-xs text-warning">
-            <span>
-              Document permissions and creator filters are temporarily unavailable.
-            </span>
+      {membersQuery.isError && (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-warning/30 bg-warning/5 px-3 py-2 text-xs text-warning">
+          <span>
+            Document permissions and creator filters are temporarily
+            unavailable.
+          </span>
 
-            <button
-              type="button"
-              onClick={
-                () => {
-                  void membersQuery.refetch();
-                }
-              }
-              className="font-medium text-primary hover:text-primary/80"
-            >
-              Retry
-            </button>
-          </div>
-        )
-      }
+          <button
+            type="button"
+            onClick={() => {
+              void membersQuery.refetch();
+            }}
+            className="font-medium text-primary hover:text-primary/80"
+          >
+            Retry
+          </button>
+        </div>
+      )}
 
       <DocumentStateTabs
-        state={
-          filters.state
-        }
-        counts={
-          tabCounts
-        }
-        onChange={
-          setStateFilter
-        }
+        state={filters.state}
+        counts={tabCounts}
+        onChange={setStateFilter}
       />
 
       <div className="flex min-w-0 flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <DocumentFilterToolbar
-          search={
-            filters.q
-          }
-          sort={
-            filters.sort
-          }
-          activeFilterCount={
-            activeFilterCount
-          }
-          onSearchChange={
-            setSearch
-          }
-          onSortChange={
-            setSort
-          }
-          onClear={
-            clearAllFilters
-          }
+          search={filters.q}
+          sort={filters.sort}
+          activeFilterCount={activeFilterCount}
+          onSearchChange={setSearch}
+          onSortChange={setSort}
+          onClear={clearAllFilters}
         />
 
         <div className="self-start lg:self-auto">
-          <DocumentViewSwitcher
-          view={
-            filters.view
-          }
-          onChange={
-            setView
-          }
-          />
+          <DocumentViewSwitcher view={filters.view} onChange={setView} />
         </div>
       </div>
 
       <div className="grid grid-cols-1 gap-5 xl:grid-cols-12">
         <section className="min-w-0 space-y-4 xl:col-span-9">
-          {
-            selectedQueryLoading && (
-              <div className="space-y-2">
-                {
-                  Array.from({
-                    length:
-                      6,
-                  }).map(
-                    (
-                      _,
-                      index
-                    ) => (
-                      <Skeleton
-                        key={
-                          index
-                        }
-                        className="h-20 w-full rounded-lg"
-                      />
-                    )
+          {selectedQueryLoading && (
+            <div className="space-y-2">
+              {Array.from({
+                length: 6,
+              }).map((_, index) => (
+                <Skeleton key={index} className="h-20 w-full rounded-lg" />
+              ))}
+            </div>
+          )}
+
+          {!selectedQueryLoading && selectedQueryUnavailable && (
+            <QueryErrorPanel
+              message={selectedErrorMessage ?? "Unable to load documents."}
+              onRetry={handleRefresh}
+            />
+          )}
+
+          {!selectedQueryLoading &&
+            !selectedQueryUnavailable &&
+            partialDataWarning && (
+              <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-warning/30 bg-warning/5 px-3 py-2 text-xs text-warning">
+                <span>
+                  Only part of the document collection is available. Loaded
+                  documents are shown below.
+                </span>
+
+                <button
+                  type="button"
+                  onClick={handleRefresh}
+                  className="font-medium text-primary hover:text-primary/80"
+                >
+                  Retry missing data
+                </button>
+              </div>
+            )}
+
+          {!selectedQueryLoading &&
+            !selectedQueryUnavailable &&
+            filters.view === "list" && (
+              <DocumentListView
+                documents={filteredDocuments}
+                workspaceId={workspaceId ?? ""}
+                projectId={projectId ?? ""}
+                emptyMessage={emptyMessage}
+                canRename={(document) =>
+                  permissionsAvailable &&
+                  canRenameDocument(document, project, workspace, role)
+                }
+                canArchive={(document) =>
+                  permissionsAvailable &&
+                  canArchiveDocument(
+                    document,
+                    project,
+                    workspace,
+                    role,
+                    currentUserId,
                   )
                 }
+                canRestore={(document) =>
+                  permissionsAvailable &&
+                  canRestoreDocument(
+                    document,
+                    project,
+                    workspace,
+                    role,
+                    currentUserId,
+                  )
+                }
+                onRename={setRenaming}
+                onArchive={(document) =>
+                  setActionTarget({
+                    type: "archive",
+                    document,
+                  })
+                }
+                onRestore={(document) =>
+                  setActionTarget({
+                    type: "restore",
+                    document,
+                  })
+                }
+              />
+            )}
+
+          {!selectedQueryLoading &&
+            !selectedQueryUnavailable &&
+            filters.view === "grid" && (
+              <DocumentGridView
+                documents={filteredDocuments}
+                workspaceId={workspaceId ?? ""}
+                projectId={projectId ?? ""}
+                emptyMessage={emptyMessage}
+                canRename={(document) =>
+                  permissionsAvailable &&
+                  canRenameDocument(document, project, workspace, role)
+                }
+                canArchive={(document) =>
+                  permissionsAvailable &&
+                  canArchiveDocument(
+                    document,
+                    project,
+                    workspace,
+                    role,
+                    currentUserId,
+                  )
+                }
+                canRestore={(document) =>
+                  permissionsAvailable &&
+                  canRestoreDocument(
+                    document,
+                    project,
+                    workspace,
+                    role,
+                    currentUserId,
+                  )
+                }
+                onRename={setRenaming}
+                onArchive={(document) =>
+                  setActionTarget({
+                    type: "archive",
+                    document,
+                  })
+                }
+                onRestore={(document) =>
+                  setActionTarget({
+                    type: "restore",
+                    document,
+                  })
+                }
+              />
+            )}
+
+          {!selectedQueryLoading &&
+            !selectedQueryUnavailable &&
+            canLoadMore && (
+              <div className="flex flex-col items-center gap-2 pt-2">
+                <p className="text-[11px] text-muted">
+                  Showing {filteredDocuments.length} loaded document
+                  {filteredDocuments.length === 1 ? "" : "s"}. More documents
+                  are available.
+                </p>
+
+                <Button
+                  variant="secondary"
+                  onClick={handleLoadMore}
+                  disabled={isLoadingMore}
+                  aria-live="polite"
+                >
+                  {isLoadingMore ? "Loading..." : "Load more documents"}
+                </Button>
               </div>
-            )
-          }
-
-          {
-            !selectedQueryLoading &&
-              selectedQueryUnavailable && (
-                <QueryErrorPanel
-                  message={
-                    selectedErrorMessage ??
-                    "Unable to load documents."
-                  }
-                  onRetry={
-                    handleRefresh
-                  }
-                />
-              )
-          }
-
-          {
-            !selectedQueryLoading &&
-              !selectedQueryUnavailable &&
-              partialDataWarning && (
-                <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-warning/30 bg-warning/5 px-3 py-2 text-xs text-warning">
-                  <span>
-                    Only part of the document collection is available. Loaded documents are shown below.
-                  </span>
-
-                  <button
-                    type="button"
-                    onClick={
-                      handleRefresh
-                    }
-                    className="font-medium text-primary hover:text-primary/80"
-                  >
-                    Retry missing data
-                  </button>
-                </div>
-              )
-          }
-
-          {
-            !selectedQueryLoading &&
-              !selectedQueryUnavailable &&
-              filters.view ===
-                "list" && (
-                <DocumentListView
-                  documents={
-                    filteredDocuments
-                  }
-                  workspaceId={
-                    workspaceId ?? ""
-                  }
-                  projectId={
-                    projectId ?? ""
-                  }
-                  emptyMessage={
-                    emptyMessage
-                  }
-                  canRename={
-                    (
-                      document
-                    ) =>
-                      permissionsAvailable &&
-                      canRenameDocument(
-                        document,
-                        project,
-                        workspace,
-                        role
-                      )
-                  }
-                  canArchive={
-                    (
-                      document
-                    ) =>
-                      permissionsAvailable &&
-                      canArchiveDocument(
-                        document,
-                        project,
-                        workspace,
-                        role,
-                        currentUserId
-                      )
-                  }
-                  canRestore={
-                    (
-                      document
-                    ) =>
-                      permissionsAvailable &&
-                      canRestoreDocument(
-                        document,
-                        project,
-                        workspace,
-                        role,
-                        currentUserId
-                      )
-                  }
-                  onRename={
-                    setRenaming
-                  }
-                  onArchive={
-                    (
-                      document
-                    ) =>
-                      setActionTarget({
-                        type:
-                          "archive",
-                        document,
-                      })
-                  }
-                  onRestore={
-                    (
-                      document
-                    ) =>
-                      setActionTarget({
-                        type:
-                          "restore",
-                        document,
-                      })
-                  }
-                />
-              )
-          }
-
-          {
-            !selectedQueryLoading &&
-              !selectedQueryUnavailable &&
-              filters.view ===
-                "grid" && (
-                <DocumentGridView
-                  documents={
-                    filteredDocuments
-                  }
-                  workspaceId={
-                    workspaceId ?? ""
-                  }
-                  projectId={
-                    projectId ?? ""
-                  }
-                  emptyMessage={
-                    emptyMessage
-                  }
-                  canRename={
-                    (
-                      document
-                    ) =>
-                      permissionsAvailable &&
-                      canRenameDocument(
-                        document,
-                        project,
-                        workspace,
-                        role
-                      )
-                  }
-                  canArchive={
-                    (
-                      document
-                    ) =>
-                      permissionsAvailable &&
-                      canArchiveDocument(
-                        document,
-                        project,
-                        workspace,
-                        role,
-                        currentUserId
-                      )
-                  }
-                  canRestore={
-                    (
-                      document
-                    ) =>
-                      permissionsAvailable &&
-                      canRestoreDocument(
-                        document,
-                        project,
-                        workspace,
-                        role,
-                        currentUserId
-                      )
-                  }
-                  onRename={
-                    setRenaming
-                  }
-                  onArchive={
-                    (
-                      document
-                    ) =>
-                      setActionTarget({
-                        type:
-                          "archive",
-                        document,
-                      })
-                  }
-                  onRestore={
-                    (
-                      document
-                    ) =>
-                      setActionTarget({
-                        type:
-                          "restore",
-                        document,
-                      })
-                  }
-                />
-              )
-          }
-
-          {
-            !selectedQueryLoading &&
-              !selectedQueryUnavailable &&
-              canLoadMore && (
-                <div className="flex flex-col items-center gap-2 pt-2">
-                  <p className="text-[11px] text-muted">
-                    Showing {filteredDocuments.length} loaded document{filteredDocuments.length === 1 ? "" : "s"}. More documents are available.
-                  </p>
-
-                  <Button
-                    variant="secondary"
-                    onClick={
-                      handleLoadMore
-                    }
-                    disabled={
-                      isLoadingMore
-                    }
-                    aria-live="polite"
-                  >
-                    {
-                      isLoadingMore
-                        ? "Loading..."
-                        : "Load more documents"
-                    }
-                  </Button>
-                </div>
-              )
-          }
+            )}
         </section>
 
         <aside className="min-w-0 space-y-4 xl:sticky xl:top-[5.5rem] xl:col-span-3 xl:self-start">
           <DocumentFiltersRail
-            filters={
-              filters
-            }
-            members={
-              members
-            }
-            membersLoading={
-              membersQuery.isLoading
-            }
-            membersUnavailable={
-              membersQuery.isError
-            }
-            activeFilterCount={
-              activeFilterCount
-            }
-            onStateChange={
-              setStateFilter
-            }
-            onCreatorChange={
-              setCreator
-            }
-            onUpdatedChange={
-              setUpdated
-            }
-            onRevisionChange={
-              setRevision
-            }
-            onRetryMembers={
-              () => {
-                void membersQuery.refetch();
-              }
-            }
-            onClear={
-              clearAllFilters
-            }
+            filters={filters}
+            members={members}
+            membersLoading={membersQuery.isLoading}
+            membersUnavailable={membersQuery.isError}
+            activeFilterCount={activeFilterCount}
+            onStateChange={setStateFilter}
+            onCreatorChange={setCreator}
+            onUpdatedChange={setUpdated}
+            onRevisionChange={setRevision}
+            onRetryMembers={() => {
+              void membersQuery.refetch();
+            }}
+            onClear={clearAllFilters}
           />
 
           <DocumentSummaryRail
-            activeLoadedCount={
-              activeDocuments.length
-            }
-            activeHasMore={
-              activeHasMore
-            }
-            activeLoading={
-              activeDocsQuery.isLoading
-            }
-            activeUnavailable={
-              activeUnavailable
-            }
-            archivedLoadedCount={
-              archivedDocuments.length
-            }
-            archivedHasMore={
-              archivedHasMore
-            }
-            archivedLoading={
-              archivedDocsQuery.isLoading
-            }
-            archivedUnavailable={
-              archivedUnavailable
-            }
-            mostRecentlyUpdated={
-              mostRecentlyUpdated
-            }
-            updatedInLastSevenDays={
-              updatedInLastSevenDays
-            }
+            activeLoadedCount={activeDocuments.length}
+            activeHasMore={activeHasMore}
+            activeLoading={activeDocsQuery.isLoading}
+            activeUnavailable={activeUnavailable}
+            archivedLoadedCount={archivedDocuments.length}
+            archivedHasMore={archivedHasMore}
+            archivedLoading={archivedDocsQuery.isLoading}
+            archivedUnavailable={archivedUnavailable}
+            mostRecentlyUpdated={mostRecentlyUpdated}
+            updatedInLastSevenDays={updatedInLastSevenDays}
           />
 
           <DocumentQuickActionsRail
-            canCreate={
-              canCreate
-            }
-            readOnlyReason={
-              readOnlyReason
-            }
-            currentState={
-              filters.state
-            }
-            hasActiveFilters={
-              hasAnyFilter
-            }
-            onCreate={
-              () =>
-                setCreateOpen(
-                  true
-                )
-            }
-            onStateChange={
-              setStateFilter
-            }
-            onClear={
-              clearAllFilters
-            }
-            onRefresh={
-              handleRefresh
-            }
-            isRefreshing={
-              isRefreshing
-            }
+            canCreate={canCreate}
+            readOnlyReason={readOnlyReason}
+            currentState={filters.state}
+            hasActiveFilters={hasAnyFilter}
+            onCreate={() => setCreateOpen(true)}
+            onStateChange={setStateFilter}
+            onClear={clearAllFilters}
+            onRefresh={handleRefresh}
+            isRefreshing={isRefreshing}
           />
         </aside>
       </div>
 
-      {
-        createOpen && (
-          <CreateDocumentDialog
-            key="create-document"
-            workspaceId={
-              workspaceId ?? ""
-            }
-            projectId={
-              project._id
-            }
-            onClose={
-              () =>
-                setCreateOpen(
-                  false
-                )
-            }
-          />
-        )
-      }
+      {createOpen && (
+        <CreateDocumentDialog
+          key="create-document"
+          workspaceId={workspaceId ?? ""}
+          projectId={project._id}
+          onClose={() => setCreateOpen(false)}
+        />
+      )}
 
-      {
-        renaming && (
-          <RenameDocumentDialog
-            key={
-              renaming._id
-            }
-            projectId={
-              project._id
-            }
-            document={
-              renaming
-            }
-            onClose={
-              () =>
-                setRenaming(
-                  null
-                )
-            }
-          />
-        )
-      }
+      {renaming && (
+        <RenameDocumentDialog
+          key={renaming._id}
+          projectId={project._id}
+          document={renaming}
+          onClose={() => setRenaming(null)}
+        />
+      )}
 
-      {
-        actionTarget && (
-          <DocumentArchiveDialogs
-            target={
-              actionTarget
-            }
-            projectId={
-              project._id
-            }
-            onClose={
-              () =>
-                setActionTarget(
-                  null
-                )
-            }
-          />
-        )
-      }
+      {actionTarget && (
+        <DocumentArchiveDialogs
+          target={actionTarget}
+          projectId={project._id}
+          onClose={() => setActionTarget(null)}
+        />
+      )}
     </main>
   );
 }

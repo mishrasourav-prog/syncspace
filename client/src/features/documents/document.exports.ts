@@ -82,21 +82,17 @@ function buildPrintableHtml(title: string, html: string): string {
 
 export function downloadDocumentAsHtml(title: string, html: string): void {
   downloadBlob(
-    new Blob([buildPrintableHtml(title, html)], { type: "text/html;charset=utf-8" }),
-    `${sanitizeFilenamePart(title)}.html`
+    new Blob([buildPrintableHtml(title, html)], {
+      type: "text/html;charset=utf-8",
+    }),
+    `${sanitizeFilenamePart(title)}.html`,
   );
 }
 
-/**
- * Opens a print-optimized document. The browser's native print dialog can save
- * it as a PDF without adding a large or fragile client-side PDF dependency.
- */
 export function downloadDocumentAsPdf(title: string, html: string): boolean {
   const printWindow = window.open("", "_blank");
   if (!printWindow) return false;
 
-  // Prevent the exported page from controlling the SyncSpace window while
-  // keeping a usable Window reference for document.write and print().
   printWindow.opener = null;
 
   printWindow.document.open();
@@ -111,15 +107,23 @@ export function downloadDocumentAsPdf(title: string, html: string): boolean {
   if (printWindow.document.readyState === "complete") {
     window.setTimeout(triggerPrint, 150);
   } else {
-    printWindow.addEventListener("load", () => window.setTimeout(triggerPrint, 150), {
-      once: true,
-    });
+    printWindow.addEventListener(
+      "load",
+      () => window.setTimeout(triggerPrint, 150),
+      {
+        once: true,
+      },
+    );
   }
 
   return true;
 }
 
-export function downloadDocumentAsJson(doc: ProjectDocument, title: string, content: unknown): void {
+export function downloadDocumentAsJson(
+  doc: ProjectDocument,
+  title: string,
+  content: unknown,
+): void {
   const payload = {
     documentId: doc._id,
     title: title.trim() || "Untitled document",
@@ -131,12 +135,19 @@ export function downloadDocumentAsJson(doc: ProjectDocument, title: string, cont
   };
 
   downloadBlob(
-    new Blob([JSON.stringify(payload, null, 2)], { type: "application/json;charset=utf-8" }),
-    `${sanitizeFilenamePart(title)}.json`
+    new Blob([JSON.stringify(payload, null, 2)], {
+      type: "application/json;charset=utf-8",
+    }),
+    `${sanitizeFilenamePart(title)}.json`,
   );
 }
 
-export function downloadLocalDraft(documentId: string, localTitle: string, localContent: unknown, basedOnRevision: number): void {
+export function downloadLocalDraft(
+  documentId: string,
+  localTitle: string,
+  localContent: unknown,
+  basedOnRevision: number,
+): void {
   const payload = {
     documentId,
     localTitle: localTitle.trim() || "Untitled document",
@@ -146,7 +157,9 @@ export function downloadLocalDraft(documentId: string, localTitle: string, local
   };
 
   downloadBlob(
-    new Blob([JSON.stringify(payload, null, 2)], { type: "application/json;charset=utf-8" }),
-    `${sanitizeFilenamePart(localTitle)}-draft.json`
+    new Blob([JSON.stringify(payload, null, 2)], {
+      type: "application/json;charset=utf-8",
+    }),
+    `${sanitizeFilenamePart(localTitle)}-draft.json`,
   );
 }

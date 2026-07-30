@@ -21,9 +21,7 @@ export function DocumentInfoPanel({ document }: DocumentInfoPanelProps) {
       await navigator.clipboard.writeText(document._id);
       setCopied(true);
       setTimeout(() => setCopied(false), 1500);
-    } catch {
-      // Clipboard access can fail (permissions/insecure context); the ID remains visible for manual copy.
-    }
+    } catch {}
   }
 
   return (
@@ -48,7 +46,10 @@ export function DocumentInfoPanel({ document }: DocumentInfoPanelProps) {
         <div className="flex items-center justify-between gap-3">
           <dt className="text-muted">Document ID</dt>
           <dd className="flex items-center gap-1.5">
-            <span title={document._id} className="font-mono text-xs text-foreground">
+            <span
+              title={document._id}
+              className="font-mono text-xs text-foreground"
+            >
               {shortenId(document._id)}
             </span>
             <button
@@ -57,35 +58,49 @@ export function DocumentInfoPanel({ document }: DocumentInfoPanelProps) {
               aria-label="Copy document ID"
               className="rounded p-1 text-muted transition-colors hover:bg-border/40 hover:text-foreground"
             >
-              {copied ? <Check className="h-3.5 w-3.5 text-success" /> : <Copy className="h-3.5 w-3.5" />}
+              {copied ? (
+                <Check className="h-3.5 w-3.5 text-success" />
+              ) : (
+                <Copy className="h-3.5 w-3.5" />
+              )}
             </button>
           </dd>
         </div>
 
         <div className="border-t border-border/60 pt-2.5">
           <dt className="text-muted">Created by</dt>
-          <dd className="mt-0.5 text-foreground">{document.createdBy?.name ?? "Unavailable member"}</dd>
+          <dd className="mt-0.5 text-foreground">
+            {document.createdBy?.name ?? "Unavailable member"}
+          </dd>
         </div>
 
         <div>
           <dt className="text-muted">Created on</dt>
-          <dd className="mt-0.5 text-foreground">{formatDateTime(document.createdAt)}</dd>
+          <dd className="mt-0.5 text-foreground">
+            {formatDateTime(document.createdAt)}
+          </dd>
         </div>
 
         <div className="border-t border-border/60 pt-2.5">
           <dt className="text-muted">Last updated by</dt>
-          <dd className="mt-0.5 text-foreground">{document.updatedBy?.name ?? "Unavailable member"}</dd>
+          <dd className="mt-0.5 text-foreground">
+            {document.updatedBy?.name ?? "Unavailable member"}
+          </dd>
         </div>
 
         <div>
           <dt className="text-muted">Last updated on</dt>
-          <dd className="mt-0.5 text-foreground">{formatDateTime(document.updatedAt)}</dd>
+          <dd className="mt-0.5 text-foreground">
+            {formatDateTime(document.updatedAt)}
+          </dd>
         </div>
 
         {document.isArchived && document.archivedAt && (
           <div className="border-t border-border/60 pt-2.5">
             <dt className="text-muted">Archived on</dt>
-            <dd className="mt-0.5 text-foreground">{formatDateTime(document.archivedAt)}</dd>
+            <dd className="mt-0.5 text-foreground">
+              {formatDateTime(document.archivedAt)}
+            </dd>
           </div>
         )}
       </dl>

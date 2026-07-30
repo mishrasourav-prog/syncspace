@@ -1,4 +1,14 @@
-import { Archive, Calendar, Clock, Globe2, LogOut, MoreHorizontal, Pencil, RotateCcw, UserPlus } from "lucide-react";
+import {
+  Archive,
+  Calendar,
+  Clock,
+  Globe2,
+  LogOut,
+  MoreHorizontal,
+  Pencil,
+  RotateCcw,
+  UserPlus,
+} from "lucide-react";
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -34,16 +44,20 @@ interface WorkspaceHeaderProps {
   onLeave: () => void;
 }
 
-export function WorkspaceHeader({ workspace, onInvite, onEdit, onArchive, onRestore, onLeave }: WorkspaceHeaderProps) {
+export function WorkspaceHeader({
+  workspace,
+  onInvite,
+  onEdit,
+  onArchive,
+  onRestore,
+  onLeave,
+}: WorkspaceHeaderProps) {
   const showInvite = canInviteWorkspaceMember(workspace);
   const showEdit = canEditWorkspace(workspace);
   const showArchive = canArchiveWorkspace(workspace);
   const showRestore = canRestoreWorkspace(workspace);
   const showLeave = canLeaveWorkspace(workspace);
-  const hasOverflowActions =
-    showArchive ||
-    showRestore ||
-    showLeave;
+  const hasOverflowActions = showArchive || showRestore || showLeave;
 
   return (
     <div className="rounded-xl border border-border bg-surface/60 p-5 shadow-soft sm:p-6">
@@ -60,13 +74,17 @@ export function WorkspaceHeader({ workspace, onInvite, onEdit, onArchive, onRest
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
               <h1 className="text-h1 text-foreground">{workspace.name}</h1>
-              <Badge variant={roleBadgeVariant[workspace.role]}>{workspace.role}</Badge>
+              <Badge variant={roleBadgeVariant[workspace.role]}>
+                {workspace.role}
+              </Badge>
               <Badge variant={workspace.isArchived ? "warning" : "success"}>
                 {workspace.isArchived ? "Archived" : "Active"}
               </Badge>
             </div>
 
-            <p className="mt-2 max-w-2xl text-body">{workspace.description || "No description provided."}</p>
+            <p className="mt-2 max-w-2xl text-body">
+              {workspace.description || "No description provided."}
+            </p>
 
             <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-caption">
               <span className="flex items-center gap-1.5">
@@ -108,12 +126,6 @@ export function WorkspaceHeader({ workspace, onInvite, onEdit, onArchive, onRest
                 <MoreHorizontal className="h-4 w-4" />
               </DropdownMenuTrigger>
               <DropdownMenuContent>
-                {/* {showEdit && (
-                  <DropdownMenuItem onClick={onEdit}>
-                    <Pencil className="h-3.5 w-3.5" />
-                    Edit workspace details
-                  </DropdownMenuItem>
-                )} */}
                 {showArchive && (
                   <DropdownMenuItem variant="danger" onClick={onArchive}>
                     <Archive className="h-3.5 w-3.5" />

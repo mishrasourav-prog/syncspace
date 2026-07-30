@@ -1,10 +1,6 @@
-import {
-  Router,
-} from "express";
+import { Router } from "express";
 
-import {
-  authenticateUser,
-} from "../../middlewares/auth.middleware";
+import { authenticateUser } from "../../middlewares/auth.middleware";
 
 import {
   changePassword,
@@ -17,105 +13,26 @@ import {
   updateSelfProfile,
 } from "./user.controller";
 
-import {
-  uploadAvatar,
-} from "./user.upload";
+import { uploadAvatar } from "./user.upload";
 
-const router =
-  Router();
+const router = Router();
 
-/*
-|--------------------------------------------------------------------------
-| All User/Profile Routes Require Authentication
-|--------------------------------------------------------------------------
-|
-| The member-profile endpoint is also protected. Its service performs an
-| additional workspace/project membership check before returning the target
-| user's safe public profile.
-|
-*/
+router.use(authenticateUser);
 
-router.use(
-  authenticateUser
-);
+router.get("/me/profile", getSelfProfile);
 
-/*
-|--------------------------------------------------------------------------
-| Authenticated User Profile
-|--------------------------------------------------------------------------
-*/
+router.patch("/me/profile", updateSelfProfile);
 
-router.get(
-  "/me/profile",
-  getSelfProfile
-);
+router.post("/me/avatar", uploadAvatar, replaceAvatar);
 
-router.patch(
-  "/me/profile",
-  updateSelfProfile
-);
+router.delete("/me/avatar", removeAvatar);
 
-/*
-|--------------------------------------------------------------------------
-| Avatar Management
-|--------------------------------------------------------------------------
-|
-| Multipart field name:
-|
-| avatar
-|
-*/
+router.patch("/me/password", changePassword);
 
-router.post(
-  "/me/avatar",
-  uploadAvatar,
-  replaceAvatar
-);
+router.get("/me/deletion-readiness", getDeletionReadiness);
 
-router.delete(
-  "/me/avatar",
-  removeAvatar
-);
+router.delete("/me", deleteAccount);
 
-/*
-|--------------------------------------------------------------------------
-| Password and Account Security
-|--------------------------------------------------------------------------
-*/
-
-router.patch(
-  "/me/password",
-  changePassword
-);
-
-router.get(
-  "/me/deletion-readiness",
-  getDeletionReadiness
-);
-
-router.delete(
-  "/me",
-  deleteAccount
-);
-
-/*
-|--------------------------------------------------------------------------
-| Context-Authorized Read-Only Member Profile
-|--------------------------------------------------------------------------
-|
-| At least one authorization context must be supplied:
-|
-| GET /users/:userId/profile?workspaceId=<workspaceId>
-| GET /users/:userId/profile?projectId=<projectId>
-| GET /users/:userId/profile?workspaceId=<workspaceId>&projectId=<projectId>
-|
-| Static /me routes are intentionally declared before this parameter route.
-|
-*/
-
-router.get(
-  "/:userId/profile",
-  getMemberProfile
-);
+router.get("/:userId/profile", getMemberProfile);
 
 export default router;

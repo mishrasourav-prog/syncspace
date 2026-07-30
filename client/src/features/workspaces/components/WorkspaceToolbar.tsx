@@ -44,11 +44,15 @@ export function WorkspaceToolbar({
             onClick={() => onFilterChange(item.value)}
             className={cn(
               "whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
-              filter === item.value ? "bg-primary text-primary-foreground" : "text-muted hover:text-foreground"
+              filter === item.value
+                ? "bg-primary text-primary-foreground"
+                : "text-muted hover:text-foreground",
             )}
           >
             {item.label}
-            <span className="ml-1.5 text-xs opacity-70">{counts[item.value]}</span>
+            <span className="ml-1.5 text-xs opacity-70">
+              {counts[item.value]}
+            </span>
           </button>
         ))}
       </div>

@@ -12,7 +12,11 @@ interface NotificationListItemProps {
   onSelect: () => void;
 }
 
-export function NotificationListItem({ notification, isSelected, onSelect }: NotificationListItemProps) {
+export function NotificationListItem({
+  notification,
+  isSelected,
+  onSelect,
+}: NotificationListItemProps) {
   const actorName = getNotificationActorName(notification);
   const supplemental = getNotificationSupplementalText(notification);
 
@@ -24,7 +28,7 @@ export function NotificationListItem({ notification, isSelected, onSelect }: Not
       className={cn(
         "flex w-full gap-3 border-b border-border/60 px-4 py-3 text-left transition-colors last:border-b-0 hover:bg-border/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-inset",
         isSelected && "bg-primary/10 border-l-2 border-l-primary",
-        !notification.isRead && !isSelected && "bg-primary/5"
+        !notification.isRead && !isSelected && "bg-primary/5",
       )}
     >
       {notification.actor ? (
@@ -35,12 +39,19 @@ export function NotificationListItem({ notification, isSelected, onSelect }: Not
 
       <div className="min-w-0 flex-1">
         <div className="flex items-start justify-between gap-2">
-          <p className="truncate text-sm font-medium text-foreground">{notification.title}</p>
+          <p className="truncate text-sm font-medium text-foreground">
+            {notification.title}
+          </p>
           {!notification.isRead && (
-            <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-primary" aria-label="Unread" />
+            <span
+              className="mt-1 h-2 w-2 shrink-0 rounded-full bg-primary"
+              aria-label="Unread"
+            />
           )}
         </div>
-        <p className="mt-0.5 line-clamp-2 text-xs text-muted">{notification.message}</p>
+        <p className="mt-0.5 line-clamp-2 text-xs text-muted">
+          {notification.message}
+        </p>
         <div className="mt-1 flex items-center gap-2 text-[11px] text-muted/70">
           <span>{actorName}</span>
           {supplemental && (
@@ -50,7 +61,10 @@ export function NotificationListItem({ notification, isSelected, onSelect }: Not
             </>
           )}
           <span aria-hidden>·</span>
-          <time dateTime={notification.createdAt} title={formatDateTime(notification.createdAt)}>
+          <time
+            dateTime={notification.createdAt}
+            title={formatDateTime(notification.createdAt)}
+          >
             {formatRelativeTime(notification.createdAt)}
           </time>
         </div>

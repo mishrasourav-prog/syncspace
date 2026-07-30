@@ -42,7 +42,6 @@ export function TaskDetailMetadata({
   onStatusChange,
   onEdit,
 }: TaskDetailMetadataProps) {
-  // eslint-disable-next-line react-hooks/purity -- one render-time snapshot for date classification.
   const now = Date.now();
   const overdue = isTaskOverdue(task, now);
   const dueToday = isTaskDueToday(task, now);
@@ -51,8 +50,14 @@ export function TaskDetailMetadata({
     <>
       <CalendarDays className="h-3.5 w-3.5 shrink-0" />
       {task.dueDate ? formatDate(task.dueDate) : "No due date"}
-      {overdue && <span className="text-[11px] font-normal text-danger">· Overdue</span>}
-      {dueToday && <span className="text-[11px] font-normal text-warning">· Due today</span>}
+      {overdue && (
+        <span className="text-[11px] font-normal text-danger">· Overdue</span>
+      )}
+      {dueToday && (
+        <span className="text-[11px] font-normal text-warning">
+          · Due today
+        </span>
+      )}
     </>
   );
 
@@ -65,7 +70,11 @@ export function TaskDetailMetadata({
 
   const dueDateClassName = cn(
     "flex items-center gap-1.5 text-sm",
-    overdue ? "font-medium text-danger" : dueToday ? "font-medium text-warning" : "text-foreground"
+    overdue
+      ? "font-medium text-danger"
+      : dueToday
+        ? "font-medium text-warning"
+        : "text-foreground",
   );
 
   return (
@@ -77,7 +86,9 @@ export function TaskDetailMetadata({
             <select
               value={task.status}
               disabled={isUpdatingStatus}
-              onChange={(event) => onStatusChange(event.target.value as TaskStatus)}
+              onChange={(event) =>
+                onStatusChange(event.target.value as TaskStatus)
+              }
               aria-label="Change task status"
               className="w-full rounded-md border border-border bg-background px-2 py-1.5 text-sm text-foreground outline-none transition-colors focus:border-muted/60 disabled:opacity-60"
             >
@@ -89,7 +100,10 @@ export function TaskDetailMetadata({
             </select>
           ) : (
             <span className="flex items-center gap-1.5 text-sm text-foreground">
-              <span className={cn("h-2 w-2 rounded-full", STATUS_DOT[task.status])} aria-hidden />
+              <span
+                className={cn("h-2 w-2 rounded-full", STATUS_DOT[task.status])}
+                aria-hidden
+              />
               {STATUS_LABEL[task.status]}
             </span>
           )}
@@ -98,7 +112,12 @@ export function TaskDetailMetadata({
 
       <div>
         <dt className="text-caption mb-1.5">Priority</dt>
-        <dd className={cn("flex items-center gap-1.5 text-sm font-medium", PRIORITY_TEXT[task.priority])}>
+        <dd
+          className={cn(
+            "flex items-center gap-1.5 text-sm font-medium",
+            PRIORITY_TEXT[task.priority],
+          )}
+        >
           {PRIORITY_LABEL[task.priority]}
         </dd>
       </div>
@@ -115,7 +134,10 @@ export function TaskDetailMetadata({
             <button
               type="button"
               onClick={onEdit}
-              className={cn(dueDateClassName, "transition-colors hover:text-foreground")}
+              className={cn(
+                dueDateClassName,
+                "transition-colors hover:text-foreground",
+              )}
               aria-label="Edit due date"
             >
               {dueDateContent}

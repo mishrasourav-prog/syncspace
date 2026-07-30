@@ -1,146 +1,71 @@
-import type {
-    Request,
-    Response,
-} from "express";
+import type { Request, Response } from "express";
 
 import mongoose from "mongoose";
 
-import {
-    isServerShuttingDown,
-} from "../../runtime/serverState";
+import { isServerShuttingDown } from "../../runtime/serverState";
 
-import {
-    isSocketServerInitialized,
-} from "../../sockets/socket.server";
+import { isSocketServerInitialized } from "../../sockets/socket.server";
 
-const databaseStateNames:
-    Record<number, string> = {
-        0:
-            "disconnected",
+const databaseStateNames: Record<number, string> = {
+  0: "disconnected",
 
-        1:
-            "connected",
+  1: "connected",
 
-        2:
-            "connecting",
+  2: "connecting",
 
-        3:
-            "disconnecting",
-    };
+  3: "disconnecting",
+};
 
 class SystemController {
-    /*
-    |--------------------------------------------------------------------------
-    | Liveness Check
-    |--------------------------------------------------------------------------
-    |
-    | This endpoint only confirms that the Node process is alive
-    | and capable of responding to HTTP requests.
-    |
-    */
+  health(_req: Request, res: Response): Response {
+    return res.status(200).json({
+      status: "ok",
 
-    health(
-        _req: Request,
-        res: Response
-    ): Response {
-        return res.status(
-            200
-        ).json({
-            status:
-                "ok",
+      timestamp: new Date().toISOString(),
 
-            timestamp:
-                new Date()
-                    .toISOString(),
+      uptimeSeconds: Math.floor(process.uptime()),
 
-            uptimeSeconds:
-                Math.floor(
-                    process.uptime()
-                ),
+      environment: process.env.NODE_ENV ?? "development",
+    });
+  }
 
-            environment:
-                process.env.NODE_ENV ??
-                "development",
-        });
-    }
+  readiness(_req: Request, res: Response): Response {
+    const mongooseState = mongoose.connection.readyState;
 
-    /*
-    |--------------------------------------------------------------------------
-    | Readiness Check
-    |--------------------------------------------------------------------------
-    |
-    | This endpoint determines whether the process is ready
-    | to receive application traffic.
-    |
-    */
+    const databaseState = databaseStateNames[mongooseState] ?? "unknown";
 
-    readiness(
-        _req: Request,
-        res: Response
-    ): Response {
-        const mongooseState =
-            mongoose.connection
-                .readyState;
+    const databaseConnected = mongooseState === 1;
 
-        const databaseState =
-            databaseStateNames[
-                mongooseState
-            ] ??
-            "unknown";
+    const socketInitialized = isSocketServerInitialized();
 
-        const databaseConnected =
-            mongooseState ===
-            1;
+    const shuttingDown = isServerShuttingDown();
 
-        const socketInitialized =
-            isSocketServerInitialized();
+    const ready = databaseConnected && socketInitialized && !shuttingDown;
 
-        const shuttingDown =
-            isServerShuttingDown();
+    return res.status(ready ? 200 : 503).json({
+      status: ready ? "ready" : "not_ready",
 
-        const ready =
-            databaseConnected &&
-            socketInitialized &&
-            !shuttingDown;
+      timestamp: new Date().toISOString(),
 
-        return res.status(
-            ready
-                ? 200
-                : 503
-        ).json({
-            status:
-                ready
-                    ? "ready"
-                    : "not_ready",
+      checks: {
+        database: {
+          ready: databaseConnected,
 
-            timestamp:
-                new Date()
-                    .toISOString(),
+          state: databaseState,
+        },
 
-            checks: {
-                database: {
-                    ready:
-                        databaseConnected,
+        socketServer: {
+          ready: socketInitialized,
+        },
 
-                    state:
-                        databaseState,
-                },
-
-                socketServer: {
-                    ready:
-                        socketInitialized,
-                },
-
-                shutdown: {
-                    active:
-                        shuttingDown,
-                },
-            },
-        });
-    }
+        shutdown: {
+          active: shuttingDown,
+        },
+      },
+    });
+  }
 }
 
-const systemController =
-    new SystemController();
+const systemController = new SystemController();
 
 export default systemController;

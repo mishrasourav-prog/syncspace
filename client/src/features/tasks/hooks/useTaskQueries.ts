@@ -20,11 +20,10 @@ export function useProjectTasksQuery(projectId: string | undefined) {
   });
 }
 
-/**
- * Authoritative single-task query for the Task Detail page. It is nested
- * beneath the project task prefix so project-access revocation clears it.
- */
-export function useTaskQuery(projectId: string | undefined, taskId: string | undefined) {
+export function useTaskQuery(
+  projectId: string | undefined,
+  taskId: string | undefined,
+) {
   return useQuery<Task, ApiErrorShape>({
     queryKey: taskQueryKeys.detail(projectId ?? "", taskId ?? ""),
     queryFn: () => {
@@ -38,13 +37,9 @@ export function useTaskQuery(projectId: string | undefined, taskId: string | und
   });
 }
 
-/**
- * Detailed assignment records are used only by Task Detail. Collection cards
- * continue using the previews already embedded in the task DTO.
- */
 export function useTaskAssigneesQuery(
   projectId: string | undefined,
-  taskId: string | undefined
+  taskId: string | undefined,
 ) {
   return useQuery<TaskAssignee[], ApiErrorShape>({
     queryKey: taskQueryKeys.assignees(projectId ?? "", taskId ?? ""),

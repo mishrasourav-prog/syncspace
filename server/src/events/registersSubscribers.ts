@@ -1,30 +1,21 @@
-import {
-    registerActivitySubscribers,
-} from "../modules/activity/activity.subscriber";
+import { registerActivitySubscribers } from "../modules/activity/activity.subscriber";
 
-import {
-    registerNotificationSubscribers,
-} from "../modules/notifications/notification.subscriber";
+import { registerNotificationSubscribers } from "../modules/notifications/notification.subscriber";
 
-import {
-    registerSocketSubscribers,
-} from "../sockets/socket.subscriber";
+import { registerSocketSubscribers } from "../sockets/socket.subscriber";
 
-let subscribersRegistered =
-    false;
+let subscribersRegistered = false;
 
-export const registerDomainEventSubscribers =
-    (): void => {
-        if (subscribersRegistered) {
-            return;
-        }
+export const registerDomainEventSubscribers = (): void => {
+  if (subscribersRegistered) {
+    return;
+  }
 
-        subscribersRegistered =
-            true;
+  subscribersRegistered = true;
 
-        registerActivitySubscribers();
+  registerActivitySubscribers();
 
-        registerNotificationSubscribers();
+  registerNotificationSubscribers();
 
-        registerSocketSubscribers();
-    };
+  registerSocketSubscribers();
+};

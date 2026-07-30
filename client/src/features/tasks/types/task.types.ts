@@ -38,15 +38,10 @@ export interface CreateTaskPayload {
   priority?: TaskPriority;
   startDate?: string;
   dueDate?: string;
-  /** Present only when creating a subtask from the Task Detail page. */
+
   parentTask?: string;
 }
 
-/**
- * Every field is optional — quick edit sends only what changed. Dates that
- * were cleared in the form are simply omitted, never sent as null, since
- * the server's update-task validator does not accept null.
- */
 export interface UpdateTaskPayload {
   title?: string;
   description?: string;

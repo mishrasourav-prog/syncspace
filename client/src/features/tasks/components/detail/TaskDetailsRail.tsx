@@ -11,7 +11,10 @@ interface TaskDetailsRailProps {
   members: ProjectMember[];
 }
 
-function resolveMemberName(members: ProjectMember[], userId: string | undefined): string {
+function resolveMemberName(
+  members: ProjectMember[],
+  userId: string | undefined,
+): string {
   if (!userId) return "—";
   const member = members.find((candidate) => candidate.user._id === userId);
   return member ? member.user.name : "Unavailable member";
@@ -53,13 +56,28 @@ export function TaskDetailsRail({ task, members }: TaskDetailsRailProps) {
     },
     { label: "Created by", value: resolveMemberName(members, task.createdBy) },
     { label: "Created on", value: formatDateTime(task.createdAt) },
-    { label: "Last updated by", value: task.updatedBy ? resolveMemberName(members, task.updatedBy) : "—" },
+    {
+      label: "Last updated by",
+      value: task.updatedBy ? resolveMemberName(members, task.updatedBy) : "—",
+    },
     { label: "Last updated on", value: formatDateTime(task.updatedAt) },
-    { label: "Completed by", value: task.completedAt ? resolveMemberName(members, task.completedBy) : "—" },
-    { label: "Completed on", value: task.completedAt ? formatDateTime(task.completedAt) : "—" },
+    {
+      label: "Completed by",
+      value: task.completedAt
+        ? resolveMemberName(members, task.completedBy)
+        : "—",
+    },
+    {
+      label: "Completed on",
+      value: task.completedAt ? formatDateTime(task.completedAt) : "—",
+    },
     {
       label: "State",
-      value: <Badge variant={task.isArchived ? "warning" : "success"}>{task.isArchived ? "Archived" : "Active"}</Badge>,
+      value: (
+        <Badge variant={task.isArchived ? "warning" : "success"}>
+          {task.isArchived ? "Archived" : "Active"}
+        </Badge>
+      ),
     },
   ];
 
@@ -68,7 +86,10 @@ export function TaskDetailsRail({ task, members }: TaskDetailsRailProps) {
       <h2 className="text-h3 mb-3 text-foreground">Details</h2>
       <dl className="space-y-2.5">
         {rows.map((row) => (
-          <div key={row.label} className="flex items-center justify-between gap-3 text-sm">
+          <div
+            key={row.label}
+            className="flex items-center justify-between gap-3 text-sm"
+          >
             <dt className="text-muted">{row.label}</dt>
             <dd className="text-right text-foreground">{row.value}</dd>
           </div>

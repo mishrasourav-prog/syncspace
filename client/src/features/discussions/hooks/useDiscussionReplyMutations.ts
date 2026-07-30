@@ -23,7 +23,7 @@ import type {
 
 function patchReplyInPages(
   data: InfiniteData<DiscussionReplyListResult> | undefined,
-  updated: DiscussionReply
+  updated: DiscussionReply,
 ): InfiniteData<DiscussionReplyListResult> | undefined {
   if (!data) return data;
 
@@ -32,7 +32,7 @@ function patchReplyInPages(
     pages: data.pages.map((page) => ({
       ...page,
       replies: page.replies.map((reply) =>
-        reply._id === updated._id ? updated : reply
+        reply._id === updated._id ? updated : reply,
       ),
     })),
   };
@@ -40,7 +40,7 @@ function patchReplyInPages(
 
 function tombstoneReplyInPages(
   data: InfiniteData<DiscussionReplyListResult> | undefined,
-  replyId: string
+  replyId: string,
 ): InfiniteData<DiscussionReplyListResult> | undefined {
   if (!data) return data;
 
@@ -51,7 +51,7 @@ function tombstoneReplyInPages(
       replies: page.replies.map((reply) =>
         reply._id === replyId
           ? { ...reply, isDeleted: true, body: null }
-          : reply
+          : reply,
       ),
     })),
   };
@@ -59,7 +59,7 @@ function tombstoneReplyInPages(
 
 function bumpDiscussionReplyCount(
   discussion: Discussion | undefined,
-  delta: number
+  delta: number,
 ): Discussion | undefined {
   if (!discussion) return discussion;
 
@@ -72,7 +72,7 @@ function bumpDiscussionReplyCount(
 function bumpInfiniteListReplyCount(
   data: InfiniteData<DiscussionListResult> | undefined,
   discussionId: string,
-  delta: number
+  delta: number,
 ): InfiniteData<DiscussionListResult> | undefined {
   if (!data) return data;
 
@@ -82,8 +82,8 @@ function bumpInfiniteListReplyCount(
       ...page,
       discussions: page.discussions.map((discussion) =>
         discussion._id === discussionId
-          ? bumpDiscussionReplyCount(discussion, delta) ?? discussion
-          : discussion
+          ? (bumpDiscussionReplyCount(discussion, delta) ?? discussion)
+          : discussion,
       ),
     })),
   };
@@ -92,7 +92,7 @@ function bumpInfiniteListReplyCount(
 function bumpPreviewReplyCount(
   data: DiscussionListResult | undefined,
   discussionId: string,
-  delta: number
+  delta: number,
 ): DiscussionListResult | undefined {
   if (!data) return data;
 
@@ -100,8 +100,8 @@ function bumpPreviewReplyCount(
     ...data,
     discussions: data.discussions.map((discussion) =>
       discussion._id === discussionId
-        ? bumpDiscussionReplyCount(discussion, delta) ?? discussion
-        : discussion
+        ? (bumpDiscussionReplyCount(discussion, delta) ?? discussion)
+        : discussion,
     ),
   };
 }
@@ -110,29 +110,28 @@ function updateCachedReplyCount(
   queryClient: QueryClient,
   projectId: string,
   discussionId: string,
-  delta: number
+  delta: number,
 ): void {
   queryClient.setQueryData<Discussion>(
     discussionQueryKeys.detail(projectId, discussionId),
-    (previous) => bumpDiscussionReplyCount(previous, delta)
+    (previous) => bumpDiscussionReplyCount(previous, delta),
   );
 
   queryClient.setQueriesData<InfiniteData<DiscussionListResult>>(
     { queryKey: discussionQueryKeys.infinite(projectId) },
-    (previous) =>
-      bumpInfiniteListReplyCount(previous, discussionId, delta)
+    (previous) => bumpInfiniteListReplyCount(previous, discussionId, delta),
   );
 
   queryClient.setQueriesData<DiscussionListResult>(
     { queryKey: discussionQueryKeys.projectListAll(projectId) },
-    (previous) => bumpPreviewReplyCount(previous, discussionId, delta)
+    (previous) => bumpPreviewReplyCount(previous, discussionId, delta),
   );
 }
 
 function invalidateReplyRelatedData(
   queryClient: QueryClient,
   projectId: string,
-  discussionId: string
+  discussionId: string,
 ): void {
   void queryClient.invalidateQueries({
     queryKey: discussionQueryKeys.replies(projectId, discussionId),
@@ -153,13 +152,13 @@ function invalidateReplyRelatedData(
 
 export function useCreateDiscussionReplyMutation(
   projectId: string,
-  discussionId: string
+  discussionId: string,
 ) {
   const queryClient = useQueryClient();
   const queryKey = discussionQueryKeys.repliesList(
     projectId,
     discussionId,
-    DISCUSSION_REPLY_PAGE_LIMIT
+    DISCUSSION_REPLY_PAGE_LIMIT,
   );
 
   return useMutation<
@@ -192,7 +191,7 @@ export function useCreateDiscussionReplyMutation(
           };
 
           return { ...previous, pages: nextPages };
-        }
+        },
       );
 
       updateCachedReplyCount(queryClient, projectId, discussionId, 1);
@@ -203,13 +202,13 @@ export function useCreateDiscussionReplyMutation(
 
 export function useUpdateDiscussionReplyMutation(
   projectId: string,
-  discussionId: string
+  discussionId: string,
 ) {
   const queryClient = useQueryClient();
   const queryKey = discussionQueryKeys.repliesList(
     projectId,
     discussionId,
-    DISCUSSION_REPLY_PAGE_LIMIT
+    DISCUSSION_REPLY_PAGE_LIMIT,
   );
 
   return useMutation<
@@ -222,7 +221,7 @@ export function useUpdateDiscussionReplyMutation(
     onSuccess: (updatedReply) => {
       queryClient.setQueryData<InfiniteData<DiscussionReplyListResult>>(
         queryKey,
-        (previous) => patchReplyInPages(previous, updatedReply)
+        (previous) => patchReplyInPages(previous, updatedReply),
       );
       void queryClient.invalidateQueries({
         queryKey: activityQueryKeys.project(projectId),
@@ -236,13 +235,13 @@ export function useUpdateDiscussionReplyMutation(
 
 export function useDeleteDiscussionReplyMutation(
   projectId: string,
-  discussionId: string
+  discussionId: string,
 ) {
   const queryClient = useQueryClient();
   const queryKey = discussionQueryKeys.repliesList(
     projectId,
     discussionId,
-    DISCUSSION_REPLY_PAGE_LIMIT
+    DISCUSSION_REPLY_PAGE_LIMIT,
   );
 
   return useMutation<void, ApiErrorShape, string>({
@@ -250,7 +249,7 @@ export function useDeleteDiscussionReplyMutation(
     onSuccess: (_result, replyId) => {
       queryClient.setQueryData<InfiniteData<DiscussionReplyListResult>>(
         queryKey,
-        (previous) => tombstoneReplyInPages(previous, replyId)
+        (previous) => tombstoneReplyInPages(previous, replyId),
       );
       updateCachedReplyCount(queryClient, projectId, discussionId, -1);
       invalidateReplyRelatedData(queryClient, projectId, discussionId);

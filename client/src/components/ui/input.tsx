@@ -20,14 +20,16 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
           "w-full bg-background border rounded-md py-2.5 text-sm text-foreground placeholder:text-muted/70 outline-none transition-colors duration-200",
           Icon ? "pl-9" : "pl-3",
           rightSlot ? "pr-10" : "pr-3",
-          error ? "border-danger focus:border-danger" : "border-border focus:border-muted/60",
-          className
+          error
+            ? "border-danger focus:border-danger"
+            : "border-border focus:border-muted/60",
+          className,
         )}
         {...props}
       />
       {rightSlot}
       {error && <p className="mt-1.5 text-xs text-danger">{error}</p>}
     </div>
-  )
+  ),
 );
 Input.displayName = "Input";

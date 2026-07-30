@@ -27,10 +27,6 @@ import {
   type WorkspaceMemberChangedPayload,
 } from "./socket";
 
-/*
-Mounted once for the authenticated application shell. It owns the single
-Socket.IO connection and global account/access events.
-*/
 export function useSocketLifecycle() {
   const userId = useAuthStore((state) => state.user?._id);
   const queryClient = useQueryClient();
@@ -56,35 +52,75 @@ export function useSocketLifecycle() {
 
   useEffect(() => {
     function handleNotificationNew() {
-      void queryClient.invalidateQueries({ queryKey: notificationQueryKeys.all });
-      void queryClient.invalidateQueries({ queryKey: workspaceInvitationQueryKeys.list() });
-      void queryClient.invalidateQueries({ queryKey: projectInvitationQueryKeys.my() });
+      void queryClient.invalidateQueries({
+        queryKey: notificationQueryKeys.all,
+      });
+      void queryClient.invalidateQueries({
+        queryKey: workspaceInvitationQueryKeys.list(),
+      });
+      void queryClient.invalidateQueries({
+        queryKey: projectInvitationQueryKeys.my(),
+      });
     }
 
-    function refreshWorkspaceMembership(payload: WorkspaceMemberChangedPayload) {
-      void queryClient.invalidateQueries({ queryKey: workspaceMemberQueryKeys.list(payload.workspaceId) });
-      void queryClient.invalidateQueries({ queryKey: workspaceQueryKeys.detail(payload.workspaceId) });
-      void queryClient.invalidateQueries({ queryKey: workspaceQueryKeys.list() });
-      void queryClient.invalidateQueries({ queryKey: activityQueryKeys.workspace(payload.workspaceId) });
+    function refreshWorkspaceMembership(
+      payload: WorkspaceMemberChangedPayload,
+    ) {
+      void queryClient.invalidateQueries({
+        queryKey: workspaceMemberQueryKeys.list(payload.workspaceId),
+      });
+      void queryClient.invalidateQueries({
+        queryKey: workspaceQueryKeys.detail(payload.workspaceId),
+      });
+      void queryClient.invalidateQueries({
+        queryKey: workspaceQueryKeys.list(),
+      });
+      void queryClient.invalidateQueries({
+        queryKey: activityQueryKeys.workspace(payload.workspaceId),
+      });
     }
 
     function refreshProjectMembership(payload: ProjectMemberChangedPayload) {
-      void queryClient.invalidateQueries({ queryKey: projectMemberQueryKeys.list(payload.projectId) });
-      void queryClient.invalidateQueries({ queryKey: projectQueryKeys.detail(payload.projectId) });
-      void queryClient.invalidateQueries({ queryKey: projectQueryKeys.workspaceList(payload.workspaceId) });
-      void queryClient.invalidateQueries({ queryKey: activityQueryKeys.project(payload.projectId) });
+      void queryClient.invalidateQueries({
+        queryKey: projectMemberQueryKeys.list(payload.projectId),
+      });
+      void queryClient.invalidateQueries({
+        queryKey: projectQueryKeys.detail(payload.projectId),
+      });
+      void queryClient.invalidateQueries({
+        queryKey: projectQueryKeys.workspaceList(payload.workspaceId),
+      });
+      void queryClient.invalidateQueries({
+        queryKey: activityQueryKeys.project(payload.projectId),
+      });
     }
 
     function handleWorkspaceRevoked(payload: WorkspaceAccessRevokedPayload) {
-      queryClient.setQueryData<WorkspaceSummary[]>(workspaceQueryKeys.list(), (previous) =>
-        previous?.filter((workspace) => workspace._id !== payload.workspaceId)
+      queryClient.setQueryData<WorkspaceSummary[]>(
+        workspaceQueryKeys.list(),
+        (previous) =>
+          previous?.filter(
+            (workspace) => workspace._id !== payload.workspaceId,
+          ),
       );
-      void queryClient.invalidateQueries({ queryKey: workspaceQueryKeys.list() });
-      void queryClient.invalidateQueries({ queryKey: workspaceInvitationQueryKeys.list() });
-      queryClient.removeQueries({ queryKey: workspaceQueryKeys.detail(payload.workspaceId) });
-      queryClient.removeQueries({ queryKey: projectQueryKeys.workspaceList(payload.workspaceId) });
-      queryClient.removeQueries({ queryKey: workspaceMemberQueryKeys.list(payload.workspaceId) });
-      queryClient.removeQueries({ queryKey: activityQueryKeys.workspace(payload.workspaceId) });
+      void queryClient.invalidateQueries({
+        queryKey: workspaceQueryKeys.list(),
+      });
+      void queryClient.invalidateQueries({
+        queryKey: workspaceInvitationQueryKeys.list(),
+      });
+      queryClient.removeQueries({
+        queryKey: workspaceQueryKeys.detail(payload.workspaceId),
+      });
+      queryClient.removeQueries({
+        queryKey: projectQueryKeys.workspaceList(payload.workspaceId),
+      });
+      queryClient.removeQueries({
+        queryKey: workspaceMemberQueryKeys.list(payload.workspaceId),
+      });
+      queryClient.removeQueries({
+        queryKey: activityQueryKeys.workspace(payload.workspaceId),
+      });
 
       if (location.pathname.startsWith(`/workspaces/${payload.workspaceId}`)) {
         navigate("/dashboard", { replace: true });
@@ -96,17 +132,39 @@ export function useSocketLifecycle() {
     }
 
     function handleProjectRevoked(payload: ProjectAccessRevokedPayload) {
-      queryClient.removeQueries({ queryKey: projectQueryKeys.detail(payload.projectId) });
-      queryClient.removeQueries({ queryKey: projectMemberQueryKeys.list(payload.projectId) });
-      queryClient.removeQueries({ queryKey: projectInvitationQueryKeys.list(payload.projectId) });
-      queryClient.removeQueries({ queryKey: taskQueryKeys.project(payload.projectId) });
-      queryClient.removeQueries({ queryKey: documentQueryKeys.project(payload.projectId) });
-      queryClient.removeQueries({ queryKey: discussionQueryKeys.project(payload.projectId) });
-      queryClient.removeQueries({ queryKey: activityQueryKeys.project(payload.projectId) });
-      void queryClient.invalidateQueries({ queryKey: projectQueryKeys.workspaceList(payload.workspaceId) });
+      queryClient.removeQueries({
+        queryKey: projectQueryKeys.detail(payload.projectId),
+      });
+      queryClient.removeQueries({
+        queryKey: projectMemberQueryKeys.list(payload.projectId),
+      });
+      queryClient.removeQueries({
+        queryKey: projectInvitationQueryKeys.list(payload.projectId),
+      });
+      queryClient.removeQueries({
+        queryKey: taskQueryKeys.project(payload.projectId),
+      });
+      queryClient.removeQueries({
+        queryKey: documentQueryKeys.project(payload.projectId),
+      });
+      queryClient.removeQueries({
+        queryKey: discussionQueryKeys.project(payload.projectId),
+      });
+      queryClient.removeQueries({
+        queryKey: activityQueryKeys.project(payload.projectId),
+      });
+      void queryClient.invalidateQueries({
+        queryKey: projectQueryKeys.workspaceList(payload.workspaceId),
+      });
 
-      if (location.pathname.startsWith(`/workspaces/${payload.workspaceId}/projects/${payload.projectId}`)) {
-        navigate(`/workspaces/${payload.workspaceId}#projects`, { replace: true });
+      if (
+        location.pathname.startsWith(
+          `/workspaces/${payload.workspaceId}/projects/${payload.projectId}`,
+        )
+      ) {
+        navigate(`/workspaces/${payload.workspaceId}#projects`, {
+          replace: true,
+        });
       }
 
       if (payload.reason === "removed") {

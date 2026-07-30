@@ -18,19 +18,25 @@ const SECURITY_ITEMS = [
   },
   {
     title: "Privacy-safe member profiles",
-    description: "Read-only member details are available only within a shared workspace or project context.",
+    description:
+      "Read-only member details are available only within a shared workspace or project context.",
   },
 ] as const;
 
 export function SecuritySection() {
   return (
-    <section id="security" className="scroll-mt-20 border-t border-border px-4 py-16 sm:px-6 sm:py-20 lg:py-24">
+    <section
+      id="security"
+      className="scroll-mt-20 border-t border-border px-4 py-16 sm:px-6 sm:py-20 lg:py-24"
+    >
       <div className="mx-auto grid max-w-6xl gap-10 lg:grid-cols-[0.85fr_1.15fr] lg:items-center lg:gap-16">
         <Reveal>
-          <h2 className="text-h1 text-foreground">Access stays tied to the workspace and project.</h2>
+          <h2 className="text-h1 text-foreground">
+            Access stays tied to the workspace and project.
+          </h2>
           <p className="mt-4 text-sm leading-relaxed text-muted sm:text-base">
-            SyncSpace applies authentication, authorization, revocation, and privacy controls across HTTP
-            requests and realtime connections.
+            SyncSpace applies authentication, authorization, revocation, and
+            privacy controls across HTTP requests and realtime connections.
           </p>
 
           <div className="mt-7 overflow-hidden rounded-lg border border-border bg-surface">
@@ -50,7 +56,9 @@ export function SecuritySection() {
             {SECURITY_ITEMS.map(({ title, description }) => (
               <div key={title} className="py-5">
                 <h3 className="text-sm font-medium text-foreground">{title}</h3>
-                <p className="mt-1.5 text-sm leading-relaxed text-muted">{description}</p>
+                <p className="mt-1.5 text-sm leading-relaxed text-muted">
+                  {description}
+                </p>
               </div>
             ))}
           </div>

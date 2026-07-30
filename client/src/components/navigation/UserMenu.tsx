@@ -27,7 +27,9 @@ export function UserMenu() {
       >
         <Avatar src={user.avatar} name={user.name} size="sm" />
         <div className="min-w-0 text-left">
-          <p className="truncate text-sm font-medium text-foreground">{user.name}</p>
+          <p className="truncate text-sm font-medium text-foreground">
+            {user.name}
+          </p>
           <p className="truncate text-caption">@{user.username}</p>
         </div>
       </DropdownMenuTrigger>
@@ -40,7 +42,11 @@ export function UserMenu() {
           View profile
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem variant="danger" onClick={logout} disabled={isPending}>
+        <DropdownMenuItem
+          variant="danger"
+          onClick={logout}
+          disabled={isPending}
+        >
           <LogOut className="h-3.5 w-3.5" />
           {isPending ? "Logging out..." : "Log out"}
         </DropdownMenuItem>

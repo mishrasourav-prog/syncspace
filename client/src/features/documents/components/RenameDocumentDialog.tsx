@@ -1,45 +1,25 @@
-import {
-  useForm,
-  useWatch,
-} from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 
-import {
-  zodResolver,
-} from "@hookform/resolvers/zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 
-import {
-  toast,
-} from "sonner";
+import { toast } from "sonner";
 
-import {
-  Button,
-} from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 
-import {
-  Dialog,
-  DialogFooter,
-} from "@/components/ui/dialog";
+import { Dialog, DialogFooter } from "@/components/ui/dialog";
 
-import {
-  Input,
-} from "@/components/ui/input";
+import { Input } from "@/components/ui/input";
 
-import {
-  Label,
-} from "@/components/ui/label";
+import { Label } from "@/components/ui/label";
 
-import {
-  useRenameDocumentMutation,
-} from "../hooks/useDocumentMutations";
+import { useRenameDocumentMutation } from "../hooks/useDocumentMutations";
 
 import {
   renameDocumentSchema,
   type RenameDocumentFormValues,
 } from "../schemas/document.schemas";
 
-import type {
-  ProjectDocument,
-} from "../types/document.types";
+import type { ProjectDocument } from "../types/document.types";
 
 interface RenameDocumentDialogProps {
   projectId: string;
@@ -52,153 +32,91 @@ export function RenameDocumentDialog({
   document,
   onClose,
 }: RenameDocumentDialogProps) {
-  const renameDocumentMutation =
-    useRenameDocumentMutation(
-      projectId
-    );
+  const renameDocumentMutation = useRenameDocumentMutation(projectId);
 
   const {
     register,
     handleSubmit,
     control,
-    formState: {
-      errors,
+    formState: { errors },
+  } = useForm<RenameDocumentFormValues>({
+    resolver: zodResolver(renameDocumentSchema),
+    defaultValues: {
+      title: document.title,
     },
-  } =
-    useForm<RenameDocumentFormValues>({
-      resolver:
-        zodResolver(
-          renameDocumentSchema
-        ),
-      defaultValues: {
-        title:
-          document.title,
-      },
-    });
+  });
 
-  const currentTitle =
-    useWatch({
-      control,
-      name: "title",
-    });
+  const currentTitle = useWatch({
+    control,
+    name: "title",
+  });
 
-  const isUnchanged =
-    currentTitle.trim() ===
-    document.title;
+  const isUnchanged = currentTitle.trim() === document.title;
 
   function handleClose(): void {
-    if (
-      renameDocumentMutation.isPending
-    ) {
+    if (renameDocumentMutation.isPending) {
       return;
     }
 
     onClose();
   }
 
-  function onSubmit(
-    values: RenameDocumentFormValues
-  ): void {
-    if (
-      values.title ===
-      document.title
-    ) {
+  function onSubmit(values: RenameDocumentFormValues): void {
+    if (values.title === document.title) {
       return;
     }
 
     renameDocumentMutation.mutate(
       {
-        documentId:
-          document._id,
+        documentId: document._id,
         payload: {
-          title:
-            values.title,
-          expectedRevision:
-            document.revision,
+          title: values.title,
+          expectedRevision: document.revision,
         },
       },
       {
-        onSuccess:
-          () => {
-            toast.success(
-              "Document renamed."
-            );
+        onSuccess: () => {
+          toast.success("Document renamed.");
 
+          onClose();
+        },
+
+        onError: (error) => {
+          toast.error(error.message ?? "Unable to rename this document.");
+
+          if (error.status === 409) {
             onClose();
-          },
-
-        onError:
-          (
-            error
-          ) => {
-            toast.error(
-              error.message ??
-                "Unable to rename this document."
-            );
-
-            if (
-              error.status ===
-              409
-            ) {
-              onClose();
-            }
-          },
-      }
+          }
+        },
+      },
     );
   }
 
   return (
     <Dialog
       open
-      onClose={
-        handleClose
-      }
+      onClose={handleClose}
       title="Rename document"
-      description={
-        `Renaming "${document.title}".`
-      }
-      disableOutsideClose={
-        renameDocumentMutation.isPending
-      }
+      description={`Renaming "${document.title}".`}
+      disableOutsideClose={renameDocumentMutation.isPending}
     >
-      {
-        renameDocumentMutation.isError &&
-          renameDocumentMutation.error
-            ?.status !==
-            409 && (
-            <div className="mb-4 rounded-md border border-danger/30 bg-danger/10 px-3 py-2 text-xs text-danger">
-              {
-                renameDocumentMutation.error
-                  ?.message ??
-                "Unable to rename this document."
-              }
-            </div>
-          )
-      }
+      {renameDocumentMutation.isError &&
+        renameDocumentMutation.error?.status !== 409 && (
+          <div className="mb-4 rounded-md border border-danger/30 bg-danger/10 px-3 py-2 text-xs text-danger">
+            {renameDocumentMutation.error?.message ??
+              "Unable to rename this document."}
+          </div>
+        )}
 
-      <form
-        onSubmit={
-          handleSubmit(
-            onSubmit
-          )
-        }
-        noValidate
-      >
+      <form onSubmit={handleSubmit(onSubmit)} noValidate>
         <div className="mb-4">
-          <Label htmlFor="document-rename-title">
-            Title
-          </Label>
+          <Label htmlFor="document-rename-title">Title</Label>
 
           <Input
             id="document-rename-title"
             autoFocus
-            error={
-              errors.title
-                ?.message
-            }
-            {...register(
-              "title"
-            )}
+            error={errors.title?.message}
+            {...register("title")}
           />
         </div>
 
@@ -206,28 +124,17 @@ export function RenameDocumentDialog({
           <Button
             type="button"
             variant="secondary"
-            onClick={
-              handleClose
-            }
-            disabled={
-              renameDocumentMutation.isPending
-            }
+            onClick={handleClose}
+            disabled={renameDocumentMutation.isPending}
           >
             Cancel
           </Button>
 
           <Button
             type="submit"
-            disabled={
-              renameDocumentMutation.isPending ||
-              isUnchanged
-            }
+            disabled={renameDocumentMutation.isPending || isUnchanged}
           >
-            {
-              renameDocumentMutation.isPending
-                ? "Saving..."
-                : "Save"
-            }
+            {renameDocumentMutation.isPending ? "Saving..." : "Save"}
           </Button>
         </DialogFooter>
       </form>

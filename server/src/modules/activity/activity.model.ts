@@ -1,237 +1,157 @@
-import {
-    model,
-    Schema,
-    Types,
-} from "mongoose";
+import { model, Schema, Types } from "mongoose";
 
-import type {
-    Document,
-} from "mongoose";
+import type { Document } from "mongoose";
 
 export enum ActivityAction {
-    TASK_CREATED =
-        "task.created",
+  TASK_CREATED = "task.created",
 
-    TASK_STATUS_CHANGED =
-        "task.status_changed",
+  TASK_STATUS_CHANGED = "task.status_changed",
 
-    DOCUMENT_CREATED =
-        "document.created",
+  DOCUMENT_CREATED = "document.created",
 
-    DOCUMENT_UPDATED =
-        "document.updated",
+  DOCUMENT_UPDATED = "document.updated",
 
-    DOCUMENT_ARCHIVED =
-        "document.archived",
+  DOCUMENT_ARCHIVED = "document.archived",
 
-    DOCUMENT_RESTORED =
-        "document.restored",
+  DOCUMENT_RESTORED = "document.restored",
 
-        DISCUSSION_CREATED =
-        "discussion.created",
+  DISCUSSION_CREATED = "discussion.created",
 
-    DISCUSSION_UPDATED =
-        "discussion.updated",
+  DISCUSSION_UPDATED = "discussion.updated",
 
-    DISCUSSION_DELETED =
-        "discussion.deleted",
+  DISCUSSION_DELETED = "discussion.deleted",
 
-    DISCUSSION_PINNED =
-        "discussion.pinned",
+  DISCUSSION_PINNED = "discussion.pinned",
 
-    DISCUSSION_UNPINNED =
-        "discussion.unpinned",
+  DISCUSSION_UNPINNED = "discussion.unpinned",
 
-    DISCUSSION_LOCKED =
-        "discussion.locked",
+  DISCUSSION_LOCKED = "discussion.locked",
 
-    DISCUSSION_UNLOCKED =
-        "discussion.unlocked",
+  DISCUSSION_UNLOCKED = "discussion.unlocked",
 
-    DISCUSSION_REPLY_CREATED =
-        "discussion.reply_created",
+  DISCUSSION_REPLY_CREATED = "discussion.reply_created",
 
-    DISCUSSION_REPLY_UPDATED =
-        "discussion.reply_updated",
+  DISCUSSION_REPLY_UPDATED = "discussion.reply_updated",
 
-    DISCUSSION_REPLY_DELETED =
-        "discussion.reply_deleted",
+  DISCUSSION_REPLY_DELETED = "discussion.reply_deleted",
 }
 
 export enum ActivityEntityType {
-    TASK =
-        "task",
+  TASK = "task",
 
-    DOCUMENT =
-        "document",
+  DOCUMENT = "document",
 
-     DISCUSSION =
-        "discussion",
+  DISCUSSION = "discussion",
 
-    DISCUSSION_REPLY =
-        "discussion_reply",
+  DISCUSSION_REPLY = "discussion_reply",
 }
-export interface IActivityDocument
-    extends Document {
-    _id:
-        Types.ObjectId;
+export interface IActivityDocument extends Document {
+  _id: Types.ObjectId;
 
-    workspace:
-        Types.ObjectId;
+  workspace: Types.ObjectId;
 
-    project:
-        Types.ObjectId;
+  project: Types.ObjectId;
 
-    actor:
-        Types.ObjectId;
+  actor: Types.ObjectId;
 
-    action:
-        ActivityAction;
+  action: ActivityAction;
 
-    entityType:
-        ActivityEntityType;
+  entityType: ActivityEntityType;
 
-    entityId:
-        Types.ObjectId;
+  entityId: Types.ObjectId;
 
-    metadata:
-        Record<
-            string,
-            unknown
-        >;
+  metadata: Record<string, unknown>;
 
-    createdAt:
-        Date;
+  createdAt: Date;
 
-    updatedAt:
-        Date;
+  updatedAt: Date;
 }
 
-const activitySchema =
-    new Schema<IActivityDocument>(
-        {
-            workspace: {
-                type:
-                    Schema.Types.ObjectId,
+const activitySchema = new Schema<IActivityDocument>(
+  {
+    workspace: {
+      type: Schema.Types.ObjectId,
 
-                ref:
-                    "Workspace",
+      ref: "Workspace",
 
-                required:
-                    true,
+      required: true,
 
-                index:
-                    true,
-            },
+      index: true,
+    },
 
-            project: {
-                type:
-                    Schema.Types.ObjectId,
+    project: {
+      type: Schema.Types.ObjectId,
 
-                ref:
-                    "Project",
+      ref: "Project",
 
-                required:
-                    true,
+      required: true,
 
-                index:
-                    true,
-            },
+      index: true,
+    },
 
-            actor: {
-                type:
-                    Schema.Types.ObjectId,
+    actor: {
+      type: Schema.Types.ObjectId,
 
-                ref:
-                    "User",
+      ref: "User",
 
-                required:
-                    true,
+      required: true,
 
-                index:
-                    true,
-            },
+      index: true,
+    },
 
-            action: {
-                type:
-                    String,
+    action: {
+      type: String,
 
-                enum:
-                    Object.values(
-                        ActivityAction
-                    ),
+      enum: Object.values(ActivityAction),
 
-                required:
-                    true,
-            },
+      required: true,
+    },
 
-            entityType: {
-                type:
-                    String,
+    entityType: {
+      type: String,
 
-                enum:
-                    Object.values(
-                        ActivityEntityType
-                    ),
+      enum: Object.values(ActivityEntityType),
 
-                required:
-                    true,
-            },
+      required: true,
+    },
 
-            entityId: {
-                type:
-                    Schema.Types.ObjectId,
+    entityId: {
+      type: Schema.Types.ObjectId,
 
-                required:
-                    true,
+      required: true,
 
-                index:
-                    true,
-            },
+      index: true,
+    },
 
-            metadata: {
-                type:
-                    Schema.Types.Mixed,
+    metadata: {
+      type: Schema.Types.Mixed,
 
-                default:
-                    {},
-            },
-        },
-        {
-            timestamps:
-                true,
+      default: {},
+    },
+  },
+  {
+    timestamps: true,
 
-            versionKey:
-                false,
-        }
-    );
+    versionKey: false,
+  },
+);
 
 activitySchema.index({
-    project:
-        1,
+  project: 1,
 
-    createdAt:
-        -1,
+  createdAt: -1,
 
-    _id:
-        -1,
+  _id: -1,
 });
 
 activitySchema.index({
-    workspace:
-        1,
+  workspace: 1,
 
-    createdAt:
-        -1,
+  createdAt: -1,
 
-    _id:
-        -1,
+  _id: -1,
 });
 
-const Activity =
-    model<IActivityDocument>(
-        "Activity",
-        activitySchema
-    );
+const Activity = model<IActivityDocument>("Activity", activitySchema);
 
 export default Activity;

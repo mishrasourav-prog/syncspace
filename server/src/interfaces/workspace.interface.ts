@@ -15,11 +15,11 @@ export interface IWorkspace {
 
   timezone: string;
 
-   settings: {
+  settings: {
     allowGuestInvites: boolean;
     defaultRole: "member" | "guest";
     allowPublicProjects: boolean;
-    allowMemberInvites:boolean;
+    allowMemberInvites: boolean;
   };
 
   isArchived: boolean;
@@ -46,51 +46,50 @@ export interface WorkspaceResponse {
 }
 
 export interface WorkspaceUserResponse {
-    _id: string;
-    name: string;
-    slug: string;
-    description?: string;
-    avatar?: string;
-    timezone: string;
-    owner: string;
-    role: WorkspaceRole;
+  _id: string;
+  name: string;
+  slug: string;
+  description?: string;
+  avatar?: string;
+  timezone: string;
+  owner: string;
+  role: WorkspaceRole;
 }
-
 
 export interface GetWorkspaceResponse {
-    _id: string;
+  _id: string;
 
-    name: string;
+  name: string;
 
-    slug: string;
+  slug: string;
 
-    description?: string;
+  description?: string;
 
-    avatar?: string;
+  avatar?: string;
 
-    owner: string;
+  owner: string;
 
-    timezone: string;
+  timezone: string;
 
-    role: WorkspaceRole;
+  role: WorkspaceRole;
 
-    settings: {
-        allowGuestInvites: boolean;
-        allowMemberInvites: boolean;
-        allowPublicProjects: boolean;
-        defaultRole: "guest" | "member";
-    };
+  settings: {
+    allowGuestInvites: boolean;
+    allowMemberInvites: boolean;
+    allowPublicProjects: boolean;
+    defaultRole: "guest" | "member";
+  };
 
-    isArchived: boolean;
+  isArchived: boolean;
 
-    createdAt: Date;
+  createdAt: Date;
 
-    updatedAt: Date;
+  updatedAt: Date;
 }
 export interface UseGetWorkspaceResponse {
-    workspace: GetWorkspaceResponse;
+  workspace: GetWorkspaceResponse;
 }
 
-export interface GetArchiveWorkspaceResponse{
-    workspaces:IWorkspace[];
+export interface GetArchiveWorkspaceResponse {
+  workspaces: IWorkspace[];
 }

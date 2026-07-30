@@ -1,260 +1,147 @@
-import axios, {
-    type AxiosError,
-    type InternalAxiosRequestConfig,
-} from "axios";
+import axios, { type AxiosError, type InternalAxiosRequestConfig } from "axios";
 
-import {
-    useAuthStore,
-} from "@/app/store";
+import { useAuthStore } from "@/app/store";
 
-import {
-    queryClient,
-} from "@/lib/queryClient";
+import { queryClient } from "@/lib/queryClient";
 
-export const axiosClient =
-    axios.create({
-        baseURL:
-            import.meta.env
-                .VITE_API_BASE_URL ??
-            "/api/v1",
+export const axiosClient = axios.create({
+  baseURL: import.meta.env.VITE_API_BASE_URL ?? "/api/v1",
 
-        timeout:
-            10_000,
+  timeout: 10_000,
 
-
-        withCredentials:
-            true,
-    });
+  withCredentials: true,
+});
 
 export interface ApiErrorShape {
-    message:
-        string;
+  message: string;
 
-    status?:
-        number;
+  status?: number;
 }
 
-interface RetryableRequestConfig
-    extends InternalAxiosRequestConfig {
-    _retry?:
-        boolean;
+interface RetryableRequestConfig extends InternalAxiosRequestConfig {
+  _retry?: boolean;
 }
 
 interface PendingRequest {
-    resolve:
-        () => void;
+  resolve: () => void;
 
-    reject:
-        (
-            error:
-                unknown
-        ) => void;
+  reject: (error: unknown) => void;
 }
 
 const PUBLIC_AUTH_PATHS = [
-    "/auth/login",
-    "/auth/register",
-    "/auth/verify-email",
-    "/auth/resend-verification-otp",
-    "/auth/forgot-password",
-    "/auth/verify-reset-otp",
-    "/auth/reset-password",
-    "/auth/resend-reset-otp",
-    "/auth/refresh",
+  "/auth/login",
+  "/auth/register",
+  "/auth/verify-email",
+  "/auth/resend-verification-otp",
+  "/auth/forgot-password",
+  "/auth/verify-reset-otp",
+  "/auth/reset-password",
+  "/auth/resend-reset-otp",
+  "/auth/refresh",
 ] as const;
 
-let isRefreshing =
-    false;
+let isRefreshing = false;
 
-let failedQueue:
-    PendingRequest[] =
-    [];
+let failedQueue: PendingRequest[] = [];
 
-function isPublicAuthRequest(
-    url:
-        string |
-        undefined
-): boolean {
-    if (
-        !url
-    ) {
-        return false;
-    }
+function isPublicAuthRequest(url: string | undefined): boolean {
+  if (!url) {
+    return false;
+  }
 
-    return PUBLIC_AUTH_PATHS.some(
-        (
-            path
-        ) =>
-            url.includes(
-                path
-            )
-    );
+  return PUBLIC_AUTH_PATHS.some((path) => url.includes(path));
 }
 
-function processQueue(
-    error?:
-        unknown
-): void {
-    failedQueue.forEach(
-        (
-            request
-        ) => {
-            if (
-                error
-            ) {
-                request.reject(
-                    error
-                );
+function processQueue(error?: unknown): void {
+  failedQueue.forEach((request) => {
+    if (error) {
+      request.reject(error);
 
-                return;
-            }
+      return;
+    }
 
-            request.resolve();
-        }
-    );
+    request.resolve();
+  });
 
-    failedQueue =
-        [];
+  failedQueue = [];
 }
 
 function normalizeApiError(
-    error:
-        AxiosError<{
-            message?:
-                string;
-        }>
+  error: AxiosError<{
+    message?: string;
+  }>,
 ): ApiErrorShape {
-    return {
-        message:
-            error.response
-                ?.data
-                ?.message ??
-            "Something went wrong. Please try again.",
+  return {
+    message:
+      error.response?.data?.message ??
+      "Something went wrong. Please try again.",
 
-        status:
-            error.response
-                ?.status,
-    };
+    status: error.response?.status,
+  };
 }
 
 axiosClient.interceptors.response.use(
-    (
-        response
-    ) =>
-        response,
+  (response) => response,
 
-    async (
-        error:
-            AxiosError<{
-                message?:
-                    string;
-            }>
-    ) => {
-        const originalRequest =
-            error.config as
-                | RetryableRequestConfig
-                | undefined;
+  async (
+    error: AxiosError<{
+      message?: string;
+    }>,
+  ) => {
+    const originalRequest = error.config as RetryableRequestConfig | undefined;
 
-        const shouldRefresh =
-            error.response
-                ?.status ===
-                401 &&
-            Boolean(
-                originalRequest
-            ) &&
-            !originalRequest
-                ?._retry &&
-            !isPublicAuthRequest(
-                originalRequest
-                    ?.url
-            );
+    const shouldRefresh =
+      error.response?.status === 401 &&
+      Boolean(originalRequest) &&
+      !originalRequest?._retry &&
+      !isPublicAuthRequest(originalRequest?.url);
 
-        if (
-            !shouldRefresh ||
-            !originalRequest
-        ) {
-            return Promise.reject(
-                normalizeApiError(
-                    error
-                )
-            );
-        }
-
-        originalRequest._retry =
-            true;
-
-        if (
-            isRefreshing
-        ) {
-            return new Promise(
-                (
-                    resolve,
-                    reject
-                ) => {
-                    failedQueue.push({
-                        resolve:
-                            () => {
-                                resolve(
-                                    axiosClient(
-                                        originalRequest
-                                    )
-                                );
-                            },
-
-                        reject,
-                    });
-                }
-            );
-        }
-
-        isRefreshing =
-            true;
-
-        try {
-            await axiosClient.post(
-                "/auth/refresh"
-            );
-
-            processQueue();
-
-            return axiosClient(
-                originalRequest
-            );
-        } catch (
-            refreshError
-        ) {
-            processQueue(
-                refreshError
-            );
-
-            const authState =
-    useAuthStore.getState();
-
-const wasAuthInitialized =
-    authState.isAuthInitialized;
-
-authState.clearSession();
-
-/*
-Do not clear React Query while the initial /auth/me
-bootstrap request is still settling. Clearing it here
-can prevent the auth query from reaching its error state,
-leaving the application on the loading screen forever.
-*/
-if (wasAuthInitialized) {
-    queryClient.clear();
-}
-
-            return Promise.reject({
-                message:
-                    "Session expired. Please log in again.",
-
-                status:
-                    401,
-            } satisfies ApiErrorShape);
-        } finally {
-            isRefreshing =
-                false;
-        }
+    if (!shouldRefresh || !originalRequest) {
+      return Promise.reject(normalizeApiError(error));
     }
+
+    originalRequest._retry = true;
+
+    if (isRefreshing) {
+      return new Promise((resolve, reject) => {
+        failedQueue.push({
+          resolve: () => {
+            resolve(axiosClient(originalRequest));
+          },
+
+          reject,
+        });
+      });
+    }
+
+    isRefreshing = true;
+
+    try {
+      await axiosClient.post("/auth/refresh");
+
+      processQueue();
+
+      return axiosClient(originalRequest);
+    } catch (refreshError) {
+      processQueue(refreshError);
+
+      const authState = useAuthStore.getState();
+
+      const wasAuthInitialized = authState.isAuthInitialized;
+
+      authState.clearSession();
+
+      if (wasAuthInitialized) {
+        queryClient.clear();
+      }
+
+      return Promise.reject({
+        message: "Session expired. Please log in again.",
+
+        status: 401,
+      } satisfies ApiErrorShape);
+    } finally {
+      isRefreshing = false;
+    }
+  },
 );

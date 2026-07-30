@@ -27,12 +27,18 @@ const ROLE_LABELS: Record<InviteWorkspaceMemberFormValues["role"], string> = {
   guest: "Guest",
 };
 
-export function InviteWorkspaceMemberDialog({ workspace, open, onClose }: InviteWorkspaceMemberDialogProps) {
+export function InviteWorkspaceMemberDialog({
+  workspace,
+  open,
+  onClose,
+}: InviteWorkspaceMemberDialogProps) {
   const inviteMutation = useInviteWorkspaceMemberMutation(workspace._id);
   const invitableRoles = getInvitableWorkspaceRoles(workspace);
 
   const defaultRole =
-    invitableRoles.find((role) => role === workspace.settings.defaultRole) ?? invitableRoles[0] ?? "member";
+    invitableRoles.find((role) => role === workspace.settings.defaultRole) ??
+    invitableRoles[0] ??
+    "member";
 
   const {
     register,
@@ -49,7 +55,6 @@ export function InviteWorkspaceMemberDialog({ workspace, open, onClose }: Invite
       reset({ email: "", role: defaultRole });
       inviteMutation.reset();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
   function handleClose() {
@@ -66,7 +71,7 @@ export function InviteWorkspaceMemberDialog({ workspace, open, onClose }: Invite
           reset();
           onClose();
         },
-      }
+      },
     );
   };
 
@@ -105,7 +110,9 @@ export function InviteWorkspaceMemberDialog({ workspace, open, onClose }: Invite
             id="invite-role"
             className={cn(
               "w-full rounded-md border bg-background px-3 py-2.5 text-sm text-foreground outline-none transition-colors duration-200",
-              errors.role ? "border-danger focus:border-danger" : "border-border focus:border-muted/60"
+              errors.role
+                ? "border-danger focus:border-danger"
+                : "border-border focus:border-muted/60",
             )}
             {...register("role")}
           >
@@ -115,11 +122,18 @@ export function InviteWorkspaceMemberDialog({ workspace, open, onClose }: Invite
               </option>
             ))}
           </select>
-          {errors.role?.message && <p className="mt-1.5 text-xs text-danger">{errors.role.message}</p>}
+          {errors.role?.message && (
+            <p className="mt-1.5 text-xs text-danger">{errors.role.message}</p>
+          )}
         </div>
 
         <DialogFooter>
-          <Button type="button" variant="secondary" onClick={handleClose} disabled={inviteMutation.isPending}>
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={handleClose}
+            disabled={inviteMutation.isPending}
+          >
             Cancel
           </Button>
           <Button type="submit" disabled={inviteMutation.isPending}>

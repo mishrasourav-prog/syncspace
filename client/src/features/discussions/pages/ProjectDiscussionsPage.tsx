@@ -1,9 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import {
-  useNavigate,
-  useParams,
-  useSearchParams,
-} from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { ArrowLeft, MessageSquare } from "lucide-react";
@@ -96,11 +92,7 @@ function useDebouncedValue(value: string, delay: number): string {
 }
 
 function parseFilter(value: string | null): DiscussionListFilter {
-  if (
-    value === "pinned" ||
-    value === "mine" ||
-    value === "locked"
-  ) {
+  if (value === "pinned" || value === "mine" || value === "locked") {
     return value;
   }
 
@@ -125,10 +117,10 @@ export function ProjectDiscussionsPage() {
 
   const isProjectRouteValid = Boolean(
     workspaceId &&
-      projectId &&
-      workspaceQuery.isSuccess &&
-      projectQuery.isSuccess &&
-      projectQuery.data?.workspace === workspaceId
+    projectId &&
+    workspaceQuery.isSuccess &&
+    projectQuery.isSuccess &&
+    projectQuery.data?.workspace === workspaceId,
   );
 
   const searchValue = searchParams.get("q") ?? "";
@@ -138,12 +130,12 @@ export function ProjectDiscussionsPage() {
   const discussionsQuery = useProjectDiscussionsInfiniteQuery(
     projectId,
     debouncedSearch,
-    isProjectRouteValid
+    isProjectRouteValid,
   );
   const discussionQuery = useDiscussionQuery(
     projectId,
     discussionId,
-    isProjectRouteValid && Boolean(discussionId)
+    isProjectRouteValid && Boolean(discussionId),
   );
   const repliesQuery = useDiscussionRepliesQuery(
     projectId,
@@ -152,7 +144,7 @@ export function ProjectDiscussionsPage() {
       Boolean(discussionId) &&
       discussionQuery.isSuccess &&
       discussionQuery.data?.project === projectId &&
-      discussionQuery.data?.workspace === workspaceId
+      discussionQuery.data?.workspace === workspaceId,
   );
 
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -172,7 +164,7 @@ export function ProjectDiscussionsPage() {
   const loadedDiscussions = useMemo(
     () =>
       discussionsQuery.data?.pages.flatMap((page) => page.discussions) ?? [],
-    [discussionsQuery.data]
+    [discussionsQuery.data],
   );
 
   const filteredDiscussions = useMemo(() => {
@@ -182,7 +174,7 @@ export function ProjectDiscussionsPage() {
 
     if (filter === "mine") {
       return loadedDiscussions.filter(
-        (discussion) => discussion.author?._id === currentUser?._id
+        (discussion) => discussion.author?._id === currentUser?._id,
       );
     }
 
@@ -191,7 +183,7 @@ export function ProjectDiscussionsPage() {
     }
 
     return [...loadedDiscussions].sort(
-      (left, right) => Number(right.isPinned) - Number(left.isPinned)
+      (left, right) => Number(right.isPinned) - Number(left.isPinned),
     );
   }, [loadedDiscussions, filter, currentUser?._id]);
 
@@ -209,10 +201,7 @@ export function ProjectDiscussionsPage() {
   }, [workspaceId, projectId, discussionId]);
 
   useEffect(() => {
-    if (
-      !isProjectInaccessible ||
-      hasShownProjectInaccessibleToast.current
-    ) {
+    if (!isProjectInaccessible || hasShownProjectInaccessibleToast.current) {
       return;
     }
 
@@ -220,11 +209,11 @@ export function ProjectDiscussionsPage() {
     toast.error(
       projectQuery.error?.status === 403
         ? "You do not have access to this project."
-        : "This project is no longer accessible."
+        : "This project is no longer accessible.",
     );
     navigate(
       workspaceId ? `/workspaces/${workspaceId}#projects` : "/dashboard",
-      { replace: true }
+      { replace: true },
     );
   }, [isProjectInaccessible, projectQuery.error, navigate, workspaceId]);
 
@@ -283,7 +272,7 @@ export function ProjectDiscussionsPage() {
     toast.error(
       discussionQuery.error?.status === 403
         ? "You do not have access to this discussion."
-        : "This discussion no longer exists."
+        : "This discussion no longer exists.",
     );
     navigate(basePathWithSearch, { replace: true });
   }, [
@@ -343,7 +332,7 @@ export function ProjectDiscussionsPage() {
       `${basePath}/${filteredDiscussions[0]._id}${
         currentSearch ? `?${currentSearch}` : ""
       }`,
-      { replace: true }
+      { replace: true },
     );
   }, [
     isDesktopMasterDetail,
@@ -393,7 +382,10 @@ export function ProjectDiscussionsPage() {
           queryKey: discussionQueryKeys.detail(projectId, payload.discussionId),
         });
         queryClient.removeQueries({
-          queryKey: discussionQueryKeys.replies(projectId, payload.discussionId),
+          queryKey: discussionQueryKeys.replies(
+            projectId,
+            payload.discussionId,
+          ),
         });
 
         if (payload.actorId !== currentUser?._id) {
@@ -572,7 +564,9 @@ export function ProjectDiscussionsPage() {
       />
 
       <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 lg:grid-cols-[340px_minmax(0,1fr)] xl:grid-cols-[340px_minmax(0,1fr)_300px]">
-        <div className={discussionId ? "hidden min-h-0 lg:flex" : "flex min-h-0"}>
+        <div
+          className={discussionId ? "hidden min-h-0 lg:flex" : "flex min-h-0"}
+        >
           <DiscussionListPanel
             workspaceId={workspaceId}
             projectId={projectId}
@@ -650,19 +644,19 @@ export function ProjectDiscussionsPage() {
                         discussion,
                         project,
                         workspace,
-                        currentUser?._id
+                        currentUser?._id,
                       )}
                       canDelete={canDeleteDiscussion(
                         discussion,
                         project,
                         workspace,
                         role,
-                        currentUser?._id
+                        currentUser?._id,
                       )}
                       canModerate={canModerateDiscussion(
                         project,
                         workspace,
-                        role
+                        role,
                       )}
                       onEdit={() => setEditTarget(discussion)}
                       onDelete={() => setDeleteTarget(discussion)}
@@ -705,10 +699,7 @@ export function ProjectDiscussionsPage() {
           discussion.project === projectId &&
           discussion.workspace === workspaceId && (
             <aside className="hidden min-h-0 space-y-4 overflow-y-auto xl:block">
-              <DiscussionAboutRail
-                discussion={discussion}
-                project={project}
-              />
+              <DiscussionAboutRail discussion={discussion} project={project} />
               <DiscussionParticipantsRail
                 discussion={discussion}
                 replies={replies}

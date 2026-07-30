@@ -5,7 +5,10 @@ import { Bell, CheckCheck } from "lucide-react";
 import { Avatar } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import { formatRelativeTime } from "@/lib/date";
-import { useNotificationsQuery, useUnreadNotificationCountQuery } from "../hooks/useNotificationQueries";
+import {
+  useNotificationsQuery,
+  useUnreadNotificationCountQuery,
+} from "../hooks/useNotificationQueries";
 import {
   useMarkAllNotificationsAsReadMutation,
   useMarkNotificationAsReadMutation,
@@ -99,18 +102,25 @@ export function NotificationCenter() {
 
             <div className="max-h-[55vh] overflow-y-auto">
               {notificationsQuery.isLoading && (
-                <div className="px-4 py-8 text-center text-caption">Loading notifications...</div>
+                <div className="px-4 py-8 text-center text-caption">
+                  Loading notifications...
+                </div>
               )}
 
               {notificationsQuery.isError && (
                 <div className="px-4 py-8 text-center text-caption text-danger">
-                  {notificationsQuery.error?.message ?? "Unable to load notifications."}
+                  {notificationsQuery.error?.message ??
+                    "Unable to load notifications."}
                 </div>
               )}
 
-              {!notificationsQuery.isLoading && !notificationsQuery.isError && notifications.length === 0 && (
-                <div className="px-4 py-8 text-center text-caption">You&apos;re all caught up.</div>
-              )}
+              {!notificationsQuery.isLoading &&
+                !notificationsQuery.isError &&
+                notifications.length === 0 && (
+                  <div className="px-4 py-8 text-center text-caption">
+                    You&apos;re all caught up.
+                  </div>
+                )}
 
               {notifications.map((notification) => (
                 <button
@@ -121,13 +131,14 @@ export function NotificationCenter() {
                       markOneReadMutation.mutate(notification._id);
                     }
 
-                    const destination = getNotificationDestination(notification);
+                    const destination =
+                      getNotificationDestination(notification);
                     setOpen(false);
                     navigate(destination?.path ?? "/notifications");
                   }}
                   className={cn(
                     "flex w-full gap-3 border-b border-border/60 px-4 py-3 text-left transition-colors last:border-b-0 hover:bg-border/20",
-                    !notification.isRead && "bg-primary/5"
+                    !notification.isRead && "bg-primary/5",
                   )}
                 >
                   <Avatar
@@ -137,11 +148,19 @@ export function NotificationCenter() {
                   />
                   <div className="min-w-0 flex-1">
                     <div className="flex items-start justify-between gap-2">
-                      <p className="truncate text-sm font-medium text-foreground">{notification.title}</p>
-                      {!notification.isRead && <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-primary" />}
+                      <p className="truncate text-sm font-medium text-foreground">
+                        {notification.title}
+                      </p>
+                      {!notification.isRead && (
+                        <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-primary" />
+                      )}
                     </div>
-                    <p className="mt-0.5 line-clamp-2 text-xs text-muted">{notification.message}</p>
-                    <p className="mt-1 text-[11px] text-muted/70">{formatRelativeTime(notification.createdAt)}</p>
+                    <p className="mt-0.5 line-clamp-2 text-xs text-muted">
+                      {notification.message}
+                    </p>
+                    <p className="mt-1 text-[11px] text-muted/70">
+                      {formatRelativeTime(notification.createdAt)}
+                    </p>
                   </div>
                 </button>
               ))}

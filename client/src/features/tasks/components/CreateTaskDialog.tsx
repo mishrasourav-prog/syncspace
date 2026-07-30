@@ -9,7 +9,10 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useCreateTaskMutation } from "../hooks/useTaskMutations";
-import { createTaskSchema, type CreateTaskFormValues } from "../schemas/task.schemas";
+import {
+  createTaskSchema,
+  type CreateTaskFormValues,
+} from "../schemas/task.schemas";
 import type { TaskType } from "../types/task.types";
 
 interface CreateTaskDialogProps {
@@ -19,7 +22,12 @@ interface CreateTaskDialogProps {
   initialType?: TaskType;
 }
 
-export function CreateTaskDialog({ projectId, open, onClose, initialType = "task" }: CreateTaskDialogProps) {
+export function CreateTaskDialog({
+  projectId,
+  open,
+  onClose,
+  initialType = "task",
+}: CreateTaskDialogProps) {
   const createTaskMutation = useCreateTaskMutation(projectId);
 
   const {
@@ -29,15 +37,28 @@ export function CreateTaskDialog({ projectId, open, onClose, initialType = "task
     formState: { errors },
   } = useForm<CreateTaskFormValues>({
     resolver: zodResolver(createTaskSchema),
-    defaultValues: { title: "", description: "", type: initialType, priority: "MEDIUM", startDate: "", dueDate: "" },
+    defaultValues: {
+      title: "",
+      description: "",
+      type: initialType,
+      priority: "MEDIUM",
+      startDate: "",
+      dueDate: "",
+    },
   });
 
   useEffect(() => {
     if (open) {
-      reset({ title: "", description: "", type: initialType, priority: "MEDIUM", startDate: "", dueDate: "" });
+      reset({
+        title: "",
+        description: "",
+        type: initialType,
+        priority: "MEDIUM",
+        startDate: "",
+        dueDate: "",
+      });
       createTaskMutation.reset();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, initialType]);
 
   function handleClose() {
@@ -59,16 +80,23 @@ export function CreateTaskDialog({ projectId, open, onClose, initialType = "task
       },
       {
         onSuccess: (createdTask) => {
-          toast.success(`${createdTask.type === "issue" ? "Issue" : "Task"} created successfully.`);
+          toast.success(
+            `${createdTask.type === "issue" ? "Issue" : "Task"} created successfully.`,
+          );
           reset();
           onClose();
         },
-      }
+      },
     );
   };
 
   return (
-    <Dialog open={open} onClose={handleClose} title="New task or issue" description="Add a work item to this project.">
+    <Dialog
+      open={open}
+      onClose={handleClose}
+      title="New task or issue"
+      description="Add a work item to this project."
+    >
       {createTaskMutation.isError && (
         <div className="mb-4 rounded-md border border-danger/30 bg-danger/10 px-3 py-2 text-xs text-danger">
           {createTaskMutation.error?.message ?? "Unable to create work item."}
@@ -90,7 +118,12 @@ export function CreateTaskDialog({ projectId, open, onClose, initialType = "task
           </div>
           <div className="min-w-0 flex-1">
             <Label htmlFor="task-title">Title</Label>
-            <Input id="task-title" placeholder="Add login page validation" error={errors.title?.message} {...register("title")} />
+            <Input
+              id="task-title"
+              placeholder="Add login page validation"
+              error={errors.title?.message}
+              {...register("title")}
+            />
           </div>
         </div>
 
@@ -126,7 +159,12 @@ export function CreateTaskDialog({ projectId, open, onClose, initialType = "task
             <Label htmlFor="task-start-date">
               Start date <span className="text-muted/60">(optional)</span>
             </Label>
-            <Input id="task-start-date" type="date" error={errors.startDate?.message} {...register("startDate")} />
+            <Input
+              id="task-start-date"
+              type="date"
+              error={errors.startDate?.message}
+              {...register("startDate")}
+            />
           </div>
           <div className="min-w-0 flex-1">
             <Label htmlFor="task-due-date">
@@ -143,7 +181,12 @@ export function CreateTaskDialog({ projectId, open, onClose, initialType = "task
         </div>
 
         <DialogFooter>
-          <Button type="button" variant="secondary" onClick={handleClose} disabled={createTaskMutation.isPending}>
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={handleClose}
+            disabled={createTaskMutation.isPending}
+          >
             Cancel
           </Button>
           <Button type="submit" disabled={createTaskMutation.isPending}>

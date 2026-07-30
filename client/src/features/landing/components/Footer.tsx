@@ -8,7 +8,9 @@ interface FooterProps {
 const GITHUB_URL = "https://github.com/mishrasourav-prog/syncspace";
 
 function scrollToSection(target: string): void {
-  document.getElementById(target)?.scrollIntoView({ behavior: "smooth", block: "start" });
+  document
+    .getElementById(target)
+    ?.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
 export function Footer({ onGetStarted, onLogin }: FooterProps) {
@@ -21,18 +23,40 @@ export function Footer({ onGetStarted, onLogin }: FooterProps) {
               <span className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-sm font-semibold text-primary-foreground">
                 S
               </span>
-              <span className="font-semibold tracking-tight text-foreground">SyncSpace</span>
+              <span className="font-semibold tracking-tight text-foreground">
+                SyncSpace
+              </span>
             </div>
             <p className="mt-3 text-sm leading-relaxed text-muted">
-              An open-source collaborative workspace for projects, tasks, documents, discussions, notifications, and secure team access.
+              An open-source collaborative workspace for projects, tasks,
+              documents, discussions, notifications, and secure team access.
             </p>
           </div>
 
-          <nav className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:items-center" aria-label="Footer navigation">
-            <Button variant="ghost" size="sm" onClick={() => scrollToSection("product")}>Product</Button>
-            <Button variant="ghost" size="sm" onClick={() => scrollToSection("security")}>Security</Button>
-            <Button variant="ghost" size="sm" onClick={onLogin}>Log in</Button>
-            <Button variant="secondary" size="sm" onClick={onGetStarted}>Get Started</Button>
+          <nav
+            className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:items-center"
+            aria-label="Footer navigation"
+          >
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => scrollToSection("product")}
+            >
+              Product
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => scrollToSection("security")}
+            >
+              Security
+            </Button>
+            <Button variant="ghost" size="sm" onClick={onLogin}>
+              Log in
+            </Button>
+            <Button variant="secondary" size="sm" onClick={onGetStarted}>
+              Get Started
+            </Button>
             <a
               href={GITHUB_URL}
               target="_blank"
@@ -54,7 +78,9 @@ export function Footer({ onGetStarted, onLogin }: FooterProps) {
 
         <div className="mt-8 flex flex-col gap-2 border-t border-border pt-6 text-xs text-muted sm:flex-row sm:items-center sm:justify-between">
           <span>© 2026 SyncSpace</span>
-          <span>Open-source collaborative workspace built by Sourav Mishra.</span>
+          <span>
+            Open-source collaborative workspace built by Sourav Mishra.
+          </span>
         </div>
       </div>
     </footer>

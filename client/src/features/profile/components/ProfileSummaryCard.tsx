@@ -69,14 +69,24 @@ export function ProfileSummaryCard({
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div className="min-w-0">
-                <h2 id="profile-summary-heading" className="truncate text-h2 text-foreground">
+                <h2
+                  id="profile-summary-heading"
+                  className="truncate text-h2 text-foreground"
+                >
                   {profile.name}
                 </h2>
-                <p className="mt-0.5 truncate text-caption">@{profile.username}</p>
+                <p className="mt-0.5 truncate text-caption">
+                  @{profile.username}
+                </p>
               </div>
 
               {!isEditing ? (
-                <Button type="button" size="sm" variant="secondary" onClick={onStartEdit}>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="secondary"
+                  onClick={onStartEdit}
+                >
                   <Pencil className="h-3.5 w-3.5" aria-hidden />
                   Edit profile
                 </Button>
@@ -85,16 +95,24 @@ export function ProfileSummaryCard({
 
             <div className="mt-3 space-y-2">
               <p className="flex min-w-0 items-center gap-2 text-sm text-foreground">
-                <Mail className="h-3.5 w-3.5 shrink-0 text-secondary" aria-hidden />
+                <Mail
+                  className="h-3.5 w-3.5 shrink-0 text-secondary"
+                  aria-hidden
+                />
                 <span className="truncate">{profile.email}</span>
               </p>
 
               <div className="flex flex-wrap items-center gap-2">
-                <Badge variant={profile.headline ? "primary" : "neutral"} className="max-w-full whitespace-normal break-words text-left">
+                <Badge
+                  variant={profile.headline ? "primary" : "neutral"}
+                  className="max-w-full whitespace-normal break-words text-left"
+                >
                   <BriefcaseBusiness className="h-3 w-3" aria-hidden />
                   {profile.headline || "No headline added"}
                 </Badge>
-                <Badge variant="neutral">{PROVIDER_LABEL[profile.provider]}</Badge>
+                <Badge variant="neutral">
+                  {PROVIDER_LABEL[profile.provider]}
+                </Badge>
               </div>
 
               <p className="flex items-center gap-2 text-caption">

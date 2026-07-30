@@ -11,8 +11,14 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { formatRelativeTime } from "@/lib/date";
 import type { ProjectMember } from "@/features/project-members/types/projectMember.types";
-import { useUpdateTaskMutation, useUpdateTaskStatusMutation } from "../hooks/useTaskMutations";
-import { updateTaskSchema, type UpdateTaskFormValues } from "../schemas/task.schemas";
+import {
+  useUpdateTaskMutation,
+  useUpdateTaskStatusMutation,
+} from "../hooks/useTaskMutations";
+import {
+  updateTaskSchema,
+  type UpdateTaskFormValues,
+} from "../schemas/task.schemas";
 import { ALL_STATUSES, STATUS_LABEL } from "../task.filters";
 import type { Task, TaskStatus } from "../types/task.types";
 import { ManageTaskAssignees } from "./ManageTaskAssignees";
@@ -59,7 +65,14 @@ export function EditTaskDialog({
     formState: { errors, isDirty },
   } = useForm<UpdateTaskFormValues>({
     resolver: zodResolver(updateTaskSchema),
-    defaultValues: { title: "", description: "", type: "task", priority: "MEDIUM", startDate: "", dueDate: "" },
+    defaultValues: {
+      title: "",
+      description: "",
+      type: "task",
+      priority: "MEDIUM",
+      startDate: "",
+      dueDate: "",
+    },
   });
 
   useEffect(() => {
@@ -74,7 +87,6 @@ export function EditTaskDialog({
       });
       updateTaskMutation.reset();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [task?._id]);
 
   function handleClose() {
@@ -88,8 +100,9 @@ export function EditTaskDialog({
       { taskId: task._id, status },
       {
         onSuccess: () => toast.success("Status updated."),
-        onError: (error) => toast.error(error.message ?? "Unable to update status."),
-      }
+        onError: (error) =>
+          toast.error(error.message ?? "Unable to update status."),
+      },
     );
   }
 
@@ -113,14 +126,18 @@ export function EditTaskDialog({
           toast.success("Changes saved.");
           onClose();
         },
-      }
+      },
     );
   };
 
   if (!task) return null;
 
   return (
-    <Dialog open={Boolean(task)} onClose={handleClose} title={task.type === "issue" ? "Edit issue" : "Edit task"}>
+    <Dialog
+      open={Boolean(task)}
+      onClose={handleClose}
+      title={task.type === "issue" ? "Edit issue" : "Edit task"}
+    >
       {updateTaskMutation.isError && (
         <div className="mb-4 rounded-md border border-danger/30 bg-danger/10 px-3 py-2 text-xs text-danger">
           {updateTaskMutation.error?.message ?? "Unable to save changes."}
@@ -132,7 +149,9 @@ export function EditTaskDialog({
         <select
           value={task.status}
           disabled={!canChangeStatus || updateStatusMutation.isPending}
-          onChange={(event) => handleStatusChange(event.target.value as TaskStatus)}
+          onChange={(event) =>
+            handleStatusChange(event.target.value as TaskStatus)
+          }
           className="w-full rounded-md border border-border bg-background px-3 py-2.5 text-sm text-foreground outline-none transition-colors focus:border-muted/60 disabled:opacity-60"
         >
           {ALL_STATUSES.map((status) => (
@@ -145,7 +164,12 @@ export function EditTaskDialog({
 
       <div className="mb-4">
         <Label>Assignees</Label>
-        <ManageTaskAssignees task={task} projectId={projectId} members={members} canManage={canManageAssignees} />
+        <ManageTaskAssignees
+          task={task}
+          projectId={projectId}
+          members={members}
+          canManage={canManageAssignees}
+        />
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
@@ -164,7 +188,11 @@ export function EditTaskDialog({
             </div>
             <div className="min-w-0 flex-1">
               <Label htmlFor="edit-task-title">Title</Label>
-              <Input id="edit-task-title" error={errors.title?.message} {...register("title")} />
+              <Input
+                id="edit-task-title"
+                error={errors.title?.message}
+                {...register("title")}
+              />
             </div>
           </div>
 
@@ -172,7 +200,12 @@ export function EditTaskDialog({
             <Label htmlFor="edit-task-description">
               Description <span className="text-muted/60">(optional)</span>
             </Label>
-            <Textarea id="edit-task-description" rows={4} error={errors.description?.message} {...register("description")} />
+            <Textarea
+              id="edit-task-description"
+              rows={4}
+              error={errors.description?.message}
+              {...register("description")}
+            />
           </div>
 
           <div className="mb-4">
@@ -194,7 +227,12 @@ export function EditTaskDialog({
               <Label htmlFor="edit-task-start-date">
                 Start date <span className="text-muted/60">(optional)</span>
               </Label>
-              <Input id="edit-task-start-date" type="date" error={errors.startDate?.message} {...register("startDate")} />
+              <Input
+                id="edit-task-start-date"
+                type="date"
+                error={errors.startDate?.message}
+                {...register("startDate")}
+              />
             </div>
             <div className="min-w-0 flex-1">
               <Label htmlFor="edit-task-due-date">
@@ -209,24 +247,36 @@ export function EditTaskDialog({
               />
             </div>
           </div>
-          <p className="mb-4 text-[11px] text-muted/70">Once set, a date can be changed but not cleared.</p>
+          <p className="mb-4 text-[11px] text-muted/70">
+            Once set, a date can be changed but not cleared.
+          </p>
         </fieldset>
 
         <p className="mb-4 text-[11px] text-muted/70">
           Created {formatRelativeTime(task.createdAt)}
-          {task.updatedAt !== task.createdAt ? ` · Updated ${formatRelativeTime(task.updatedAt)}` : ""}
+          {task.updatedAt !== task.createdAt
+            ? ` · Updated ${formatRelativeTime(task.updatedAt)}`
+            : ""}
         </p>
 
         <DialogFooter className="items-center justify-between sm:justify-between">
           <div>
             {canArchive && (
-              <Button type="button" variant="secondary" onClick={() => onRequestArchive(task)}>
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => onRequestArchive(task)}
+              >
                 <Archive className="h-3.5 w-3.5" />
                 Archive
               </Button>
             )}
             {canRestore && (
-              <Button type="button" variant="secondary" onClick={() => onRequestRestore(task)}>
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => onRequestRestore(task)}
+              >
                 <RotateCcw className="h-3.5 w-3.5" />
                 Restore
               </Button>
@@ -234,11 +284,19 @@ export function EditTaskDialog({
           </div>
 
           <div className="flex gap-2">
-            <Button type="button" variant="secondary" onClick={handleClose} disabled={updateTaskMutation.isPending}>
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={handleClose}
+              disabled={updateTaskMutation.isPending}
+            >
               Close
             </Button>
             {canEdit && (
-              <Button type="submit" disabled={updateTaskMutation.isPending || !isDirty}>
+              <Button
+                type="submit"
+                disabled={updateTaskMutation.isPending || !isDirty}
+              >
                 {updateTaskMutation.isPending ? "Saving..." : "Save changes"}
               </Button>
             )}

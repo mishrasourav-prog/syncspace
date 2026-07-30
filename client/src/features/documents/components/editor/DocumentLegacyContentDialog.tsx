@@ -7,12 +7,23 @@ interface DocumentLegacyContentDialogProps {
   onConfirmConvert: () => void;
 }
 
-export function DocumentLegacyContentDialog({ open, onClose, onConfirmConvert }: DocumentLegacyContentDialogProps) {
+export function DocumentLegacyContentDialog({
+  open,
+  onClose,
+  onConfirmConvert,
+}: DocumentLegacyContentDialogProps) {
   return (
-    <Dialog open={open} onClose={onClose} title="Convert to a rich-text document?" disableOutsideClose>
+    <Dialog
+      open={open}
+      onClose={onClose}
+      title="Convert to a rich-text document?"
+      disableOutsideClose
+    >
       <p className="text-body">
-        This document uses an unsupported legacy content format. Its existing content has not been modified. Converting
-        it will replace that content with a blank rich-text document the next time you save — this cannot be undone.
+        This document uses an unsupported legacy content format. Its existing
+        content has not been modified. Converting it will replace that content
+        with a blank rich-text document the next time you save — this cannot be
+        undone.
       </p>
 
       <DialogFooter>

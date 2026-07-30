@@ -1,41 +1,29 @@
 export interface IAssignTask {
-
-    userId: string;
-
+  userId: string;
 }
 
 export interface ITaskAssigneeResponse {
+  _id: string;
 
+  task: string;
+
+  user: {
     _id: string;
 
-    task: string;
+    name: string;
 
-    user: {
+    username: string;
 
-        _id: string;
+    email: string;
 
-        name: string;
+    avatar?: string;
+  };
 
-        username: string;
+  assignedBy: string;
 
-        email: string;
-
-        avatar?: string;
-
-    };
-
-    assignedBy: string;
-
-    assignedAt: Date;
-
+  assignedAt: Date;
 }
 
 export interface ITaskAssigneesResponse {
-
-    assignees: ITaskAssigneeResponse[];
-
+  assignees: ITaskAssigneeResponse[];
 }
-
-
-
-

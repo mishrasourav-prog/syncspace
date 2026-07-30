@@ -8,11 +8,15 @@ interface DropdownMenuContextValue {
   triggerRef: React.RefObject<HTMLButtonElement | null>;
 }
 
-const DropdownMenuContext = React.createContext<DropdownMenuContextValue | null>(null);
+const DropdownMenuContext =
+  React.createContext<DropdownMenuContextValue | null>(null);
 
 function useDropdownMenuContext() {
   const context = React.useContext(DropdownMenuContext);
-  if (!context) throw new Error("DropdownMenu components must be used within <DropdownMenu>");
+  if (!context)
+    throw new Error(
+      "DropdownMenu components must be used within <DropdownMenu>",
+    );
   return context;
 }
 
@@ -75,7 +79,7 @@ export function DropdownMenuTrigger({
       onClick={() => setOpen(!open)}
       className={cn(
         "inline-flex h-8 w-8 items-center justify-center rounded-md text-muted transition-colors hover:bg-border/40 hover:text-foreground",
-        className
+        className,
       )}
     >
       {children}
@@ -107,7 +111,7 @@ export function DropdownMenuContent({
           className={cn(
             "absolute z-40 mt-1.5 min-w-[180px] rounded-xl border border-border bg-surface p-1.5 shadow-elevated",
             align === "end" ? "right-0" : "left-0",
-            className
+            className,
           )}
         >
           {children}
@@ -138,8 +142,10 @@ export function DropdownMenuItem({
       onClick={onClick}
       className={cn(
         "flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm transition-colors disabled:pointer-events-none disabled:opacity-50",
-        variant === "danger" ? "text-danger hover:bg-danger/10" : "text-foreground hover:bg-border/40",
-        className
+        variant === "danger"
+          ? "text-danger hover:bg-danger/10"
+          : "text-foreground hover:bg-border/40",
+        className,
       )}
     >
       {children}

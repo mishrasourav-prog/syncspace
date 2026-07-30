@@ -1,188 +1,139 @@
-import {
-    model,
-    Schema,
-    Types,
-} from "mongoose";
+import { model, Schema, Types } from "mongoose";
 
 export interface IProjectDocument {
-    workspace: Types.ObjectId;
+  workspace: Types.ObjectId;
 
-    project: Types.ObjectId;
+  project: Types.ObjectId;
 
-    title: string;
+  title: string;
 
-    /*
-    This can store TipTap, BlockNote or another
-    rich-text editor's JSON structure.
-    */
-    content: unknown;
+  content: unknown;
 
-    createdBy: Types.ObjectId;
+  createdBy: Types.ObjectId;
 
-    updatedBy: Types.ObjectId;
+  updatedBy: Types.ObjectId;
 
-    /*
-    Increased after every update.
+  revision: number;
 
-    The frontend sends its current revision during updates.
-    This prevents one user from silently overwriting another
-    user's newer changes.
-    */
-    revision: number;
+  isArchived: boolean;
 
-    isArchived: boolean;
+  archivedAt?: Date | null;
 
-    archivedAt?: Date | null;
+  archivedBy?: Types.ObjectId | null;
 
-    archivedBy?: Types.ObjectId | null;
+  createdAt: Date;
 
-    createdAt: Date;
-
-    updatedAt: Date;
+  updatedAt: Date;
 }
 
-const projectDocumentSchema =
-    new Schema<IProjectDocument>(
-        {
-            workspace: {
-                type:
-                    Schema.Types.ObjectId,
+const projectDocumentSchema = new Schema<IProjectDocument>(
+  {
+    workspace: {
+      type: Schema.Types.ObjectId,
 
-                ref:
-                    "Workspace",
+      ref: "Workspace",
 
-                required:
-                    true,
-            },
+      required: true,
+    },
 
-            project: {
-                type:
-                    Schema.Types.ObjectId,
+    project: {
+      type: Schema.Types.ObjectId,
 
-                ref:
-                    "Project",
+      ref: "Project",
 
-                required:
-                    true,
-            },
+      required: true,
+    },
 
-            title: {
-                type:
-                    String,
+    title: {
+      type: String,
 
-                required:
-                    true,
+      required: true,
 
-                trim:
-                    true,
+      trim: true,
 
-                maxlength:
-                    200,
-            },
+      maxlength: 200,
+    },
 
-            content: {
-                type:
-                    Schema.Types.Mixed,
+    content: {
+      type: Schema.Types.Mixed,
 
-                default:
-                    null,
-            },
+      default: null,
+    },
 
-            createdBy: {
-                type:
-                    Schema.Types.ObjectId,
+    createdBy: {
+      type: Schema.Types.ObjectId,
 
-                ref:
-                    "User",
+      ref: "User",
 
-                required:
-                    true,
-            },
+      required: true,
+    },
 
-            updatedBy: {
-                type:
-                    Schema.Types.ObjectId,
+    updatedBy: {
+      type: Schema.Types.ObjectId,
 
-                ref:
-                    "User",
+      ref: "User",
 
-                required:
-                    true,
-            },
+      required: true,
+    },
 
-            revision: {
-                type:
-                    Number,
+    revision: {
+      type: Number,
 
-                required:
-                    true,
+      required: true,
 
-                default:
-                    1,
+      default: 1,
 
-                min:
-                    1,
-            },
+      min: 1,
+    },
 
-            isArchived: {
-                type:
-                    Boolean,
+    isArchived: {
+      type: Boolean,
 
-                required:
-                    true,
+      required: true,
 
-                default:
-                    false,
-            },
+      default: false,
+    },
 
-            archivedAt: {
-                type:
-                    Date,
+    archivedAt: {
+      type: Date,
 
-                default:
-                    null,
-            },
+      default: null,
+    },
 
-            archivedBy: {
-                type:
-                    Schema.Types.ObjectId,
+    archivedBy: {
+      type: Schema.Types.ObjectId,
 
-                ref:
-                    "User",
+      ref: "User",
 
-                default:
-                    null,
-            },
-        },
-        {
-            timestamps:
-                true,
+      default: null,
+    },
+  },
+  {
+    timestamps: true,
 
-            versionKey:
-                false,
-        }
-    );
+    versionKey: false,
+  },
+);
 
 projectDocumentSchema.index({
-    project: 1,
-    isArchived: 1,
-    _id: -1,
+  project: 1,
+  isArchived: 1,
+  _id: -1,
 });
 
 projectDocumentSchema.index({
-    workspace: 1,
-    updatedAt: -1,
+  workspace: 1,
+  updatedAt: -1,
 });
 
 projectDocumentSchema.index({
-    project: 1,
-    title: 1,
+  project: 1,
+  title: 1,
 });
 
-const ProjectDocument =
-    model<IProjectDocument>(
-        "ProjectDocument",
-        projectDocumentSchema
-    );
+const ProjectDocument = model<IProjectDocument>(
+  "ProjectDocument",
+  projectDocumentSchema,
+);
 
 export default ProjectDocument;

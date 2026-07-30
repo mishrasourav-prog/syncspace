@@ -1,111 +1,99 @@
 export interface IDiscussionUserPreview {
-    _id: string;
+  _id: string;
 
-    name: string;
+  name: string;
 
-    username: string;
+  username: string;
 
-    avatar?: string;
+  avatar?: string;
 }
 
 export interface IDiscussionResponse {
-    _id: string;
+  _id: string;
 
-    workspace: string;
+  workspace: string;
 
-    project: string;
+  project: string;
 
-    title: string;
+  title: string;
 
-    body: string;
+  body: string;
 
-    author:
-        IDiscussionUserPreview |
-        null;
+  author: IDiscussionUserPreview | null;
 
-    isPinned: boolean;
+  isPinned: boolean;
 
-    isLocked: boolean;
+  isLocked: boolean;
 
-    replyCount: number;
+  replyCount: number;
 
-    createdAt: Date;
+  createdAt: Date;
 
-    updatedAt: Date;
+  updatedAt: Date;
 }
 
 export interface IDiscussionReplyResponse {
-    _id: string;
+  _id: string;
 
-    workspace: string;
+  workspace: string;
 
-    project: string;
+  project: string;
 
-    discussion: string;
+  discussion: string;
 
-    author:
-        IDiscussionUserPreview |
-        null;
+  author: IDiscussionUserPreview | null;
 
-    body:
-        string |
-        null;
+  body: string | null;
 
-    isDeleted: boolean;
+  isDeleted: boolean;
 
-    createdAt: Date;
+  createdAt: Date;
 
-    updatedAt: Date;
+  updatedAt: Date;
 }
 
 export interface ICreateDiscussionInput {
-    title: string;
+  title: string;
 
-    body: string;
+  body: string;
 }
 
 export interface IUpdateDiscussionInput {
-    title?: string;
+  title?: string;
 
-    body?: string;
+  body?: string;
 }
 
 export interface ICreateDiscussionReplyInput {
-    body: string;
+  body: string;
 }
 
 export interface IUpdateDiscussionReplyInput {
-    body: string;
+  body: string;
 }
 
 export interface IDiscussionListQuery {
-    search?: string;
+  search?: string;
 
-    cursor?: string;
+  cursor?: string;
 
-    limit: number;
+  limit: number;
 }
 
 export interface IDiscussionReplyListQuery {
-    cursor?: string;
+  cursor?: string;
 
-    limit: number;
+  limit: number;
 }
 
 export interface IDiscussionListResponse {
-    discussions:
-        IDiscussionResponse[];
+  discussions: IDiscussionResponse[];
 
-    nextCursor:
-        string |
-        null;
+  nextCursor: string | null;
 }
 
 export interface IDiscussionReplyListResponse {
-    replies:
-        IDiscussionReplyResponse[];
+  replies: IDiscussionReplyResponse[];
 
-    nextCursor:
-        string |
-        null;
+  nextCursor: string | null;
 }

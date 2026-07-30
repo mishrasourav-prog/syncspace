@@ -1,24 +1,43 @@
 import type { InfiniteData, QueryClient } from "@tanstack/react-query";
 import { documentQueryKeys } from "./document.queryKeys";
-import type { ProjectDocument, ProjectDocumentListResult } from "./types/document.types";
+import type {
+  ProjectDocument,
+  ProjectDocumentListResult,
+} from "./types/document.types";
 
-type InfiniteDocuments = InfiniteData<ProjectDocumentListResult, string | undefined>;
+type InfiniteDocuments = InfiniteData<
+  ProjectDocumentListResult,
+  string | undefined
+>;
 
-function replaceInPages(pages: ProjectDocumentListResult[], document: ProjectDocument): ProjectDocumentListResult[] {
+function replaceInPages(
+  pages: ProjectDocumentListResult[],
+  document: ProjectDocument,
+): ProjectDocumentListResult[] {
   return pages.map((page) => ({
     ...page,
-    documents: page.documents.map((candidate) => (candidate._id === document._id ? document : candidate)),
+    documents: page.documents.map((candidate) =>
+      candidate._id === document._id ? document : candidate,
+    ),
   }));
 }
 
-function removeFromPages(pages: ProjectDocumentListResult[], documentId: string): ProjectDocumentListResult[] {
+function removeFromPages(
+  pages: ProjectDocumentListResult[],
+  documentId: string,
+): ProjectDocumentListResult[] {
   return pages.map((page) => ({
     ...page,
-    documents: page.documents.filter((candidate) => candidate._id !== documentId),
+    documents: page.documents.filter(
+      (candidate) => candidate._id !== documentId,
+    ),
   }));
 }
 
-function prependToFirstPage(pages: ProjectDocumentListResult[], document: ProjectDocument): ProjectDocumentListResult[] {
+function prependToFirstPage(
+  pages: ProjectDocumentListResult[],
+  document: ProjectDocument,
+): ProjectDocumentListResult[] {
   if (pages.length === 0) return pages;
 
   return pages.map((page, index) => {
@@ -26,70 +45,104 @@ function prependToFirstPage(pages: ProjectDocumentListResult[], document: Projec
 
     return {
       ...page,
-      documents: [document, ...page.documents.filter((candidate) => candidate._id !== document._id)],
+      documents: [
+        document,
+        ...page.documents.filter((candidate) => candidate._id !== document._id),
+      ],
     };
   });
 }
 
-export function writeDocumentToCaches(queryClient: QueryClient, projectId: string, document: ProjectDocument): void {
-  queryClient.setQueryData(documentQueryKeys.detail(projectId, document._id), document);
+export function writeDocumentToCaches(
+  queryClient: QueryClient,
+  projectId: string,
+  document: ProjectDocument,
+): void {
+  queryClient.setQueryData(
+    documentQueryKeys.detail(projectId, document._id),
+    document,
+  );
 
-  queryClient.setQueriesData<InfiniteDocuments>({ queryKey: documentQueryKeys.infinite(projectId) }, (data) => {
-    if (!data) return data;
-    return { ...data, pages: replaceInPages(data.pages, document) };
-  });
+  queryClient.setQueriesData<InfiniteDocuments>(
+    { queryKey: documentQueryKeys.infinite(projectId) },
+    (data) => {
+      if (!data) return data;
+      return { ...data, pages: replaceInPages(data.pages, document) };
+    },
+  );
 
   queryClient.setQueriesData<ProjectDocumentListResult>(
     { queryKey: [...documentQueryKeys.project(projectId), "list"] },
     (data) => {
       if (!data) return data;
       return replaceInPages([data], document)[0];
-    }
+    },
   );
 }
 
-/**
- * Removes a document from every loaded list cache, then inserts it only into
- * the unfiltered cache for its new state. Filtered caches are intentionally
- * left empty until their invalidation refetch verifies whether the title
- * still matches the filter.
- */
 export function moveDocumentBetweenCaches(
   queryClient: QueryClient,
   projectId: string,
-  document: ProjectDocument
+  document: ProjectDocument,
 ): void {
-  queryClient.setQueryData(documentQueryKeys.detail(projectId, document._id), document);
+  queryClient.setQueryData(
+    documentQueryKeys.detail(projectId, document._id),
+    document,
+  );
 
-  queryClient.setQueriesData<InfiniteDocuments>({ queryKey: documentQueryKeys.infinite(projectId) }, (data) => {
-    if (!data) return data;
-    return { ...data, pages: removeFromPages(data.pages, document._id) };
-  });
+  queryClient.setQueriesData<InfiniteDocuments>(
+    { queryKey: documentQueryKeys.infinite(projectId) },
+    (data) => {
+      if (!data) return data;
+      return { ...data, pages: removeFromPages(data.pages, document._id) };
+    },
+  );
 
   queryClient.setQueryData<InfiniteDocuments>(
     documentQueryKeys.infiniteList(projectId, document.isArchived, ""),
     (data) => {
       if (!data) return data;
       return { ...data, pages: prependToFirstPage(data.pages, document) };
-    }
+    },
   );
 
   queryClient.setQueriesData<ProjectDocumentListResult>(
     { queryKey: [...documentQueryKeys.project(projectId), "list"] },
     (data) => {
       if (!data) return data;
-      return { ...data, documents: data.documents.filter((candidate) => candidate._id !== document._id) };
-    }
+      return {
+        ...data,
+        documents: data.documents.filter(
+          (candidate) => candidate._id !== document._id,
+        ),
+      };
+    },
   );
 
   if (!document.isArchived) {
-    queryClient.setQueryData<ProjectDocumentListResult>(documentQueryKeys.projectList(projectId, ""), (data) => {
-      if (!data) return data;
-      return { ...data, documents: [document, ...data.documents.filter((candidate) => candidate._id !== document._id)] };
-    });
+    queryClient.setQueryData<ProjectDocumentListResult>(
+      documentQueryKeys.projectList(projectId, ""),
+      (data) => {
+        if (!data) return data;
+        return {
+          ...data,
+          documents: [
+            document,
+            ...data.documents.filter(
+              (candidate) => candidate._id !== document._id,
+            ),
+          ],
+        };
+      },
+    );
   }
 }
 
-export function invalidateProjectDocuments(queryClient: QueryClient, projectId: string): Promise<void> {
-  return queryClient.invalidateQueries({ queryKey: documentQueryKeys.project(projectId) });
+export function invalidateProjectDocuments(
+  queryClient: QueryClient,
+  projectId: string,
+): Promise<void> {
+  return queryClient.invalidateQueries({
+    queryKey: documentQueryKeys.project(projectId),
+  });
 }

@@ -1,5 +1,14 @@
 import type { LucideIcon } from "lucide-react";
-import { CheckSquare, FileText, Lock, MessageSquare, Pin, Reply, Unlock, Zap } from "lucide-react";
+import {
+  CheckSquare,
+  FileText,
+  Lock,
+  MessageSquare,
+  Pin,
+  Reply,
+  Unlock,
+  Zap,
+} from "lucide-react";
 import type { Activity, ActivityAction } from "./types/activity.types";
 
 const ACTION_COPY: Record<ActivityAction, string> = {

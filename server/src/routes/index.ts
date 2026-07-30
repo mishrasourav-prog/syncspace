@@ -6,9 +6,9 @@ import workspaceRoutes from "../modules/workspace/workspace.routes";
 
 import workspaceInvitationRoutes from "../modules/workspaceInvitation/workspaceInvitation.routes";
 
-import workspaceMemberRoutes from "../modules/workspace-member/workspace-member.routes"
+import workspaceMemberRoutes from "../modules/workspace-member/workspace-member.routes";
 
-import projectRoutes from "../modules/project/project.routes"
+import projectRoutes from "../modules/project/project.routes";
 import projectInvitationRoutes from "../modules/projectInvitation/projectInvitation.routes";
 
 import projectMemberRoutes from "../modules/projectMember/projectMember.routes";
@@ -37,30 +37,16 @@ router.use("/auth", authRoutes);
 
 router.use("/workspaces", workspaceRoutes);
 
-router.use(
-    "/",
-    workspaceInvitationRoutes
-);
+router.use("/", workspaceInvitationRoutes);
 
-router.use(
-    "/workspaces",
-    workspaceMemberRoutes
-);
+router.use("/workspaces", workspaceMemberRoutes);
 
 router.use("/", projectRoutes);
-router.use(
-    projectInvitationRoutes
-);
+router.use(projectInvitationRoutes);
 
-router.use(
-    "/",
-    projectMemberRoutes
-);
+router.use("/", projectMemberRoutes);
 
-router.use(
-    "/",
-    taskRoutes
-)
+router.use("/", taskRoutes);
 
 router.use("/", taskAssigneeRoutes);
 
@@ -68,28 +54,14 @@ router.use("/", taskCommentRoutes);
 
 router.use("/", taskAssignmentRequestRoutes);
 
-router.use(
-    "/",
-    activityRouter
-);
+router.use("/", activityRouter);
 
+router.use("/", notificationRouter);
 
-router.use(
-    "/",
-    notificationRouter
-);
+router.use(documentRouter);
 
-router.use(
-    documentRouter
-);
+router.use(discussionRouter);
 
-router.use(
-    discussionRouter
-);
-
-router.use(
-  "/users",
-  userRoutes
-);
+router.use("/users", userRoutes);
 
 export default router;

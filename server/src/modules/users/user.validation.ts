@@ -1,10 +1,6 @@
-import {
-  z,
-} from "zod";
+import { z } from "zod";
 
-import {
-  objectIdSchema,
-} from "../../validators/common.validation";
+import { objectIdSchema } from "../../validators/common.validation";
 
 import {
   NAME_MAX_LENGTH,
@@ -15,513 +11,230 @@ import {
   passwordSchema,
 } from "../auth/auth.validation";
 
-/*
-|--------------------------------------------------------------------------
-| Profile Field Limits
-|--------------------------------------------------------------------------
-|
-| These values match the User schema exactly.
-|
-*/
+export const HEADLINE_MAX_LENGTH = 80;
 
-export const HEADLINE_MAX_LENGTH =
-  80;
+export const BIO_MAX_LENGTH = 500;
 
-export const BIO_MAX_LENGTH =
-  500;
+export const LOCATION_MAX_LENGTH = 120;
 
-export const LOCATION_MAX_LENGTH =
-  120;
+export const AVATAR_URL_MAX_LENGTH = 2048;
 
-export const AVATAR_URL_MAX_LENGTH =
-  2048;
+const USERNAME_PATTERN = /^[A-Za-z0-9]+$/;
 
-const USERNAME_PATTERN =
-  /^[A-Za-z0-9]+$/;
-
-/*
-|--------------------------------------------------------------------------
-| Blank Optional Field Normalization
-|--------------------------------------------------------------------------
-|
-| Optional profile fields are nullable in MongoDB.
-|
-| Examples:
-|
-| "  Software Engineer  " -> "Software Engineer"
-| "       "               -> null
-| null                    -> null
-|
-*/
-
-const nullableTrimmedText = (
-  maximumLength: number,
-  fieldName: string
-) =>
+const nullableTrimmedText = (maximumLength: number, fieldName: string) =>
   z.preprocess(
-    (
-      value
-    ) => {
-      if (
-        value ===
-        null
-      ) {
+    (value) => {
+      if (value === null) {
         return null;
       }
 
-      if (
-        typeof value ===
-        "string"
-      ) {
-        const trimmed =
-          value.trim();
+      if (typeof value === "string") {
+        const trimmed = value.trim();
 
-        return trimmed.length ===
-          0
-          ? null
-          : trimmed;
+        return trimmed.length === 0 ? null : trimmed;
       }
 
       return value;
     },
     z.union([
-      z
-        .string()
-        .max(
-          maximumLength,
-          {
-            message:
-              `${fieldName} must be at most ${maximumLength} characters long.`,
-          }
-        ),
+      z.string().max(maximumLength, {
+        message: `${fieldName} must be at most ${maximumLength} characters long.`,
+      }),
 
       z.null(),
-    ])
+    ]),
   );
 
-/*
-|--------------------------------------------------------------------------
-| Avatar URL
-|--------------------------------------------------------------------------
-*/
+export const avatarUrlSchema = z.preprocess(
+  (value) => {
+    if (value === null) {
+      return null;
+    }
 
-export const avatarUrlSchema =
-  z.preprocess(
-    (
-      value
-    ) => {
-      if (
-        value ===
-        null
-      ) {
-        return null;
-      }
+    if (typeof value === "string") {
+      const trimmed = value.trim();
 
-      if (
-        typeof value ===
-        "string"
-      ) {
-        const trimmed =
-          value.trim();
+      return trimmed.length === 0 ? null : trimmed;
+    }
 
-        return trimmed.length ===
-          0
-          ? null
-          : trimmed;
-      }
+    return value;
+  },
+  z.union([
+    z
+      .string()
+      .max(AVATAR_URL_MAX_LENGTH, {
+        message: `Avatar URL must be at most ${AVATAR_URL_MAX_LENGTH} characters long.`,
+      })
+      .url({
+        message: "Avatar must be a valid URL.",
+      })
+      .refine(
+        (value) => {
+          try {
+            const protocol = new URL(value).protocol;
 
-      return value;
-    },
-    z.union([
-      z
-        .string()
-        .max(
-          AVATAR_URL_MAX_LENGTH,
-          {
-            message:
-              `Avatar URL must be at most ${AVATAR_URL_MAX_LENGTH} characters long.`,
+            return protocol === "http:" || protocol === "https:";
+          } catch {
+            return false;
           }
-        )
-        .url({
-          message:
-            "Avatar must be a valid URL.",
-        })
-        .refine(
-          (
-            value
-          ) => {
-            try {
-              const protocol =
-                new URL(
-                  value
-                ).protocol;
+        },
+        {
+          message: "Avatar must use an HTTP or HTTPS URL.",
+        },
+      ),
 
-              return (
-                protocol ===
-                  "http:" ||
-                protocol ===
-                  "https:"
-              );
-            } catch {
-              return false;
-            }
-          },
-          {
-            message:
-              "Avatar must use an HTTP or HTTPS URL.",
-          }
-        ),
+    z.null(),
+  ]),
+);
 
-      z.null(),
-    ])
-  );
+export const updateSelfProfileSchema = z
+  .object({
+    name: z
+      .string({
+        error: "Name must be a string.",
+      })
+      .trim()
+      .min(NAME_MIN_LENGTH, {
+        message: `Name must be at least ${NAME_MIN_LENGTH} characters long.`,
+      })
+      .max(NAME_MAX_LENGTH, {
+        message: `Name must be at most ${NAME_MAX_LENGTH} characters long.`,
+      })
+      .optional(),
 
-/*
-|--------------------------------------------------------------------------
-| Update Authenticated Profile
-|--------------------------------------------------------------------------
-*/
+    username: z
+      .string({
+        error: "Username must be a string.",
+      })
+      .trim()
+      .min(USERNAME_MIN_LENGTH, {
+        message: `Username must be at least ${USERNAME_MIN_LENGTH} characters long.`,
+      })
+      .max(USERNAME_MAX_LENGTH, {
+        message: `Username must be at most ${USERNAME_MAX_LENGTH} characters long.`,
+      })
+      .regex(USERNAME_PATTERN, {
+        message: "Username can only contain letters and numbers.",
+      })
+      .optional(),
 
-export const updateSelfProfileSchema =
-  z
-    .object({
-      name:
-        z
-          .string({
-            error:
-              "Name must be a string.",
-          })
-          .trim()
-          .min(
-            NAME_MIN_LENGTH,
-            {
-              message:
-                `Name must be at least ${NAME_MIN_LENGTH} characters long.`,
-            }
-          )
-          .max(
-            NAME_MAX_LENGTH,
-            {
-              message:
-                `Name must be at most ${NAME_MAX_LENGTH} characters long.`,
-            }
-          )
-          .optional(),
+    avatar: avatarUrlSchema.optional(),
 
-      username:
-        z
-          .string({
-            error:
-              "Username must be a string.",
-          })
-          .trim()
-          .min(
-            USERNAME_MIN_LENGTH,
-            {
-              message:
-                `Username must be at least ${USERNAME_MIN_LENGTH} characters long.`,
-            }
-          )
-          .max(
-            USERNAME_MAX_LENGTH,
-            {
-              message:
-                `Username must be at most ${USERNAME_MAX_LENGTH} characters long.`,
-            }
-          )
-          .regex(
-            USERNAME_PATTERN,
-            {
-              message:
-                "Username can only contain letters and numbers.",
-            }
-          )
-          .optional(),
+    headline: nullableTrimmedText(HEADLINE_MAX_LENGTH, "Headline").optional(),
 
-      /*
-      Avatar normally changes through the dedicated upload/delete endpoints.
-      Keeping this field validated also supports a trusted hosted-avatar URL
-      integration without allowing data URLs or arbitrary protocols.
-      */
-      avatar:
-        avatarUrlSchema
-          .optional(),
+    bio: nullableTrimmedText(BIO_MAX_LENGTH, "Bio").optional(),
 
-      headline:
-        nullableTrimmedText(
-          HEADLINE_MAX_LENGTH,
-          "Headline"
-        )
-          .optional(),
+    location: nullableTrimmedText(LOCATION_MAX_LENGTH, "Location").optional(),
+  })
+  .strict()
+  .refine((data) => Object.keys(data).length > 0, {
+    message: "At least one profile field must be provided.",
+  });
 
-      bio:
-        nullableTrimmedText(
-          BIO_MAX_LENGTH,
-          "Bio"
-        )
-          .optional(),
+export const changePasswordSchema = z
+  .object({
+    currentPassword: z
+      .string({
+        error: "Current password is required.",
+      })
+      .min(1, {
+        message: "Current password is required.",
+      })
+      .max(PASSWORD_MAX_LENGTH, {
+        message: `Current password must be at most ${PASSWORD_MAX_LENGTH} characters long.`,
+      }),
 
-      location:
-        nullableTrimmedText(
-          LOCATION_MAX_LENGTH,
-          "Location"
-        )
-          .optional(),
-    })
-    .strict()
-    .refine(
-      (
-        data
-      ) =>
-        Object.keys(
-          data
-        ).length >
-        0,
-      {
-        message:
-          "At least one profile field must be provided.",
-      }
-    );
+    newPassword: passwordSchema,
 
-/*
-|--------------------------------------------------------------------------
-| Change Password
-|--------------------------------------------------------------------------
-*/
+    confirmPassword: z
+      .string({
+        error: "Password confirmation is required.",
+      })
+      .min(1, {
+        message: "Password confirmation is required.",
+      })
+      .max(PASSWORD_MAX_LENGTH, {
+        message: `Password confirmation must be at most ${PASSWORD_MAX_LENGTH} characters long.`,
+      }),
+  })
+  .strict()
+  .superRefine((data, context) => {
+    if (data.newPassword !== data.confirmPassword) {
+      context.addIssue({
+        code: "custom",
 
-export const changePasswordSchema =
-  z
-    .object({
-      currentPassword:
-        z
-          .string({
-            error:
-              "Current password is required.",
-          })
-          .min(
-            1,
-            {
-              message:
-                "Current password is required.",
-            }
-          )
-          .max(
-            PASSWORD_MAX_LENGTH,
-            {
-              message:
-                `Current password must be at most ${PASSWORD_MAX_LENGTH} characters long.`,
-            }
-          ),
+        path: ["confirmPassword"],
 
-      newPassword:
-        passwordSchema,
+        message: "Passwords do not match.",
+      });
+    }
 
-      confirmPassword:
-        z
-          .string({
-            error:
-              "Password confirmation is required.",
-          })
-          .min(
-            1,
-            {
-              message:
-                "Password confirmation is required.",
-            }
-          )
-          .max(
-            PASSWORD_MAX_LENGTH,
-            {
-              message:
-                `Password confirmation must be at most ${PASSWORD_MAX_LENGTH} characters long.`,
-            }
-          ),
-    })
-    .strict()
-    .superRefine(
-      (
-        data,
-        context
-      ) => {
-        if (
-          data.newPassword !==
-          data.confirmPassword
-        ) {
-          context.addIssue({
-            code:
-              "custom",
+    if (data.currentPassword === data.newPassword) {
+      context.addIssue({
+        code: "custom",
 
-            path: [
-              "confirmPassword",
-            ],
+        path: ["newPassword"],
 
-            message:
-              "Passwords do not match.",
-          });
-        }
+        message: "New password cannot be the same as the current password.",
+      });
+    }
+  });
 
-        if (
-          data.currentPassword ===
-          data.newPassword
-        ) {
-          context.addIssue({
-            code:
-              "custom",
+export const deleteAccountSchema = z
+  .object({
+    confirmation: z.literal("DELETE", {
+      error: 'Type "DELETE" to confirm account deletion.',
+    }),
 
-            path: [
-              "newPassword",
-            ],
+    username: z
+      .string({
+        error: "Username confirmation is required.",
+      })
+      .trim()
+      .min(1, {
+        message: "Username confirmation is required.",
+      })
+      .max(64, {
+        message: "Username confirmation is invalid.",
+      }),
 
-            message:
-              "New password cannot be the same as the current password.",
-          });
-        }
-      }
-    );
+    currentPassword: z
+      .string()
+      .min(1, {
+        message: "Current password cannot be empty.",
+      })
+      .max(PASSWORD_MAX_LENGTH, {
+        message: `Current password must be at most ${PASSWORD_MAX_LENGTH} characters long.`,
+      })
+      .optional(),
+  })
+  .strict();
 
-/*
-|--------------------------------------------------------------------------
-| Delete Account
-|--------------------------------------------------------------------------
-*/
+export const memberProfileParamsSchema = z
+  .object({
+    userId: objectIdSchema,
+  })
+  .strict();
 
-export const deleteAccountSchema =
-  z
-    .object({
-      confirmation:
-        z.literal(
-          "DELETE",
-          {
-            error:
-              'Type "DELETE" to confirm account deletion.',
-          }
-        ),
+export const memberProfileQuerySchema = z
+  .object({
+    workspaceId: objectIdSchema.optional(),
 
-      username:
-        z
-          .string({
-            error:
-              "Username confirmation is required.",
-          })
-          .trim()
-          .min(
-            1,
-            {
-              message:
-                "Username confirmation is required.",
-            }
-          )
-          .max(
-            64,
-            {
-              message:
-                "Username confirmation is invalid.",
-            }
-          ),
+    projectId: objectIdSchema.optional(),
+  })
+  .strict()
+  .refine((data) => Boolean(data.workspaceId || data.projectId), {
+    message: "workspaceId or projectId is required.",
+  });
 
-      /*
-      The service requires this field for local email/password accounts and
-      ignores its absence for provider-only accounts.
-      */
-      currentPassword:
-        z
-          .string()
-          .min(
-            1,
-            {
-              message:
-                "Current password cannot be empty.",
-            }
-          )
-          .max(
-            PASSWORD_MAX_LENGTH,
-            {
-              message:
-                `Current password must be at most ${PASSWORD_MAX_LENGTH} characters long.`,
-            }
-          )
-          .optional(),
-    })
-    .strict();
+export type UpdateSelfProfileInput = z.infer<typeof updateSelfProfileSchema>;
 
-/*
-|--------------------------------------------------------------------------
-| Member Profile Route Parameters
-|--------------------------------------------------------------------------
-*/
+export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;
 
-export const memberProfileParamsSchema =
-  z
-    .object({
-      userId:
-        objectIdSchema,
-    })
-    .strict();
+export type DeleteAccountInput = z.infer<typeof deleteAccountSchema>;
 
-/*
-|--------------------------------------------------------------------------
-| Member Profile Context Query
-|--------------------------------------------------------------------------
-|
-| The caller must provide a workspace, a project, or both. The service then
-| verifies that both the requester and target user belong to the supplied
-| context before returning the safe public profile.
-|
-*/
+export type MemberProfileParamsInput = z.infer<
+  typeof memberProfileParamsSchema
+>;
 
-export const memberProfileQuerySchema =
-  z
-    .object({
-      workspaceId:
-        objectIdSchema
-          .optional(),
-
-      projectId:
-        objectIdSchema
-          .optional(),
-    })
-    .strict()
-    .refine(
-      (
-        data
-      ) =>
-        Boolean(
-          data.workspaceId ||
-          data.projectId
-        ),
-      {
-        message:
-          "workspaceId or projectId is required.",
-      }
-    );
-
-/*
-|--------------------------------------------------------------------------
-| Inferred Request Types
-|--------------------------------------------------------------------------
-*/
-
-export type UpdateSelfProfileInput =
-  z.infer<
-    typeof updateSelfProfileSchema
-  >;
-
-export type ChangePasswordInput =
-  z.infer<
-    typeof changePasswordSchema
-  >;
-
-export type DeleteAccountInput =
-  z.infer<
-    typeof deleteAccountSchema
-  >;
-
-export type MemberProfileParamsInput =
-  z.infer<
-    typeof memberProfileParamsSchema
-  >;
-
-export type MemberProfileQueryInput =
-  z.infer<
-    typeof memberProfileQuerySchema
-  >;
+export type MemberProfileQueryInput = z.infer<typeof memberProfileQuerySchema>;

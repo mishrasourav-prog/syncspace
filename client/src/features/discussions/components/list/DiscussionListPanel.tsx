@@ -32,7 +32,7 @@ interface DiscussionListPanelProps {
 function getEmptyMessage(
   searchValue: string,
   filter: DiscussionListFilter,
-  hasMore: boolean
+  hasMore: boolean,
 ): string {
   if (searchValue.trim()) {
     return hasMore
@@ -171,7 +171,8 @@ export function DiscussionListPanel({
 
       {!isLoading && !isError && (
         <div className="shrink-0 border-t border-border px-3 py-2 text-center text-[11px] text-muted/80">
-          Showing {loadedCount} loaded {loadedCount === 1 ? "discussion" : "discussions"}
+          Showing {loadedCount} loaded{" "}
+          {loadedCount === 1 ? "discussion" : "discussions"}
           {hasMore ? " · More available" : ""}
         </div>
       )}

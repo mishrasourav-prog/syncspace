@@ -9,11 +9,6 @@ interface TaskSiblingNavigationProps {
   currentTaskId: string;
 }
 
-/**
- * "Back to Tasks & Issues" plus previous/next controls derived from the
- * already-loaded project task list, ordered by `position` then `_id` to
- * match the server's own ordering. No server endpoint exists for this.
- */
 export function TaskSiblingNavigation({
   workspaceId,
   projectId,
@@ -22,18 +17,29 @@ export function TaskSiblingNavigation({
 }: TaskSiblingNavigationProps) {
   const navigate = useNavigate();
   const location = useLocation();
-  const fromTasksSearch = (location.state as { fromTasksSearch?: string } | null)?.fromTasksSearch;
+  const fromTasksSearch = (
+    location.state as { fromTasksSearch?: string } | null
+  )?.fromTasksSearch;
 
   const tasksPath = `/workspaces/${workspaceId}/projects/${projectId}/tasks`;
-  const backHref = fromTasksSearch ? `${tasksPath}${fromTasksSearch}` : tasksPath;
+  const backHref = fromTasksSearch
+    ? `${tasksPath}${fromTasksSearch}`
+    : tasksPath;
 
-  const currentIndex = orderedTasks.findIndex((task) => task._id === currentTaskId);
-  const previousTask = currentIndex > 0 ? orderedTasks[currentIndex - 1] : undefined;
+  const currentIndex = orderedTasks.findIndex(
+    (task) => task._id === currentTaskId,
+  );
+  const previousTask =
+    currentIndex > 0 ? orderedTasks[currentIndex - 1] : undefined;
   const nextTask =
-    currentIndex >= 0 && currentIndex < orderedTasks.length - 1 ? orderedTasks[currentIndex + 1] : undefined;
+    currentIndex >= 0 && currentIndex < orderedTasks.length - 1
+      ? orderedTasks[currentIndex + 1]
+      : undefined;
 
   function goTo(task: Task) {
-    navigate(`${tasksPath}/${task._id}`, { state: fromTasksSearch ? { fromTasksSearch } : undefined });
+    navigate(`${tasksPath}/${task._id}`, {
+      state: fromTasksSearch ? { fromTasksSearch } : undefined,
+    });
   }
 
   return (
@@ -51,7 +57,11 @@ export function TaskSiblingNavigation({
           type="button"
           onClick={() => previousTask && goTo(previousTask)}
           disabled={!previousTask}
-          aria-label={previousTask ? `Previous: ${previousTask.title}` : "No previous task"}
+          aria-label={
+            previousTask
+              ? `Previous: ${previousTask.title}`
+              : "No previous task"
+          }
           className="flex h-8 w-8 items-center justify-center rounded-md border border-border text-muted transition-colors hover:bg-border/40 hover:text-foreground disabled:pointer-events-none disabled:opacity-40"
         >
           <ChevronLeft className="h-4 w-4" />

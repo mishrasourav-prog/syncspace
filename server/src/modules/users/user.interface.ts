@@ -1,39 +1,14 @@
-import type {
-  AuthProvider,
-} from "../../interfaces/user.interface";
+import type { AuthProvider } from "../../interfaces/user.interface";
 
-import type {
-  ProjectRole,
-} from "../../interfaces/projectMember.interface";
+import type { ProjectRole } from "../../interfaces/projectMember.interface";
 
-import type {
-  WorkspaceRole,
-} from "../workspace-member/workspace-member.model";
-
-/*
-|--------------------------------------------------------------------------
-| Self-Profile Statistics
-|--------------------------------------------------------------------------
-*/
+import type { WorkspaceRole } from "../workspace-member/workspace-member.model";
 
 export interface UserProfileStats {
   workspaces: number;
   projects: number;
   tasksCompleted: number;
 }
-
-/*
-|--------------------------------------------------------------------------
-| Authenticated User Profile
-|--------------------------------------------------------------------------
-|
-| This is the authoritative private profile returned only to the currently
-| authenticated user.
-|
-| Never add password, refreshToken, providerId, passwordChangedAt,
-| sessionVersion, deletedAt, or other internal account fields here.
-|
-*/
 
 export interface SelfProfile {
   _id: string;
@@ -44,77 +19,40 @@ export interface SelfProfile {
 
   email: string;
 
-  avatar:
-    string |
-    null;
+  avatar: string | null;
 
-  headline:
-    string |
-    null;
+  headline: string | null;
 
-  bio:
-    string |
-    null;
+  bio: string | null;
 
-  location:
-    string |
-    null;
+  location: string | null;
 
-  provider:
-    AuthProvider;
+  provider: AuthProvider;
 
   createdAt: string;
 
   updatedAt: string;
 
-  lastLoginAt:
-    string |
-    null;
+  lastLoginAt: string | null;
 
-  canChangePassword:
-    boolean;
+  canChangePassword: boolean;
 
-  stats:
-    UserProfileStats;
+  stats: UserProfileStats;
 }
-
-/*
-|--------------------------------------------------------------------------
-| Update Self Profile
-|--------------------------------------------------------------------------
-|
-| Email, provider, password, and internal account fields are intentionally
-| absent. Blank optional profile strings are normalized to null by validation.
-|
-*/
 
 export interface UpdateSelfProfilePayload {
   name?: string;
 
   username?: string;
 
-  avatar?:
-    string |
-    null;
+  avatar?: string | null;
 
-  headline?:
-    string |
-    null;
+  headline?: string | null;
 
-  bio?:
-    string |
-    null;
+  bio?: string | null;
 
-  location?:
-    string |
-    null;
+  location?: string | null;
 }
-
-/*
-|--------------------------------------------------------------------------
-| Change Password
-|--------------------------------------------------------------------------
-*/
 
 export interface ChangePasswordPayload {
   currentPassword: string;
@@ -123,12 +61,6 @@ export interface ChangePasswordPayload {
 
   confirmPassword: string;
 }
-
-/*
-|--------------------------------------------------------------------------
-| Account Deletion Readiness
-|--------------------------------------------------------------------------
-*/
 
 export interface OwnedWorkspaceDeletionBlocker {
   _id: string;
@@ -147,84 +79,43 @@ export interface LastAdminProjectDeletionBlocker {
 
   name: string;
 
-  workspace:
-    LastAdminProjectWorkspace;
+  workspace: LastAdminProjectWorkspace;
 }
 
 export interface AccountDeletionBlockers {
-  ownedWorkspaces:
-    OwnedWorkspaceDeletionBlocker[];
+  ownedWorkspaces: OwnedWorkspaceDeletionBlocker[];
 
-  lastAdminProjects:
-    LastAdminProjectDeletionBlocker[];
+  lastAdminProjects: LastAdminProjectDeletionBlocker[];
 }
 
 export interface AccountDeletionReadiness {
   canDelete: boolean;
 
-  blockers:
-    AccountDeletionBlockers;
+  blockers: AccountDeletionBlockers;
 }
-
-/*
-|--------------------------------------------------------------------------
-| Delete Account
-|--------------------------------------------------------------------------
-*/
 
 export interface DeleteAccountPayload {
-  confirmation:
-    "DELETE";
+  confirmation: "DELETE";
 
-  username:
-    string;
+  username: string;
 
-  /*
-  Required for active local-password accounts.
-  Provider-only accounts do not have a local password.
-  */
-  currentPassword?:
-    string;
+  currentPassword?: string;
 }
-
-/*
-|--------------------------------------------------------------------------
-| Member Profile Context Query
-|--------------------------------------------------------------------------
-|
-| At least one of workspaceId or projectId is required by validation.
-|
-*/
 
 export interface MemberProfileContextQuery {
-  workspaceId?:
-    string;
+  workspaceId?: string;
 
-  projectId?:
-    string;
+  projectId?: string;
 }
-
-/*
-|--------------------------------------------------------------------------
-| Context-Authorized Read-Only Member Profile
-|--------------------------------------------------------------------------
-|
-| This response intentionally excludes email, provider, providerId,
-| lastLoginAt, updatedAt, statistics, ownership data, deletion state, and all
-| password/session fields.
-|
-*/
 
 export interface MemberWorkspaceContext {
   _id: string;
 
   name: string;
 
-  role:
-    WorkspaceRole;
+  role: WorkspaceRole;
 
-  joinedAt:
-    string;
+  joinedAt: string;
 }
 
 export interface MemberProjectContext {
@@ -232,21 +123,15 @@ export interface MemberProjectContext {
 
   name: string;
 
-  role:
-    ProjectRole;
+  role: ProjectRole;
 
-  joinedAt:
-    string;
+  joinedAt: string;
 }
 
 export interface MemberProfileContext {
-  workspace:
-    MemberWorkspaceContext |
-    null;
+  workspace: MemberWorkspaceContext | null;
 
-  project:
-    MemberProjectContext |
-    null;
+  project: MemberProjectContext | null;
 }
 
 export interface MemberProfile {
@@ -256,25 +141,15 @@ export interface MemberProfile {
 
   username: string;
 
-  avatar:
-    string |
-    null;
+  avatar: string | null;
 
-  headline:
-    string |
-    null;
+  headline: string | null;
 
-  bio:
-    string |
-    null;
+  bio: string | null;
 
-  location:
-    string |
-    null;
+  location: string | null;
 
-  createdAt:
-    string;
+  createdAt: string;
 
-  context:
-    MemberProfileContext;
+  context: MemberProfileContext;
 }

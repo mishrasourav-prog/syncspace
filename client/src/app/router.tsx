@@ -1,5 +1,11 @@
 import { useEffect, type ReactNode } from "react";
-import { Navigate, Route, Routes, useLocation, useNavigate } from "react-router-dom";
+import {
+  Navigate,
+  Route,
+  Routes,
+  useLocation,
+  useNavigate,
+} from "react-router-dom";
 import { toast } from "sonner";
 import { ForgotPasswordPage } from "@/features/auth/pages/ForgotPasswordPage";
 import { LoginPage } from "@/features/auth/pages/LoginPage";
@@ -83,11 +89,9 @@ function VerifyEmailRoute() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const stateEmail =
-    (location.state as { email?: string } | null)?.email;
+  const stateEmail = (location.state as { email?: string } | null)?.email;
 
-  const email =
-    stateEmail ?? readPendingRegistrationEmail();
+  const email = stateEmail ?? readPendingRegistrationEmail();
 
   useEffect(() => {
     if (email) {
@@ -221,7 +225,6 @@ export function AppRouter() {
         }
       />
 
-      {/* Authenticated application shell — sidebar/topbar stay mounted across nested routes. */}
       <Route
         element={
           <ProtectedRoute>
@@ -233,27 +236,43 @@ export function AppRouter() {
         <Route path="/notifications" element={<NotificationsPage />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/members/:userId" element={<MemberProfilePage />} />
-        <Route path="/workspaces/:workspaceId" element={<WorkspaceOverviewPage />} />
-        <Route path="/workspaces/:workspaceId/projects/:projectId" element={<ProjectOverviewPage />} />
-        <Route path="/workspaces/:workspaceId/projects/:projectId/tasks" element={<ProjectTasksPage />} />
-        <Route path="/workspaces/:workspaceId/projects/:projectId/documents" element={<ProjectDocumentsPage />} />
+        <Route
+          path="/workspaces/:workspaceId"
+          element={<WorkspaceOverviewPage />}
+        />
+        <Route
+          path="/workspaces/:workspaceId/projects/:projectId"
+          element={<ProjectOverviewPage />}
+        />
+        <Route
+          path="/workspaces/:workspaceId/projects/:projectId/tasks"
+          element={<ProjectTasksPage />}
+        />
+        <Route
+          path="/workspaces/:workspaceId/projects/:projectId/documents"
+          element={<ProjectDocumentsPage />}
+        />
         <Route
           path="/workspaces/:workspaceId/projects/:projectId/documents/:documentId"
           element={<DocumentEditorPage />}
         />
-        <Route path="/workspaces/:workspaceId/projects/:projectId/tasks/:taskId" element={<TaskDetailPage />} />
-        <Route path="/workspaces/:workspaceId/projects/:projectId/discussions" element={<ProjectDiscussionsPage />} />
+        <Route
+          path="/workspaces/:workspaceId/projects/:projectId/tasks/:taskId"
+          element={<TaskDetailPage />}
+        />
+        <Route
+          path="/workspaces/:workspaceId/projects/:projectId/discussions"
+          element={<ProjectDiscussionsPage />}
+        />
         <Route
           path="/workspaces/:workspaceId/projects/:projectId/discussions/:discussionId"
           element={<ProjectDiscussionsPage />}
         />
       </Route>
 
-      {/* Preserve old bookmarks/links pointing at the previous /home route. */}
       <Route path="/home" element={<Navigate to="/dashboard" replace />} />
 
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }
-

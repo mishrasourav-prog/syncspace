@@ -7,7 +7,10 @@ import { Dialog, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useCreateDocumentMutation } from "../hooks/useDocumentMutations";
-import { createDocumentSchema, type CreateDocumentFormValues } from "../schemas/document.schemas";
+import {
+  createDocumentSchema,
+  type CreateDocumentFormValues,
+} from "../schemas/document.schemas";
 
 interface CreateDocumentDialogProps {
   workspaceId: string;
@@ -15,7 +18,11 @@ interface CreateDocumentDialogProps {
   onClose: () => void;
 }
 
-export function CreateDocumentDialog({ workspaceId, projectId, onClose }: CreateDocumentDialogProps) {
+export function CreateDocumentDialog({
+  workspaceId,
+  projectId,
+  onClose,
+}: CreateDocumentDialogProps) {
   const navigate = useNavigate();
   const createDocumentMutation = useCreateDocumentMutation(projectId);
 
@@ -40,15 +47,15 @@ export function CreateDocumentDialog({ workspaceId, projectId, onClose }: Create
         onSuccess: (created) => {
           toast.success("Document created.");
           onClose();
-          // Navigating straight into the editor avoids a pointless extra click,
-          // and the document is guaranteed accessible since it was just created
-          // by the current member of this project.
-          navigate(`/workspaces/${workspaceId}/projects/${projectId}/documents/${created._id}`);
+
+          navigate(
+            `/workspaces/${workspaceId}/projects/${projectId}/documents/${created._id}`,
+          );
         },
         onError: (error) => {
           toast.error(error.message ?? "Unable to create this document.");
         },
-      }
+      },
     );
   }
 
@@ -62,7 +69,8 @@ export function CreateDocumentDialog({ workspaceId, projectId, onClose }: Create
     >
       {createDocumentMutation.isError && (
         <div className="mb-4 rounded-md border border-danger/30 bg-danger/10 px-3 py-2 text-xs text-danger">
-          {createDocumentMutation.error?.message ?? "Unable to create this document."}
+          {createDocumentMutation.error?.message ??
+            "Unable to create this document."}
         </div>
       )}
 
@@ -79,11 +87,18 @@ export function CreateDocumentDialog({ workspaceId, projectId, onClose }: Create
         </div>
 
         <DialogFooter>
-          <Button type="button" variant="secondary" onClick={handleClose} disabled={createDocumentMutation.isPending}>
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={handleClose}
+            disabled={createDocumentMutation.isPending}
+          >
             Cancel
           </Button>
           <Button type="submit" disabled={createDocumentMutation.isPending}>
-            {createDocumentMutation.isPending ? "Creating..." : "Create document"}
+            {createDocumentMutation.isPending
+              ? "Creating..."
+              : "Create document"}
           </Button>
         </DialogFooter>
       </form>

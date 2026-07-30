@@ -55,27 +55,36 @@ interface MobileNavigationDrawerProps {
   onCreateWorkspace: () => void;
 }
 
-export function MobileNavigationDrawer({ open, onClose, onCreateWorkspace }: MobileNavigationDrawerProps) {
+export function MobileNavigationDrawer({
+  open,
+  onClose,
+  onCreateWorkspace,
+}: MobileNavigationDrawerProps) {
   const user = useAuthStore((state) => state.user);
   const { logout, isPending } = useLogout();
   const location = useLocation();
   const panelRef = useRef<HTMLDivElement>(null);
   const previouslyFocusedRef = useRef<HTMLElement | null>(null);
 
-  const routeMatch = location.pathname.match(/^\/workspaces\/([^/]+)(?:\/projects\/([^/]+))?/);
+  const routeMatch = location.pathname.match(
+    /^\/workspaces\/([^/]+)(?:\/projects\/([^/]+))?/,
+  );
   const currentWorkspaceId = routeMatch?.[1];
   const currentProjectId = routeMatch?.[2];
 
-  // Focus trap, Escape-to-close, and body scroll lock while the drawer is open.
   useEffect(() => {
     if (!open) return;
 
-    previouslyFocusedRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    previouslyFocusedRef.current =
+      document.activeElement instanceof HTMLElement
+        ? document.activeElement
+        : null;
     const previousBodyOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
 
     const frame = window.requestAnimationFrame(() => {
-      const firstFocusable = panelRef.current?.querySelector<HTMLElement>(FOCUSABLE_SELECTOR);
+      const firstFocusable =
+        panelRef.current?.querySelector<HTMLElement>(FOCUSABLE_SELECTOR);
       (firstFocusable ?? panelRef.current)?.focus();
     });
 
@@ -88,7 +97,9 @@ export function MobileNavigationDrawer({ open, onClose, onCreateWorkspace }: Mob
 
       if (event.key !== "Tab" || !panelRef.current) return;
 
-      const focusableElements = Array.from(panelRef.current.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR));
+      const focusableElements = Array.from(
+        panelRef.current.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR),
+      );
       if (focusableElements.length === 0) {
         event.preventDefault();
         panelRef.current.focus();
@@ -148,7 +159,9 @@ export function MobileNavigationDrawer({ open, onClose, onCreateWorkspace }: Mob
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-secondary">
                   <Sparkles className="h-4.5 w-4.5 text-white" />
                 </div>
-                <span className="text-lg font-semibold tracking-tight text-foreground">SyncSpace</span>
+                <span className="text-lg font-semibold tracking-tight text-foreground">
+                  SyncSpace
+                </span>
               </div>
               <button
                 type="button"
@@ -192,7 +205,11 @@ export function MobileNavigationDrawer({ open, onClose, onCreateWorkspace }: Mob
                 onClose={onClose}
               />
             ) : currentWorkspaceId ? (
-              <WorkspaceContextMobileNav workspaceId={currentWorkspaceId} activeHash={location.hash} onClose={onClose} />
+              <WorkspaceContextMobileNav
+                workspaceId={currentWorkspaceId}
+                activeHash={location.hash}
+                onClose={onClose}
+              />
             ) : (
               <DashboardMobileNav onClose={onClose} />
             )}
@@ -202,7 +219,9 @@ export function MobileNavigationDrawer({ open, onClose, onCreateWorkspace }: Mob
                 <div className="flex items-center gap-2.5 rounded-lg px-2 py-2">
                   <Avatar src={user.avatar} name={user.name} size="sm" />
                   <div className="min-w-0 text-left">
-                    <p className="truncate text-sm font-medium text-foreground">{user.name}</p>
+                    <p className="truncate text-sm font-medium text-foreground">
+                      {user.name}
+                    </p>
                     <p className="truncate text-caption">{user.email}</p>
                   </div>
                 </div>
@@ -212,7 +231,9 @@ export function MobileNavigationDrawer({ open, onClose, onCreateWorkspace }: Mob
                   className={({ isActive }) =>
                     cn(
                       "flex items-center gap-2.5 rounded-lg px-2 py-2 text-sm transition-colors",
-                      isActive ? "bg-primary/15 text-primary" : "text-muted hover:bg-background hover:text-foreground"
+                      isActive
+                        ? "bg-primary/15 text-primary"
+                        : "text-muted hover:bg-background hover:text-foreground",
                     )
                   }
                 >
@@ -237,7 +258,7 @@ export function MobileNavigationDrawer({ open, onClose, onCreateWorkspace }: Mob
         </div>
       )}
     </AnimatePresence>,
-    document.body
+    document.body,
   );
 }
 
@@ -248,15 +269,24 @@ function DashboardMobileNav({ onClose }: { onClose: () => void }) {
   const [searchParams] = useSearchParams();
   const location = useLocation();
 
-  const workspaces = (workspacesQuery.data ?? []).filter((workspace) => !workspace.isArchived);
+  const workspaces = (workspacesQuery.data ?? []).filter(
+    (workspace) => !workspace.isArchived,
+  );
   const pendingInvitationCount = invitationsQuery.data?.length ?? 0;
   const unreadNotificationCount = unreadCountQuery.data ?? 0;
 
   const isDashboardHome =
-    location.pathname === "/dashboard" && !searchParams.get("status") && !location.hash;
-  const isActiveFilter = location.pathname === "/dashboard" && searchParams.get("status") === "active";
-  const isArchivedFilter = location.pathname === "/dashboard" && searchParams.get("status") === "archived";
-  const isInvitationsHash = location.pathname === "/dashboard" && location.hash === "#invitations";
+    location.pathname === "/dashboard" &&
+    !searchParams.get("status") &&
+    !location.hash;
+  const isActiveFilter =
+    location.pathname === "/dashboard" &&
+    searchParams.get("status") === "active";
+  const isArchivedFilter =
+    location.pathname === "/dashboard" &&
+    searchParams.get("status") === "archived";
+  const isInvitationsHash =
+    location.pathname === "/dashboard" && location.hash === "#invitations";
   const isNotificationsActive = location.pathname === "/notifications";
 
   return (
@@ -267,7 +297,9 @@ function DashboardMobileNav({ onClose }: { onClose: () => void }) {
         onClick={onClose}
         className={cn(
           "flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
-          isDashboardHome ? "bg-primary/15 text-primary" : "text-muted hover:bg-background hover:text-foreground"
+          isDashboardHome
+            ? "bg-primary/15 text-primary"
+            : "text-muted hover:bg-background hover:text-foreground",
         )}
       >
         <LayoutGrid className="h-4 w-4" />
@@ -279,7 +311,9 @@ function DashboardMobileNav({ onClose }: { onClose: () => void }) {
         onClick={onClose}
         className={cn(
           "flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
-          isActiveFilter ? "bg-primary/15 text-primary" : "text-muted hover:bg-background hover:text-foreground"
+          isActiveFilter
+            ? "bg-primary/15 text-primary"
+            : "text-muted hover:bg-background hover:text-foreground",
         )}
       >
         <Users className="h-4 w-4" />
@@ -291,7 +325,9 @@ function DashboardMobileNav({ onClose }: { onClose: () => void }) {
         onClick={onClose}
         className={cn(
           "flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
-          isArchivedFilter ? "bg-primary/15 text-primary" : "text-muted hover:bg-background hover:text-foreground"
+          isArchivedFilter
+            ? "bg-primary/15 text-primary"
+            : "text-muted hover:bg-background hover:text-foreground",
         )}
       >
         <Archive className="h-4 w-4" />
@@ -303,7 +339,9 @@ function DashboardMobileNav({ onClose }: { onClose: () => void }) {
         onClick={onClose}
         className={cn(
           "flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
-          isInvitationsHash ? "bg-primary/15 text-primary" : "text-muted hover:bg-background hover:text-foreground"
+          isInvitationsHash
+            ? "bg-primary/15 text-primary"
+            : "text-muted hover:bg-background hover:text-foreground",
         )}
       >
         <Mail className="h-4 w-4" />
@@ -320,7 +358,9 @@ function DashboardMobileNav({ onClose }: { onClose: () => void }) {
         onClick={onClose}
         className={cn(
           "flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
-          isNotificationsActive ? "bg-primary/15 text-primary" : "text-muted hover:bg-background hover:text-foreground"
+          isNotificationsActive
+            ? "bg-primary/15 text-primary"
+            : "text-muted hover:bg-background hover:text-foreground",
         )}
       >
         <Bell className="h-4 w-4" />
@@ -332,7 +372,9 @@ function DashboardMobileNav({ onClose }: { onClose: () => void }) {
         )}
       </NavLink>
 
-      <p className="mt-6 px-3 text-caption uppercase tracking-wide">Workspaces</p>
+      <p className="mt-6 px-3 text-caption uppercase tracking-wide">
+        Workspaces
+      </p>
       <div className="mt-1.5 space-y-0.5">
         {workspaces.map((workspace) => (
           <NavLink
@@ -342,11 +384,18 @@ function DashboardMobileNav({ onClose }: { onClose: () => void }) {
             className={({ isActive }) =>
               cn(
                 "flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm transition-colors",
-                isActive ? "bg-background text-foreground" : "text-muted hover:bg-background hover:text-foreground"
+                isActive
+                  ? "bg-background text-foreground"
+                  : "text-muted hover:bg-background hover:text-foreground",
               )
             }
           >
-            <Avatar src={workspace.avatar} name={workspace.name} size="sm" square />
+            <Avatar
+              src={workspace.avatar}
+              name={workspace.name}
+              size="sm"
+              square
+            />
             <span className="truncate">{workspace.name}</span>
           </NavLink>
         ))}
@@ -364,12 +413,18 @@ interface WorkspaceContextMobileNavProps {
   onClose: () => void;
 }
 
-function WorkspaceContextMobileNav({ workspaceId, activeHash, onClose }: WorkspaceContextMobileNavProps) {
+function WorkspaceContextMobileNav({
+  workspaceId,
+  activeHash,
+  onClose,
+}: WorkspaceContextMobileNavProps) {
   const activeTab = activeHash ? activeHash.replace("#", "") : "overview";
   const workspacesQuery = useWorkspacesQuery();
   const workspaceName = useMemo(
-    () => workspacesQuery.data?.find((workspace) => workspace._id === workspaceId)?.name,
-    [workspacesQuery.data, workspaceId]
+    () =>
+      workspacesQuery.data?.find((workspace) => workspace._id === workspaceId)
+        ?.name,
+    [workspacesQuery.data, workspaceId],
   );
 
   return (
@@ -394,7 +449,9 @@ function WorkspaceContextMobileNav({ workspaceId, activeHash, onClose }: Workspa
         </NavLink>
       </div>
 
-      <p className="mt-6 truncate px-3 text-caption uppercase tracking-wide">{workspaceName ?? "Workspace"}</p>
+      <p className="mt-6 truncate px-3 text-caption uppercase tracking-wide">
+        {workspaceName ?? "Workspace"}
+      </p>
       <div className="mt-1.5 space-y-0.5">
         {WORKSPACE_TABS.map((tab) => {
           const isActive = activeTab === tab.id;
@@ -407,7 +464,9 @@ function WorkspaceContextMobileNav({ workspaceId, activeHash, onClose }: Workspa
               onClick={onClose}
               className={cn(
                 "flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
-                isActive ? "bg-primary/15 text-primary" : "text-muted hover:bg-background hover:text-foreground"
+                isActive
+                  ? "bg-primary/15 text-primary"
+                  : "text-muted hover:bg-background hover:text-foreground",
               )}
             >
               <Icon className="h-4 w-4" />
@@ -427,22 +486,35 @@ interface ProjectContextMobileNavProps {
   onClose: () => void;
 }
 
-function ProjectContextMobileNav({ workspaceId, projectId, activeHash, onClose }: ProjectContextMobileNavProps) {
+function ProjectContextMobileNav({
+  workspaceId,
+  projectId,
+  activeHash,
+  onClose,
+}: ProjectContextMobileNavProps) {
   const location = useLocation();
   const activeTab = activeHash ? activeHash.replace("#", "") : "overview";
   const tasksPath = `/workspaces/${workspaceId}/projects/${projectId}/tasks`;
-  const isTasksRoute = location.pathname === tasksPath || location.pathname.startsWith(`${tasksPath}/`);
+  const isTasksRoute =
+    location.pathname === tasksPath ||
+    location.pathname.startsWith(`${tasksPath}/`);
   const documentsPath = `/workspaces/${workspaceId}/projects/${projectId}/documents`;
-  const isDocumentsRoute = location.pathname === documentsPath || location.pathname.startsWith(`${documentsPath}/`);
+  const isDocumentsRoute =
+    location.pathname === documentsPath ||
+    location.pathname.startsWith(`${documentsPath}/`);
   const discussionsPath = `/workspaces/${workspaceId}/projects/${projectId}/discussions`;
   const isDiscussionsRoute =
-    location.pathname === discussionsPath || location.pathname.startsWith(`${discussionsPath}/`);
-  const isProjectSubRoute = isTasksRoute || isDocumentsRoute || isDiscussionsRoute;
+    location.pathname === discussionsPath ||
+    location.pathname.startsWith(`${discussionsPath}/`);
+  const isProjectSubRoute =
+    isTasksRoute || isDocumentsRoute || isDiscussionsRoute;
   const workspacesQuery = useWorkspacesQuery();
   const projectQuery = useProjectQuery(projectId);
   const workspaceName = useMemo(
-    () => workspacesQuery.data?.find((workspace) => workspace._id === workspaceId)?.name,
-    [workspacesQuery.data, workspaceId]
+    () =>
+      workspacesQuery.data?.find((workspace) => workspace._id === workspaceId)
+        ?.name,
+    [workspacesQuery.data, workspaceId],
   );
 
   return (
@@ -467,7 +539,9 @@ function ProjectContextMobileNav({ workspaceId, projectId, activeHash, onClose }
         </NavLink>
       </div>
 
-      <p className="mt-6 truncate px-3 text-caption uppercase tracking-wide">{workspaceName ?? "Workspace"}</p>
+      <p className="mt-6 truncate px-3 text-caption uppercase tracking-wide">
+        {workspaceName ?? "Workspace"}
+      </p>
       <div className="mt-1.5 space-y-0.5">
         <NavLink
           to={`/workspaces/${workspaceId}#overview`}
@@ -487,7 +561,9 @@ function ProjectContextMobileNav({ workspaceId, projectId, activeHash, onClose }
         </NavLink>
       </div>
 
-      <p className="mt-6 truncate px-3 text-caption uppercase tracking-wide">{projectQuery.data?.name ?? "Project"}</p>
+      <p className="mt-6 truncate px-3 text-caption uppercase tracking-wide">
+        {projectQuery.data?.name ?? "Project"}
+      </p>
       <div className="mt-1.5 space-y-0.5">
         <NavLink
           to={`/workspaces/${workspaceId}/projects/${projectId}#overview`}
@@ -496,7 +572,7 @@ function ProjectContextMobileNav({ workspaceId, projectId, activeHash, onClose }
             "flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
             !isProjectSubRoute && activeTab === "overview"
               ? "bg-primary/15 text-primary"
-              : "text-muted hover:bg-background hover:text-foreground"
+              : "text-muted hover:bg-background hover:text-foreground",
           )}
         >
           <LayoutGrid className="h-4 w-4" />
@@ -508,7 +584,9 @@ function ProjectContextMobileNav({ workspaceId, projectId, activeHash, onClose }
           onClick={onClose}
           className={cn(
             "flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
-            isTasksRoute ? "bg-primary/15 text-primary" : "text-muted hover:bg-background hover:text-foreground"
+            isTasksRoute
+              ? "bg-primary/15 text-primary"
+              : "text-muted hover:bg-background hover:text-foreground",
           )}
         >
           <CheckSquare className="h-4 w-4" />
@@ -520,7 +598,9 @@ function ProjectContextMobileNav({ workspaceId, projectId, activeHash, onClose }
           onClick={onClose}
           className={cn(
             "flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
-            isDocumentsRoute ? "bg-primary/15 text-primary" : "text-muted hover:bg-background hover:text-foreground"
+            isDocumentsRoute
+              ? "bg-primary/15 text-primary"
+              : "text-muted hover:bg-background hover:text-foreground",
           )}
         >
           <FileText className="h-4 w-4" />
@@ -532,7 +612,9 @@ function ProjectContextMobileNav({ workspaceId, projectId, activeHash, onClose }
           onClick={onClose}
           className={cn(
             "flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
-            isDiscussionsRoute ? "bg-primary/15 text-primary" : "text-muted hover:bg-background hover:text-foreground"
+            isDiscussionsRoute
+              ? "bg-primary/15 text-primary"
+              : "text-muted hover:bg-background hover:text-foreground",
           )}
         >
           <MessageSquare className="h-4 w-4" />
@@ -550,7 +632,9 @@ function ProjectContextMobileNav({ workspaceId, projectId, activeHash, onClose }
               onClick={onClose}
               className={cn(
                 "flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
-                isActive ? "bg-primary/15 text-primary" : "text-muted hover:bg-background hover:text-foreground"
+                isActive
+                  ? "bg-primary/15 text-primary"
+                  : "text-muted hover:bg-background hover:text-foreground",
               )}
             >
               <Icon className="h-4 w-4" />

@@ -16,7 +16,8 @@ export type ActivityAction =
   | "discussion.reply_updated"
   | "discussion.reply_deleted";
 
-export type ActivityEntityType = "task" | "document" | "discussion" | "discussion_reply";
+export type ActivityEntityType =
+  "task" | "document" | "discussion" | "discussion_reply";
 
 export interface ActivityActor {
   _id: string;

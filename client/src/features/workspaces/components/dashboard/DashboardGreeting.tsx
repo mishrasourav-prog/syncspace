@@ -50,8 +50,7 @@ function getGreetingForHour(hour: number): Greeting {
 export function DashboardGreeting() {
   const user = useAuthStore((state) => state.user);
 
-  const [greeting, setGreeting] =
-    useState<Greeting>(DEFAULT_GREETING);
+  const [greeting, setGreeting] = useState<Greeting>(DEFAULT_GREETING);
 
   useEffect(() => {
     const updateGreeting = () => {
@@ -62,31 +61,24 @@ export function DashboardGreeting() {
 
     updateGreeting();
 
-    const intervalId = window.setInterval(
-      updateGreeting,
-      60_000,
-    );
+    const intervalId = window.setInterval(updateGreeting, 60_000);
 
     return () => {
       window.clearInterval(intervalId);
     };
   }, []);
 
-  const firstName = user?.name
-    ?.trim()
-    .split(/\s+/)[0];
+  const firstName = user?.name?.trim().split(/\s+/)[0];
 
   return (
     <div>
       <h1 className="text-h1 text-foreground">
         {greeting.text}
-        {firstName ? `, ${firstName}` : ""}!{" "}
-        {greeting.emoji}
+        {firstName ? `, ${firstName}` : ""}! {greeting.emoji}
       </h1>
 
       <p className="mt-1 text-body">
-        Here&apos;s what&apos;s happening across your
-        workspaces.
+        Here&apos;s what&apos;s happening across your workspaces.
       </p>
     </div>
   );

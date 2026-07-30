@@ -47,10 +47,20 @@ export function ConfirmDialog({
       )}
 
       <DialogFooter>
-        <Button type="button" variant="secondary" onClick={onClose} disabled={isPending}>
+        <Button
+          type="button"
+          variant="secondary"
+          onClick={onClose}
+          disabled={isPending}
+        >
           {cancelLabel}
         </Button>
-        <Button type="button" variant={confirmVariant} onClick={onConfirm} disabled={isPending}>
+        <Button
+          type="button"
+          variant={confirmVariant}
+          onClick={onConfirm}
+          disabled={isPending}
+        >
           {isPending ? "Please wait..." : confirmLabel}
         </Button>
       </DialogFooter>

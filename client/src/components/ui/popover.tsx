@@ -12,7 +12,8 @@ const PopoverContext = React.createContext<PopoverContextValue | null>(null);
 
 function usePopoverContext() {
   const context = React.useContext(PopoverContext);
-  if (!context) throw new Error("Popover components must be used within <Popover>");
+  if (!context)
+    throw new Error("Popover components must be used within <Popover>");
   return context;
 }
 
@@ -22,12 +23,11 @@ interface PopoverProps {
   onOpenChange?: (open: boolean) => void;
 }
 
-/**
- * A lightweight popover, distinct from DropdownMenu: content does not close
- * on inner clicks, so it supports multi-select checkboxes and forms. Closes
- * on outside click and Escape.
- */
-export function Popover({ children, open: controlledOpen, onOpenChange }: PopoverProps) {
+export function Popover({
+  children,
+  open: controlledOpen,
+  onOpenChange,
+}: PopoverProps) {
   const [uncontrolledOpen, setUncontrolledOpen] = React.useState(false);
   const isControlled = controlledOpen !== undefined;
   const open = isControlled ? controlledOpen : uncontrolledOpen;
@@ -37,7 +37,7 @@ export function Popover({ children, open: controlledOpen, onOpenChange }: Popove
       if (!isControlled) setUncontrolledOpen(next);
       onOpenChange?.(next);
     },
-    [isControlled, onOpenChange]
+    [isControlled, onOpenChange],
   );
 
   const triggerRef = React.useRef<HTMLButtonElement>(null);
@@ -125,7 +125,7 @@ export function PopoverContent({
           className={cn(
             "absolute z-40 mt-1.5 rounded-xl border border-border bg-surface p-3 shadow-elevated",
             align === "end" ? "right-0" : "left-0",
-            className
+            className,
           )}
         >
           {children}

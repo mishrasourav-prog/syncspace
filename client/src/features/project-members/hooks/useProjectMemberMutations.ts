@@ -1,279 +1,131 @@
-import {
-    useMutation,
-    useQueryClient,
-} from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-import type {
-    ApiErrorShape,
-} from "@/lib/axios";
+import type { ApiErrorShape } from "@/lib/axios";
 
-import {
-    activityQueryKeys,
-} from "@/features/activity/activity.queryKeys";
+import { activityQueryKeys } from "@/features/activity/activity.queryKeys";
 
-import {
-    discussionQueryKeys,
-} from "@/features/discussions/discussion.queryKeys";
+import { discussionQueryKeys } from "@/features/discussions/discussion.queryKeys";
 
-import {
-    documentQueryKeys,
-} from "@/features/documents/document.queryKeys";
+import { documentQueryKeys } from "@/features/documents/document.queryKeys";
+
+import { projectInvitationQueryKeys } from "@/features/project-invitations/projectInvitation.queryKeys";
+
+import { projectQueryKeys } from "@/features/projects/project.queryKeys";
+
+import { taskQueryKeys } from "@/features/tasks/task.queryKeys";
 
 import {
-    projectInvitationQueryKeys,
-} from "@/features/project-invitations/projectInvitation.queryKeys";
-
-import {
-    projectQueryKeys,
-} from "@/features/projects/project.queryKeys";
-
-import {
-    taskQueryKeys,
-} from "@/features/tasks/task.queryKeys";
-
-import {
-    leaveProjectRequest,
-    removeProjectMemberRequest,
-    updateProjectMemberRoleRequest,
+  leaveProjectRequest,
+  removeProjectMemberRequest,
+  updateProjectMemberRoleRequest,
 } from "../api/projectMember.api";
 
-import {
-    projectMemberQueryKeys,
-} from "../projectMember.queryKeys";
+import { projectMemberQueryKeys } from "../projectMember.queryKeys";
 
-import type {
+import type { ProjectMember, ProjectRole } from "../types/projectMember.types";
+
+export function useUpdateProjectMemberRoleMutation(projectId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation<
     ProjectMember,
-    ProjectRole,
-} from "../types/projectMember.types";
+    ApiErrorShape,
+    {
+      memberId: string;
 
-export function useUpdateProjectMemberRoleMutation(
-    projectId:
-        string
-) {
-    const queryClient =
-        useQueryClient();
+      role: ProjectRole;
+    }
+  >({
+    mutationFn: ({ memberId, role }) =>
+      updateProjectMemberRoleRequest(projectId, memberId, role),
 
-    return useMutation<
-        ProjectMember,
-        ApiErrorShape,
-        {
-            memberId:
-                string;
+    onSuccess: (updatedMember) => {
+      queryClient.setQueryData<ProjectMember[]>(
+        projectMemberQueryKeys.list(projectId),
+        (previous) =>
+          previous?.map((member) =>
+            member._id === updatedMember._id ? updatedMember : member,
+          ),
+      );
 
-            role:
-                ProjectRole;
-        }
-    >({
-        mutationFn:
-            ({
-                memberId,
-                role,
-            }) =>
-                updateProjectMemberRoleRequest(
-                    projectId,
-                    memberId,
-                    role
-                ),
-
-        onSuccess:
-            (
-                updatedMember
-            ) => {
-                queryClient.setQueryData<
-                    ProjectMember[]
-                >(
-                    projectMemberQueryKeys.list(
-                        projectId
-                    ),
-                    (
-                        previous
-                    ) =>
-                        previous?.map(
-                            (
-                                member
-                            ) =>
-                                member._id ===
-                                updatedMember._id
-                                    ? updatedMember
-                                    : member
-                        )
-                );
-
-                void queryClient.invalidateQueries({
-                    queryKey:
-                        projectMemberQueryKeys.list(
-                            projectId
-                        ),
-                });
-            },
-    });
+      void queryClient.invalidateQueries({
+        queryKey: projectMemberQueryKeys.list(projectId),
+      });
+    },
+  });
 }
 
-export function useRemoveProjectMemberMutation(
-    projectId:
-        string
-) {
-    const queryClient =
-        useQueryClient();
+export function useRemoveProjectMemberMutation(projectId: string) {
+  const queryClient = useQueryClient();
 
-    return useMutation<
-        void,
-        ApiErrorShape,
-        string
-    >({
-        mutationFn:
-            (
-                memberId
-            ) =>
-                removeProjectMemberRequest(
-                    projectId,
-                    memberId
-                ),
+  return useMutation<void, ApiErrorShape, string>({
+    mutationFn: (memberId) => removeProjectMemberRequest(projectId, memberId),
 
-        onSuccess:
-            (
-                _data,
-                memberId
-            ) => {
-                queryClient.setQueryData<
-                    ProjectMember[]
-                >(
-                    projectMemberQueryKeys.list(
-                        projectId
-                    ),
-                    (
-                        previous
-                    ) =>
-                        previous?.filter(
-                            (
-                                member
-                            ) =>
-                                member._id !==
-                                memberId
-                        )
-                );
+    onSuccess: (_data, memberId) => {
+      queryClient.setQueryData<ProjectMember[]>(
+        projectMemberQueryKeys.list(projectId),
+        (previous) => previous?.filter((member) => member._id !== memberId),
+      );
 
-                void queryClient.invalidateQueries({
-                    queryKey:
-                        projectMemberQueryKeys.list(
-                            projectId
-                        ),
-                });
-            },
-    });
+      void queryClient.invalidateQueries({
+        queryKey: projectMemberQueryKeys.list(projectId),
+      });
+    },
+  });
 }
 
 export function useLeaveProjectMutation(
-    projectId:
-        string,
+  projectId: string,
 
-    workspaceId:
-        string
+  workspaceId: string,
 ) {
-    const queryClient =
-        useQueryClient();
+  const queryClient = useQueryClient();
 
-    return useMutation<
-        void,
-        ApiErrorShape,
-        void
-    >({
-        mutationFn:
-            () =>
-                leaveProjectRequest(
-                    projectId
-                ),
+  return useMutation<void, ApiErrorShape, void>({
+    mutationFn: () => leaveProjectRequest(projectId),
 
-        onSuccess:
-            async () => {
-                /*
-                |--------------------------------------------------------------------------
-                | Remove every cache that contains inaccessible project data
-                |--------------------------------------------------------------------------
-                */
+    onSuccess: async () => {
+      queryClient.removeQueries({
+        queryKey: projectQueryKeys.detail(projectId),
 
-                queryClient.removeQueries({
-                    queryKey:
-                        projectQueryKeys.detail(
-                            projectId
-                        ),
+        exact: true,
+      });
 
-                    exact:
-                        true,
-                });
+      queryClient.removeQueries({
+        queryKey: projectMemberQueryKeys.list(projectId),
 
-                queryClient.removeQueries({
-                    queryKey:
-                        projectMemberQueryKeys.list(
-                            projectId
-                        ),
+        exact: true,
+      });
 
-                    exact:
-                        true,
-                });
+      queryClient.removeQueries({
+        queryKey: projectInvitationQueryKeys.list(projectId),
 
-                queryClient.removeQueries({
-                    queryKey:
-                        projectInvitationQueryKeys.list(
-                            projectId
-                        ),
+        exact: true,
+      });
 
-                    exact:
-                        true,
-                });
+      queryClient.removeQueries({
+        queryKey: taskQueryKeys.project(projectId),
+      });
 
-                queryClient.removeQueries({
-                    queryKey:
-                        taskQueryKeys.project(
-                            projectId
-                        ),
-                });
+      queryClient.removeQueries({
+        queryKey: documentQueryKeys.project(projectId),
+      });
 
-                /*
-                These are parent keys, so all search/filter variations
-                beneath the project are removed.
-                */
+      queryClient.removeQueries({
+        queryKey: discussionQueryKeys.project(projectId),
+      });
 
-                queryClient.removeQueries({
-                    queryKey:
-                        documentQueryKeys.project(
-                            projectId
-                        ),
-                });
+      queryClient.removeQueries({
+        queryKey: activityQueryKeys.project(projectId),
 
-                queryClient.removeQueries({
-                    queryKey:
-                        discussionQueryKeys.project(
-                            projectId
-                        ),
-                });
+        exact: true,
+      });
 
-                queryClient.removeQueries({
-                    queryKey:
-                        activityQueryKeys.project(
-                            projectId
-                        ),
-
-                    exact:
-                        true,
-                });
-
-                /*
-                The workspace project list is invalidated instead of manually
-                deleting the project because the current backend list endpoint
-                is authoritative and may still return all workspace projects.
-                */
-
-                if (
-                    workspaceId
-                ) {
-                    await queryClient.invalidateQueries({
-                        queryKey:
-                            projectQueryKeys.workspaceList(
-                                workspaceId
-                            ),
-                    });
-                }
-            },
-    });
+      if (workspaceId) {
+        await queryClient.invalidateQueries({
+          queryKey: projectQueryKeys.workspaceList(workspaceId),
+        });
+      }
+    },
+  });
 }

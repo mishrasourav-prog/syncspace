@@ -1,5 +1,13 @@
 import { useState } from "react";
-import { ChevronDown, Eye, FileText, Maximize2, Minimize2, Pencil, Users } from "lucide-react";
+import {
+  ChevronDown,
+  Eye,
+  FileText,
+  Maximize2,
+  Minimize2,
+  Pencil,
+  Users,
+} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,7 +21,8 @@ import { Input } from "@/components/ui/input";
 import { formatDateTime, formatRelativeTime } from "@/lib/date";
 import type { ProjectDocument } from "../../types/document.types";
 
-export type DocumentSaveState = "saved" | "unsaved" | "saving" | "error" | "conflict" | "read-only";
+export type DocumentSaveState =
+  "saved" | "unsaved" | "saving" | "error" | "conflict" | "read-only";
 
 const SAVE_STATE_LABEL: Record<DocumentSaveState, string> = {
   saved: "Saved",
@@ -129,7 +138,9 @@ export function DocumentEditorHeader({
                 onClick={() => setIsEditingTitle(true)}
                 className="group flex max-w-full items-center gap-1.5 text-left disabled:cursor-default"
               >
-                <h1 className="text-h1 truncate text-foreground">{draftTitle || "Untitled document"}</h1>
+                <h1 className="text-h1 truncate text-foreground">
+                  {draftTitle || "Untitled document"}
+                </h1>
                 {canEditTitle && (
                   <Pencil className="h-3.5 w-3.5 shrink-0 text-muted opacity-0 transition-opacity group-hover:opacity-100" />
                 )}
@@ -142,7 +153,9 @@ export function DocumentEditorHeader({
               </Badge>
               <span>rev {document.revision}</span>
               <span aria-hidden>·</span>
-              <span title={formatDateTime(document.updatedAt)}>Updated {formatRelativeTime(document.updatedAt)}</span>
+              <span title={formatDateTime(document.updatedAt)}>
+                Updated {formatRelativeTime(document.updatedAt)}
+              </span>
               <span aria-hidden>·</span>
               <span aria-live="polite" className={SAVE_STATE_TONE[saveState]}>
                 {SAVE_STATE_LABEL[saveState]}
@@ -158,7 +171,9 @@ export function DocumentEditorHeader({
               aria-pressed={mode === "editing"}
               onClick={() => onModeChange("editing")}
               className={`flex items-center gap-1.5 rounded px-2.5 py-1.5 text-xs font-medium transition-colors ${
-                mode === "editing" ? "bg-primary/15 text-primary" : "text-muted hover:text-foreground"
+                mode === "editing"
+                  ? "bg-primary/15 text-primary"
+                  : "text-muted hover:text-foreground"
               }`}
             >
               <Pencil className="h-3.5 w-3.5" />
@@ -169,7 +184,9 @@ export function DocumentEditorHeader({
               aria-pressed={mode === "preview"}
               onClick={() => onModeChange("preview")}
               className={`flex items-center gap-1.5 rounded px-2.5 py-1.5 text-xs font-medium transition-colors ${
-                mode === "preview" ? "bg-primary/15 text-primary" : "text-muted hover:text-foreground"
+                mode === "preview"
+                  ? "bg-primary/15 text-primary"
+                  : "text-muted hover:text-foreground"
               }`}
             >
               <Eye className="h-3.5 w-3.5" />
@@ -185,16 +202,30 @@ export function DocumentEditorHeader({
             aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
             title={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
           >
-            {isFullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+            {isFullscreen ? (
+              <Minimize2 className="h-4 w-4" />
+            ) : (
+              <Maximize2 className="h-4 w-4" />
+            )}
           </Button>
 
-          <Button type="button" variant="secondary" size="sm" onClick={onShowMembers}>
+          <Button
+            type="button"
+            variant="secondary"
+            size="sm"
+            onClick={onShowMembers}
+          >
             <Users className="h-3.5 w-3.5" />
             <span className="hidden sm:inline">Project members</span>
           </Button>
 
           {canArchive && (
-            <Button type="button" variant="secondary" size="sm" onClick={onArchive}>
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              onClick={onArchive}
+            >
               Archive
             </Button>
           )}
@@ -207,7 +238,13 @@ export function DocumentEditorHeader({
 
           {showSaveControls && (
             <div className="flex items-center">
-              <Button type="button" size="sm" onClick={onSave} disabled={!canSave || isSaving} className="rounded-r-none">
+              <Button
+                type="button"
+                size="sm"
+                onClick={onSave}
+                disabled={!canSave || isSaving}
+                className="rounded-r-none"
+              >
                 {isSaving ? "Saving…" : "Save"}
               </Button>
               <DropdownMenu>
@@ -218,8 +255,13 @@ export function DocumentEditorHeader({
                   <ChevronDown className="h-3.5 w-3.5" />
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={onSaveAndReturn} disabled={isSaving}>
-                    {canSave ? "Save and return to Documents" : "Return to Documents"}
+                  <DropdownMenuItem
+                    onClick={onSaveAndReturn}
+                    disabled={isSaving}
+                  >
+                    {canSave
+                      ? "Save and return to Documents"
+                      : "Return to Documents"}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -231,19 +273,34 @@ export function DocumentEditorHeader({
               <ChevronDown className="h-4 w-4" />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={onDuplicate} disabled={!canDuplicate || isDuplicating}>
+              <DropdownMenuItem
+                onClick={onDuplicate}
+                disabled={!canDuplicate || isDuplicating}
+              >
                 {isDuplicating ? "Duplicating…" : "Duplicate document"}
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={onDownloadPdf} disabled={!canDownloadPdf}>
+              <DropdownMenuItem
+                onClick={onDownloadPdf}
+                disabled={!canDownloadPdf}
+              >
                 Download PDF
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={onDownloadHtml} disabled={!canDownloadHtml}>
+              <DropdownMenuItem
+                onClick={onDownloadHtml}
+                disabled={!canDownloadHtml}
+              >
                 Download HTML
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={onDownloadJson}>Download JSON</DropdownMenuItem>
-              <DropdownMenuItem onClick={onCopyId}>Copy document ID</DropdownMenuItem>
+              <DropdownMenuItem onClick={onDownloadJson}>
+                Download JSON
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={onCopyId}>
+                Copy document ID
+              </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={onBackToDocuments}>Back to Documents</DropdownMenuItem>
+              <DropdownMenuItem onClick={onBackToDocuments}>
+                Back to Documents
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

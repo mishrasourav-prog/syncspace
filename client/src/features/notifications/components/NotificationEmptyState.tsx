@@ -2,18 +2,29 @@ import { BellOff, SearchX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { NotificationFilter } from "../notification.types";
 
-const FILTER_EMPTY_COPY: Record<NotificationFilter, { title: string; description: string }> = {
-  all: { title: "You’re all caught up.", description: "No notifications are available yet." },
+const FILTER_EMPTY_COPY: Record<
+  NotificationFilter,
+  { title: string; description: string }
+> = {
+  all: {
+    title: "You’re all caught up.",
+    description: "No notifications are available yet.",
+  },
   unread: { title: "You have no unread notifications.", description: "" },
   tasks: {
     title: "No task or issue notifications",
-    description: "No task or issue notifications are in your latest notifications.",
+    description:
+      "No task or issue notifications are in your latest notifications.",
   },
   discussions: {
     title: "No discussion notifications",
-    description: "No discussion notifications are in your latest notifications.",
+    description:
+      "No discussion notifications are in your latest notifications.",
   },
-  read: { title: "No read notifications", description: "No read notifications are in your latest notifications." },
+  read: {
+    title: "No read notifications",
+    description: "No read notifications are in your latest notifications.",
+  },
 };
 
 interface NotificationEmptyStateProps {
@@ -22,7 +33,11 @@ interface NotificationEmptyStateProps {
   onClear: () => void;
 }
 
-export function NotificationEmptyState({ filter, hasSearchQuery, onClear }: NotificationEmptyStateProps) {
+export function NotificationEmptyState({
+  filter,
+  hasSearchQuery,
+  onClear,
+}: NotificationEmptyStateProps) {
   if (hasSearchQuery) {
     return (
       <div className="flex flex-col items-center gap-3 px-4 py-14 text-center">
@@ -42,7 +57,9 @@ export function NotificationEmptyState({ filter, hasSearchQuery, onClear }: Noti
       <BellOff className="h-6 w-6 text-muted" />
       <div>
         <p className="text-body font-medium text-foreground">{copy.title}</p>
-        {copy.description && <p className="mt-1 text-caption">{copy.description}</p>}
+        {copy.description && (
+          <p className="mt-1 text-caption">{copy.description}</p>
+        )}
       </div>
       {filter !== "all" && (
         <Button size="sm" variant="secondary" onClick={onClear}>

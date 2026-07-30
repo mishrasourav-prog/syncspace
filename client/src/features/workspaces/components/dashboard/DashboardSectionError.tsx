@@ -7,7 +7,11 @@ interface DashboardSectionErrorProps {
   compact?: boolean;
 }
 
-export function DashboardSectionError({ message, onRetry, compact }: DashboardSectionErrorProps) {
+export function DashboardSectionError({
+  message,
+  onRetry,
+  compact,
+}: DashboardSectionErrorProps) {
   return (
     <div
       className={

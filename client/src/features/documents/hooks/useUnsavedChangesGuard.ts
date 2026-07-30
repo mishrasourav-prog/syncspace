@@ -2,8 +2,7 @@ import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 type PendingNavigation =
-  | { kind: "route"; to: string }
-  | { kind: "history-back" };
+  { kind: "route"; to: string } | { kind: "history-back" };
 
 const HISTORY_GUARD_KEY = "__syncspaceDocumentUnsavedGuard";
 
@@ -14,20 +13,13 @@ export interface UseUnsavedChangesGuardResult {
   navigateToPendingAfterSave: () => void;
   navigateAfterSave: (to: string) => void;
   cancelNavigation: () => void;
-  /** Wraps a same-app programmatic navigation with the same guard used for links. */
+
   guardedNavigate: (to: string) => void;
 }
 
-/**
- * Protects document drafts while the app is using BrowserRouter rather than a
- * data router. It covers in-app links, programmatic navigation routed through
- * this hook, tab close/refresh, and browser Back.
- *
- * Browser Back is intercepted with a same-URL history sentinel. Because the
- * first Back only reaches the original entry for the current URL, the route is
- * not allowed to change until the user explicitly discards or saves.
- */
-export function useUnsavedChangesGuard(isDirty: boolean): UseUnsavedChangesGuardResult {
+export function useUnsavedChangesGuard(
+  isDirty: boolean,
+): UseUnsavedChangesGuardResult {
   const navigate = useNavigate();
   const isDirtyRef = useRef(isDirty);
   const sentinelActiveRef = useRef(false);
@@ -46,11 +38,14 @@ export function useUnsavedChangesGuard(isDirty: boolean): UseUnsavedChangesGuard
 
     window.history.pushState(
       {
-        ...(typeof window.history.state === "object" && window.history.state !== null ? window.history.state : {}),
+        ...(typeof window.history.state === "object" &&
+        window.history.state !== null
+          ? window.history.state
+          : {}),
         [HISTORY_GUARD_KEY]: guardId,
       },
       "",
-      window.location.href
+      window.location.href,
     );
     sentinelActiveRef.current = true;
   }, [guardId]);
@@ -69,7 +64,7 @@ export function useUnsavedChangesGuard(isDirty: boolean): UseUnsavedChangesGuard
       suppressNextPopRef.current = true;
       window.history.back();
     },
-    [navigate]
+    [navigate],
   );
 
   useEffect(() => {
@@ -80,9 +75,6 @@ export function useUnsavedChangesGuard(isDirty: boolean): UseUnsavedChangesGuard
 
     if (!sentinelActiveRef.current || suppressNextPopRef.current) return;
 
-    // The draft became clean without leaving (for example after a normal
-    // save). Remove the same-URL sentinel so it does not create a duplicate
-    // Back stop later.
     suppressNextPopRef.current = true;
     window.history.back();
   }, [isDirty, pushSentinel]);
@@ -115,8 +107,6 @@ export function useUnsavedChangesGuard(isDirty: boolean): UseUnsavedChangesGuard
         return;
       }
 
-      // Back moved from the sentinel to the original entry for this same URL.
-      // Restore the sentinel immediately and ask for an explicit decision.
       sentinelActiveRef.current = false;
       pushSentinel();
       setPending({ kind: "history-back" });
@@ -129,7 +119,14 @@ export function useUnsavedChangesGuard(isDirty: boolean): UseUnsavedChangesGuard
   useEffect(() => {
     function handleClickCapture(event: MouseEvent) {
       if (!isDirtyRef.current) return;
-      if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+      if (
+        event.defaultPrevented ||
+        event.button !== 0 ||
+        event.metaKey ||
+        event.ctrlKey ||
+        event.shiftKey ||
+        event.altKey
+      ) {
         return;
       }
 
@@ -145,7 +142,8 @@ export function useUnsavedChangesGuard(isDirty: boolean): UseUnsavedChangesGuard
     }
 
     window.document.addEventListener("click", handleClickCapture, true);
-    return () => window.document.removeEventListener("click", handleClickCapture, true);
+    return () =>
+      window.document.removeEventListener("click", handleClickCapture, true);
   }, []);
 
   const cancelNavigation = useCallback(() => setPending(null), []);
@@ -161,8 +159,6 @@ export function useUnsavedChangesGuard(isDirty: boolean): UseUnsavedChangesGuard
       return;
     }
 
-    // Current entry is the restored sentinel. Skip both it and the original
-    // same-URL entry to complete the Back navigation the user requested.
     sentinelActiveRef.current = false;
     suppressNextPopRef.current = true;
     window.history.go(-2);
@@ -187,7 +183,7 @@ export function useUnsavedChangesGuard(isDirty: boolean): UseUnsavedChangesGuard
     (to: string) => {
       removeSentinelThenNavigate(to);
     },
-    [removeSentinelThenNavigate]
+    [removeSentinelThenNavigate],
   );
 
   const guardedNavigate = useCallback(
@@ -198,7 +194,7 @@ export function useUnsavedChangesGuard(isDirty: boolean): UseUnsavedChangesGuard
       }
       setPending({ kind: "route", to });
     },
-    [navigate]
+    [navigate],
   );
 
   return {

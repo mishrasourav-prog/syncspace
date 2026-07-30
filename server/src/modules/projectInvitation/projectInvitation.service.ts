@@ -35,23 +35,26 @@ interface PopulatedProjectInvitation {
   project: {
     _id: Types.ObjectId;
     name: string;
-    workspace: {
-      _id: Types.ObjectId;
-      name: string;
-    } | Types.ObjectId;
+    workspace:
+      | {
+          _id: Types.ObjectId;
+          name: string;
+        }
+      | Types.ObjectId;
   };
-  invitedBy: {
-    _id: Types.ObjectId;
-    name?: string;
-  } | Types.ObjectId;
+  invitedBy:
+    | {
+        _id: Types.ObjectId;
+        name?: string;
+      }
+    | Types.ObjectId;
 }
-
 
 export class ProjectInvitationService {
   private async markExpiredIfNeeded(
     invitationId: string,
     expiresAt: Date,
-    now: Date
+    now: Date,
   ): Promise<void> {
     if (expiresAt.getTime() > now.getTime()) return;
 
@@ -61,7 +64,7 @@ export class ProjectInvitationService {
         status: ProjectInvitationStatus.PENDING,
         expiresAt: { $lte: now },
       },
-      { $set: { status: ProjectInvitationStatus.EXPIRED } }
+      { $set: { status: ProjectInvitationStatus.EXPIRED } },
     );
 
     throw new ApiError(410, "Invitation has expired.");
@@ -70,7 +73,7 @@ export class ProjectInvitationService {
   private mapInvitation(
     invitation: IProjectInvitationDocument,
     context?: ProjectContext,
-    invitedByName?: string
+    invitedByName?: string,
   ): IProjectInvitationResponse {
     return {
       _id: invitation._id.toString(),
@@ -92,10 +95,14 @@ export class ProjectInvitationService {
   }
 
   private async getContext(projectId: string): Promise<ProjectContext> {
-    const project = await Project.findById(projectId).select("_id name workspace").lean();
+    const project = await Project.findById(projectId)
+      .select("_id name workspace")
+      .lean();
     if (!project) throw new ApiError(404, "Project not found.");
 
-    const workspace = await Workspace.findById(project.workspace).select("_id name").lean();
+    const workspace = await Workspace.findById(project.workspace)
+      .select("_id name")
+      .lean();
     if (!workspace) throw new ApiError(404, "Workspace not found.");
 
     return {
@@ -109,7 +116,7 @@ export class ProjectInvitationService {
   async inviteMember(
     projectId: string,
     inviterId: string,
-    data: ICreateProjectInvitation
+    data: ICreateProjectInvitation,
   ): Promise<IProjectInvitationResponse> {
     const project = await Project.findById(projectId);
     if (!project) throw new ApiError(404, "Project not found.");
@@ -141,10 +148,16 @@ export class ProjectInvitationService {
       throw new ApiError(403, "You are no longer a member of this workspace.");
     }
     if (workspace.isArchived) {
-      throw new ApiError(409, "Users cannot be invited while the workspace is archived.");
+      throw new ApiError(
+        409,
+        "Users cannot be invited while the workspace is archived.",
+      );
     }
     if (project.isArchived) {
-      throw new ApiError(409, "Users cannot be invited to an archived project.");
+      throw new ApiError(
+        409,
+        "Users cannot be invited to an archived project.",
+      );
     }
 
     const normalizedEmail = data.email.trim().toLowerCase();
@@ -164,7 +177,10 @@ export class ProjectInvitationService {
       user: invitedUser._id,
     });
     if (!invitedUserWorkspaceMembership) {
-      throw new ApiError(409, "The user must join the workspace before being invited to this project.");
+      throw new ApiError(
+        409,
+        "The user must join the workspace before being invited to this project.",
+      );
     }
 
     const existingProjectMember = await ProjectMember.exists({
@@ -183,7 +199,7 @@ export class ProjectInvitationService {
         status: ProjectInvitationStatus.PENDING,
         expiresAt: { $lte: now },
       },
-      { $set: { status: ProjectInvitationStatus.EXPIRED } }
+      { $set: { status: ProjectInvitationStatus.EXPIRED } },
     );
 
     const existingInvitation = await ProjectInvitation.exists({
@@ -193,7 +209,10 @@ export class ProjectInvitationService {
       expiresAt: { $gt: now },
     });
     if (existingInvitation) {
-      throw new ApiError(409, "An active invitation already exists for this user.");
+      throw new ApiError(
+        409,
+        "An active invitation already exists for this user.",
+      );
     }
 
     const invitation = await ProjectInvitation.create({
@@ -224,8 +243,6 @@ export class ProjectInvitationService {
         },
       });
     } catch (error) {
-      // Keep invitation creation atomic from the user's perspective. A
-      // registered recipient must never receive an invisible invitation.
       await ProjectInvitation.deleteOne({ _id: invitation._id });
       throw error;
     }
@@ -253,7 +270,11 @@ export class ProjectInvitationService {
     if (invitation.status !== ProjectInvitationStatus.PENDING) {
       throw new ApiError(409, "Invitation has already been processed.");
     }
-    await this.markExpiredIfNeeded(invitation._id.toString(), invitation.expiresAt, now);
+    await this.markExpiredIfNeeded(
+      invitation._id.toString(),
+      invitation.expiresAt,
+      now,
+    );
 
     const session = await mongoose.startSession();
     let committedProjectId: string | null = null;
@@ -276,7 +297,9 @@ export class ProjectInvitationService {
           throw new ApiError(409, "Invitation is no longer available.");
         }
 
-        const project = await Project.findById(activeInvitation.project).session(session);
+        const project = await Project.findById(
+          activeInvitation.project,
+        ).session(session);
         if (!project) throw new ApiError(404, "Project not found.");
 
         const workspace = await Workspace.findById(project.workspace)
@@ -284,7 +307,10 @@ export class ProjectInvitationService {
           .session(session);
         if (!workspace) throw new ApiError(404, "Workspace not found.");
         if (workspace.isArchived) {
-          throw new ApiError(409, "Cannot join a project while its workspace is archived.");
+          throw new ApiError(
+            409,
+            "Cannot join a project while its workspace is archived.",
+          );
         }
         if (project.isArchived) {
           throw new ApiError(409, "Cannot join an archived project.");
@@ -295,7 +321,10 @@ export class ProjectInvitationService {
           user: user._id,
         }).session(session);
         if (!workspaceMembership) {
-          throw new ApiError(403, "You must be a workspace member before joining this project.");
+          throw new ApiError(
+            403,
+            "You must be a workspace member before joining this project.",
+          );
         }
 
         const existingMember = await ProjectMember.exists({
@@ -336,7 +365,10 @@ export class ProjectInvitationService {
       !memberId ||
       !inviterId
     ) {
-      throw new ApiError(500, "Project invitation acceptance did not complete.");
+      throw new ApiError(
+        500,
+        "Project invitation acceptance did not complete.",
+      );
     }
 
     await eventBus.publish(DomainEventName.PROJECT_MEMBER_ADDED, {
@@ -363,7 +395,11 @@ export class ProjectInvitationService {
     }
 
     const now = new Date();
-    await this.markExpiredIfNeeded(invitation._id.toString(), invitation.expiresAt, now);
+    await this.markExpiredIfNeeded(
+      invitation._id.toString(),
+      invitation.expiresAt,
+      now,
+    );
 
     invitation.status = ProjectInvitationStatus.REJECTED;
     invitation.rejectedAt = now;
@@ -384,7 +420,8 @@ export class ProjectInvitationService {
       .select("role")
       .lean();
 
-    if (!membership) throw new ApiError(403, "You are not a member of this project.");
+    if (!membership)
+      throw new ApiError(403, "You are not a member of this project.");
     if (membership.role !== ProjectRole.ADMIN) {
       throw new ApiError(403, "Only project admins can cancel invitations.");
     }
@@ -393,7 +430,11 @@ export class ProjectInvitationService {
     }
 
     const now = new Date();
-    await this.markExpiredIfNeeded(invitation._id.toString(), invitation.expiresAt, now);
+    await this.markExpiredIfNeeded(
+      invitation._id.toString(),
+      invitation.expiresAt,
+      now,
+    );
 
     invitation.status = ProjectInvitationStatus.CANCELLED;
     await invitation.save();
@@ -401,20 +442,28 @@ export class ProjectInvitationService {
 
   async getPendingInvitations(
     projectId: string,
-    userId: string
+    userId: string,
   ): Promise<IProjectInvitationsResponse> {
-    const project = await Project.findById(projectId).select("_id name workspace").lean();
+    const project = await Project.findById(projectId)
+      .select("_id name workspace")
+      .lean();
     if (!project) throw new ApiError(404, "Project not found.");
 
-    const member = await ProjectMember.findOne({ project: projectId, user: userId })
+    const member = await ProjectMember.findOne({
+      project: projectId,
+      user: userId,
+    })
       .select("role")
       .lean();
-    if (!member) throw new ApiError(403, "You are not a member of this project.");
+    if (!member)
+      throw new ApiError(403, "You are not a member of this project.");
     if (member.role !== ProjectRole.ADMIN) {
       throw new ApiError(403, "Only project admins can view invitations.");
     }
 
-    const workspace = await Workspace.findById(project.workspace).select("_id name").lean();
+    const workspace = await Workspace.findById(project.workspace)
+      .select("_id name")
+      .lean();
     if (!workspace) throw new ApiError(404, "Workspace not found.");
 
     const now = new Date();
@@ -424,7 +473,7 @@ export class ProjectInvitationService {
         status: ProjectInvitationStatus.PENDING,
         expiresAt: { $lte: now },
       },
-      { $set: { status: ProjectInvitationStatus.EXPIRED } }
+      { $set: { status: ProjectInvitationStatus.EXPIRED } },
     );
 
     const invitations = await ProjectInvitation.find({
@@ -440,7 +489,9 @@ export class ProjectInvitationService {
       workspaceName: workspace.name,
     };
 
-    return { invitations: invitations.map((item) => this.mapInvitation(item, context)) };
+    return {
+      invitations: invitations.map((item) => this.mapInvitation(item, context)),
+    };
   }
 
   async getMyInvitations(userId: string): Promise<IProjectInvitationsResponse> {
@@ -456,7 +507,7 @@ export class ProjectInvitationService {
         status: ProjectInvitationStatus.PENDING,
         expiresAt: { $lte: now },
       },
-      { $set: { status: ProjectInvitationStatus.EXPIRED } }
+      { $set: { status: ProjectInvitationStatus.EXPIRED } },
     );
 
     const invitations = await ProjectInvitation.find({
@@ -478,8 +529,14 @@ export class ProjectInvitationService {
         .map((item) => {
           const populated = item as unknown as PopulatedProjectInvitation;
           const project = populated.project;
-          const workspace = project.workspace as { _id: Types.ObjectId; name: string };
-          const inviter = populated.invitedBy as { _id: Types.ObjectId; name?: string };
+          const workspace = project.workspace as {
+            _id: Types.ObjectId;
+            name: string;
+          };
+          const inviter = populated.invitedBy as {
+            _id: Types.ObjectId;
+            name?: string;
+          };
 
           return {
             _id: item._id.toString(),

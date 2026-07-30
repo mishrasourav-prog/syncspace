@@ -12,11 +12,19 @@ interface MetricCardProps {
   helper: string;
 }
 
-function MetricCard({ icon: Icon, iconClassName, value, label, helper }: MetricCardProps) {
+function MetricCard({
+  icon: Icon,
+  iconClassName,
+  value,
+  label,
+  helper,
+}: MetricCardProps) {
   return (
     <div className="rounded-xl border border-border bg-surface/60 p-4 shadow-soft">
       <div className="flex items-center gap-3">
-        <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${iconClassName}`}>
+        <span
+          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${iconClassName}`}
+        >
           <Icon className="h-4.5 w-4.5" />
         </span>
         <div className="min-w-0">
@@ -73,11 +81,16 @@ export function ProjectOverviewMetrics({
   const activeTasks = activeItems.filter((task) => task.type === "task");
   const activeIssues = activeItems.filter((task) => task.type === "issue");
   const doneTasks = activeTasks.filter((task) => task.status === "DONE").length;
-  const openIssues = activeIssues.filter((task) => task.status !== "DONE").length;
+  const openIssues = activeIssues.filter(
+    (task) => task.status !== "DONE",
+  ).length;
   const adminCount = members.filter((member) => member.role === "admin").length;
 
   return (
-    <div id="overview" className="scroll-mt-24 grid grid-cols-2 gap-3 xl:grid-cols-4">
+    <div
+      id="overview"
+      className="scroll-mt-24 grid grid-cols-2 gap-3 xl:grid-cols-4"
+    >
       {isLoadingTasks ? (
         <>
           <MetricCardSkeleton />
@@ -85,8 +98,20 @@ export function ProjectOverviewMetrics({
         </>
       ) : hasTasksError ? (
         <>
-          <MetricCard icon={CheckSquare} iconClassName="bg-secondary/15 text-secondary" value="—" label="Tasks" helper="Unavailable" />
-          <MetricCard icon={AlertCircle} iconClassName="bg-danger/15 text-danger" value="—" label="Issues" helper="Unavailable" />
+          <MetricCard
+            icon={CheckSquare}
+            iconClassName="bg-secondary/15 text-secondary"
+            value="—"
+            label="Tasks"
+            helper="Unavailable"
+          />
+          <MetricCard
+            icon={AlertCircle}
+            iconClassName="bg-danger/15 text-danger"
+            value="—"
+            label="Issues"
+            helper="Unavailable"
+          />
         </>
       ) : (
         <>
@@ -110,12 +135,20 @@ export function ProjectOverviewMetrics({
       {isLoadingDocuments ? (
         <MetricCardSkeleton />
       ) : hasDocumentsError ? (
-        <MetricCard icon={FileText} iconClassName="bg-success/15 text-success" value="—" label="Documents" helper="Unavailable" />
+        <MetricCard
+          icon={FileText}
+          iconClassName="bg-success/15 text-success"
+          value="—"
+          label="Documents"
+          helper="Unavailable"
+        />
       ) : (
         <MetricCard
           icon={FileText}
           iconClassName="bg-success/15 text-success"
-          value={documentCountHasMore ? `${documentCount}+` : (documentCount ?? 0)}
+          value={
+            documentCountHasMore ? `${documentCount}+` : (documentCount ?? 0)
+          }
           label="Documents"
           helper={documentCountHasMore ? "Showing most recent" : "Total"}
         />
@@ -124,7 +157,13 @@ export function ProjectOverviewMetrics({
       {isLoadingMembers ? (
         <MetricCardSkeleton />
       ) : hasMembersError ? (
-        <MetricCard icon={Users} iconClassName="bg-primary/15 text-primary" value="—" label="Members" helper="Unavailable" />
+        <MetricCard
+          icon={Users}
+          iconClassName="bg-primary/15 text-primary"
+          value="—"
+          label="Members"
+          helper="Unavailable"
+        />
       ) : (
         <MetricCard
           icon={Users}

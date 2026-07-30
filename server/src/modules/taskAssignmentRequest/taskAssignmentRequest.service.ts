@@ -26,8 +26,10 @@ interface PopulatedUser {
   avatar?: string;
 }
 
-interface PopulatedRequest
-  extends Omit<ITaskAssignmentRequestDocument, "requester" | "acceptedBy"> {
+interface PopulatedRequest extends Omit<
+  ITaskAssignmentRequestDocument,
+  "requester" | "acceptedBy"
+> {
   requester: PopulatedUser | null;
   acceptedBy?: PopulatedUser | null;
 }
@@ -65,7 +67,9 @@ export class TaskAssignmentRequestService {
     };
   }
 
-  private mapRequest(request: PopulatedRequest): ITaskAssignmentRequestResponse {
+  private mapRequest(
+    request: PopulatedRequest,
+  ): ITaskAssignmentRequestResponse {
     if (!request.requester) {
       throw new ApiError(409, "The requesting member is no longer available.");
     }
@@ -82,7 +86,7 @@ export class TaskAssignmentRequestService {
   }
 
   private async populateRequest(
-    request: ITaskAssignmentRequestDocument
+    request: ITaskAssignmentRequestDocument,
   ): Promise<ITaskAssignmentRequestResponse> {
     const populated = await request.populate<{
       requester: PopulatedUser | null;
@@ -95,7 +99,10 @@ export class TaskAssignmentRequestService {
     return this.mapRequest(populated as unknown as PopulatedRequest);
   }
 
-  private async getContext(taskId: string, userId: string): Promise<TaskRequestContext> {
+  private async getContext(
+    taskId: string,
+    userId: string,
+  ): Promise<TaskRequestContext> {
     const task = await Task.findById(taskId)
       .select("_id project title type isArchived")
       .lean<TaskRequestContext["task"]>()
@@ -144,12 +151,22 @@ export class TaskAssignmentRequestService {
   }
 
   private assertWritable(context: TaskRequestContext): void {
-    if (context.workspace.isArchived || context.project.isArchived || context.task.isArchived) {
-      throw new ApiError(409, "Assignment requests cannot be changed on an archived resource.");
+    if (
+      context.workspace.isArchived ||
+      context.project.isArchived ||
+      context.task.isArchived
+    ) {
+      throw new ApiError(
+        409,
+        "Assignment requests cannot be changed on an archived resource.",
+      );
     }
   }
 
-  async getRequests(taskId: string, userId: string): Promise<ITaskAssignmentRequestsResponse> {
+  async getRequests(
+    taskId: string,
+    userId: string,
+  ): Promise<ITaskAssignmentRequestsResponse> {
     const context = await this.getContext(taskId, userId);
 
     const filter: Record<string, unknown> = {
@@ -157,10 +174,12 @@ export class TaskAssignmentRequestService {
       status: TaskAssignmentRequestStatus.PENDING,
     };
 
-
     const requests = await TaskAssignmentRequest.find(filter)
       .sort({ requestedAt: 1, _id: 1 })
-      .populate<{ requester: PopulatedUser | null; acceptedBy?: PopulatedUser | null }>([
+      .populate<{
+        requester: PopulatedUser | null;
+        acceptedBy?: PopulatedUser | null;
+      }>([
         { path: "requester", select: "name username avatar" },
         { path: "acceptedBy", select: "name username avatar" },
       ])
@@ -175,7 +194,10 @@ export class TaskAssignmentRequestService {
     return { requests: mapped };
   }
 
-  async createRequest(taskId: string, userId: string): Promise<ITaskAssignmentRequestResponse> {
+  async createRequest(
+    taskId: string,
+    userId: string,
+  ): Promise<ITaskAssignmentRequestResponse> {
     const context = await this.getContext(taskId, userId);
     this.assertWritable(context);
 
@@ -199,7 +221,12 @@ export class TaskAssignmentRequestService {
         requester: new Types.ObjectId(userId),
       });
     } catch (error) {
-      if (typeof error === "object" && error !== null && "code" in error && error.code === 11000) {
+      if (
+        typeof error === "object" &&
+        error !== null &&
+        "code" in error &&
+        error.code === 11000
+      ) {
         const concurrent = await TaskAssignmentRequest.findOne({
           task: context.task._id,
           status: TaskAssignmentRequestStatus.PENDING,
@@ -226,13 +253,16 @@ export class TaskAssignmentRequestService {
   async acceptRequest(
     taskId: string,
     requestId: string,
-    userId: string
+    userId: string,
   ): Promise<ITaskAssignmentRequestResponse> {
     const context = await this.getContext(taskId, userId);
     this.assertWritable(context);
 
     if (context.membership.role !== ProjectRole.ADMIN) {
-      throw new ApiError(403, "Only a project admin can accept assignment requests.");
+      throw new ApiError(
+        403,
+        "Only a project admin can accept assignment requests.",
+      );
     }
 
     const now = new Date();
@@ -249,11 +279,14 @@ export class TaskAssignmentRequestService {
           acceptedAt: now,
         },
       },
-      { new: true }
+      { new: true },
     );
 
     if (!request) {
-      throw new ApiError(409, "This assignment request has already been handled.");
+      throw new ApiError(
+        409,
+        "This assignment request has already been handled.",
+      );
     }
 
     let assignmentCreated = false;
@@ -268,16 +301,20 @@ export class TaskAssignmentRequestService {
             assignedAt: now,
           },
         },
-        { upsert: true }
+        { upsert: true },
       );
       assignmentCreated = assignmentResult.upsertedCount > 0;
     } catch (error) {
       await TaskAssignmentRequest.updateOne(
-        { _id: request._id, status: TaskAssignmentRequestStatus.ACCEPTED, acceptedBy: userId },
+        {
+          _id: request._id,
+          status: TaskAssignmentRequestStatus.ACCEPTED,
+          acceptedBy: userId,
+        },
         {
           $set: { status: TaskAssignmentRequestStatus.PENDING },
           $unset: { acceptedBy: 1, acceptedAt: 1 },
-        }
+        },
       );
       throw error;
     }

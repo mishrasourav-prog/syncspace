@@ -1,6 +1,9 @@
 import { toast } from "sonner";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
-import { useArchiveDocumentMutation, useRestoreDocumentMutation } from "../hooks/useDocumentMutations";
+import {
+  useArchiveDocumentMutation,
+  useRestoreDocumentMutation,
+} from "../hooks/useDocumentMutations";
 import type { ProjectDocument } from "../types/document.types";
 
 export type DocumentActionType = "archive" | "restore";
@@ -16,11 +19,16 @@ interface DocumentArchiveDialogsProps {
   onClose: () => void;
 }
 
-export function DocumentArchiveDialogs({ target, projectId, onClose }: DocumentArchiveDialogsProps) {
+export function DocumentArchiveDialogs({
+  target,
+  projectId,
+  onClose,
+}: DocumentArchiveDialogsProps) {
   const archiveMutation = useArchiveDocumentMutation(projectId);
   const restoreMutation = useRestoreDocumentMutation(projectId);
 
-  const activeMutation = target?.type === "archive" ? archiveMutation : restoreMutation;
+  const activeMutation =
+    target?.type === "archive" ? archiveMutation : restoreMutation;
 
   function handleClose() {
     if (activeMutation.isPending) return;
@@ -35,18 +43,24 @@ export function DocumentArchiveDialogs({ target, projectId, onClose }: DocumentA
     if (target.type === "archive") {
       archiveMutation.mutate(target.document._id, {
         onSuccess: () => {
-          toast.success(`"${target.document.title || "Untitled document"}" was archived.`);
+          toast.success(
+            `"${target.document.title || "Untitled document"}" was archived.`,
+          );
           onClose();
         },
-        onError: (error) => toast.error(error.message ?? "Unable to archive this document."),
+        onError: (error) =>
+          toast.error(error.message ?? "Unable to archive this document."),
       });
     } else {
       restoreMutation.mutate(target.document._id, {
         onSuccess: () => {
-          toast.success(`"${target.document.title || "Untitled document"}" was restored.`);
+          toast.success(
+            `"${target.document.title || "Untitled document"}" was restored.`,
+          );
           onClose();
         },
-        onError: (error) => toast.error(error.message ?? "Unable to restore this document."),
+        onError: (error) =>
+          toast.error(error.message ?? "Unable to restore this document."),
       });
     }
   }

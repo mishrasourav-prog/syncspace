@@ -38,7 +38,9 @@ export function TaskSubtasksSection({
   onToggleComplete,
   onAddSubtask,
 }: TaskSubtasksSectionProps) {
-  const completedCount = subtasks.filter((subtask) => subtask.status === "DONE").length;
+  const completedCount = subtasks.filter(
+    (subtask) => subtask.status === "DONE",
+  ).length;
   const total = subtasks.length;
   const progress = total === 0 ? 0 : (completedCount / total) * 100;
 
@@ -64,7 +66,13 @@ export function TaskSubtasksSection({
       {isError && (
         <div className="rounded-lg border border-danger/20 bg-danger/5 px-3 py-3 text-sm text-muted">
           <p>Unable to load subtasks.</p>
-          <Button type="button" size="sm" variant="secondary" className="mt-2" onClick={onRetry}>
+          <Button
+            type="button"
+            size="sm"
+            variant="secondary"
+            className="mt-2"
+            onClick={onRetry}
+          >
             Retry
           </Button>
         </div>
@@ -72,7 +80,10 @@ export function TaskSubtasksSection({
 
       {!isLoading && !isError && total > 0 && (
         <div className="mb-3 h-1.5 w-full overflow-hidden rounded-full bg-border/60">
-          <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${progress}%` }} />
+          <div
+            className="h-full rounded-full bg-primary transition-all"
+            style={{ width: `${progress}%` }}
+          />
         </div>
       )}
 
@@ -96,17 +107,34 @@ export function TaskSubtasksSection({
                   type="button"
                   role="checkbox"
                   aria-checked={isDone}
-                  aria-label={isDone ? `Mark "${subtask.title}" as To Do` : `Mark "${subtask.title}" as Done`}
-                  disabled={!canToggleThisSubtask || isUpdatingStatus || isPending}
+                  aria-label={
+                    isDone
+                      ? `Mark "${subtask.title}" as To Do`
+                      : `Mark "${subtask.title}" as Done`
+                  }
+                  disabled={
+                    !canToggleThisSubtask || isUpdatingStatus || isPending
+                  }
                   onClick={() => onToggleComplete(subtask)}
-                  title={subtask.isArchived ? "Archived subtasks are read-only." : undefined}
+                  title={
+                    subtask.isArchived
+                      ? "Archived subtasks are read-only."
+                      : undefined
+                  }
                   className={cn(
                     "flex h-5 w-5 shrink-0 items-center justify-center rounded border transition-colors disabled:cursor-not-allowed disabled:opacity-50",
-                    isDone ? "border-success bg-success text-white" : "border-border bg-background"
+                    isDone
+                      ? "border-success bg-success text-white"
+                      : "border-border bg-background",
                   )}
                 >
                   {isDone && (
-                    <svg viewBox="0 0 12 12" className="h-3 w-3" fill="none" aria-hidden>
+                    <svg
+                      viewBox="0 0 12 12"
+                      className="h-3 w-3"
+                      fill="none"
+                      aria-hidden
+                    >
                       <path
                         d="M2 6.2 4.8 9 10 3"
                         stroke="currentColor"
@@ -122,17 +150,22 @@ export function TaskSubtasksSection({
                   to={`/workspaces/${workspaceId}/projects/${projectId}/tasks/${subtask._id}`}
                   className={cn(
                     "min-w-0 flex-1 truncate text-sm transition-colors hover:text-primary",
-                    isDone ? "text-muted line-through" : "text-foreground"
+                    isDone ? "text-muted line-through" : "text-foreground",
                   )}
                 >
                   {subtask.title}
                 </Link>
 
-                {subtask.isArchived && <Badge variant="warning">Archived</Badge>}
+                {subtask.isArchived && (
+                  <Badge variant="warning">Archived</Badge>
+                )}
                 <Badge variant="neutral">{STATUS_LABEL[subtask.status]}</Badge>
 
                 {subtask.assignees.length > 0 && (
-                  <div className="flex -space-x-1.5" aria-label={`${subtask.assignees.length} assignees`}>
+                  <div
+                    className="flex -space-x-1.5"
+                    aria-label={`${subtask.assignees.length} assignees`}
+                  >
                     {subtask.assignees.slice(0, 3).map((assignee) => (
                       <Avatar
                         key={assignee._id}
@@ -146,7 +179,9 @@ export function TaskSubtasksSection({
                 )}
 
                 <span className="shrink-0 text-[11px] text-muted">
-                  {subtask.dueDate ? formatDate(subtask.dueDate) : "No due date"}
+                  {subtask.dueDate
+                    ? formatDate(subtask.dueDate)
+                    : "No due date"}
                 </span>
               </li>
             );

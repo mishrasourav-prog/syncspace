@@ -38,8 +38,9 @@ export function TaskCommentComposer({
           setBody("");
           toast.success("Comment posted.");
         },
-        onError: (error) => toast.error(error.message ?? "Unable to post comment."),
-      }
+        onError: (error) =>
+          toast.error(error.message ?? "Unable to post comment."),
+      },
     );
   }
 
@@ -80,7 +81,11 @@ export function TaskCommentComposer({
               ? `${body.length} / ${MAX_LENGTH}`
               : "Ctrl/Cmd + Enter to submit"}
           </span>
-          <Button size="sm" onClick={handleSubmit} disabled={!trimmed || createMutation.isPending}>
+          <Button
+            size="sm"
+            onClick={handleSubmit}
+            disabled={!trimmed || createMutation.isPending}
+          >
             {createMutation.isPending ? "Posting..." : "Comment"}
           </Button>
         </div>

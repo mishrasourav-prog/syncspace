@@ -1,81 +1,52 @@
 import type {
-    NotificationEntityType,
-    NotificationType,
+  NotificationEntityType,
+  NotificationType,
 } from "../modules/notifications/notification.model";
 
 export interface INotificationActor {
-    _id:
-        string;
+  _id: string;
 
-    name:
-        string;
+  name: string;
 
-    username:
-        string;
+  username: string;
 
-    avatar?:
-        string;
+  avatar?: string;
 }
 
 export interface INotificationResponse {
-    _id:
-        string;
+  _id: string;
 
-    recipient:
-        string;
+  recipient: string;
 
-    actor:
-        INotificationActor |
-        null;
+  actor: INotificationActor | null;
 
-    type:
-        NotificationType;
+  type: NotificationType;
 
-    title:
-        string;
+  title: string;
 
-    message:
-        string;
+  message: string;
 
-    workspace:
-        string |
-        null;
+  workspace: string | null;
 
-    project:
-        string |
-        null;
+  project: string | null;
 
-    entityType:
-        NotificationEntityType |
-        null;
+  entityType: NotificationEntityType | null;
 
-    entityId:
-        string |
-        null;
+  entityId: string | null;
 
-    metadata:
-        Record<
-            string,
-            unknown
-        >;
+  metadata: Record<string, unknown>;
 
-    isRead:
-        boolean;
+  isRead: boolean;
 
-    readAt:
-        Date |
-        null;
+  readAt: Date | null;
 
-    createdAt:
-        Date;
+  createdAt: Date;
 }
 
 export interface INotificationsResponse {
-    notifications:
-        INotificationResponse[];
+  notifications: INotificationResponse[];
 }
 
 export interface IUnreadNotificationCountResponse {
-    unreadCount:
-        number;
+  unreadCount: number;
 }

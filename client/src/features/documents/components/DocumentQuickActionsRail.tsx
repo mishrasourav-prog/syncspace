@@ -1,18 +1,8 @@
-import {
-  Archive,
-  FilePlus2,
-  Files,
-  RefreshCw,
-  X,
-} from "lucide-react";
+import { Archive, FilePlus2, Files, RefreshCw, X } from "lucide-react";
 
-import {
-  cn,
-} from "@/lib/utils";
+import { cn } from "@/lib/utils";
 
-import type {
-  DocumentState,
-} from "../document.filters";
+import type { DocumentState } from "../document.filters";
 
 interface DocumentQuickActionsRailProps {
   canCreate: boolean;
@@ -20,9 +10,7 @@ interface DocumentQuickActionsRailProps {
   currentState: DocumentState;
   hasActiveFilters: boolean;
   onCreate: () => void;
-  onStateChange: (
-    state: DocumentState
-  ) => void;
+  onStateChange: (state: DocumentState) => void;
   onClear: () => void;
   onRefresh: () => void;
   isRefreshing: boolean;
@@ -54,26 +42,20 @@ export function DocumentQuickActionsRail({
       <div className="space-y-1">
         <button
           type="button"
-          onClick={
-            onCreate
-          }
-          disabled={
-            !canCreate
-          }
+          onClick={onCreate}
+          disabled={!canCreate}
           title={
             !canCreate
-              ? readOnlyReason ??
-                "You do not have permission to create documents."
+              ? (readOnlyReason ??
+                "You do not have permission to create documents.")
               : undefined
           }
-          className={
-            cn(
-              "flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-sm font-medium transition-colors",
-              canCreate
-                ? "text-foreground hover:bg-border/40"
-                : "cursor-not-allowed text-muted/60"
-            )
-          }
+          className={cn(
+            "flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-sm font-medium transition-colors",
+            canCreate
+              ? "text-foreground hover:bg-border/40"
+              : "cursor-not-allowed text-muted/60",
+          )}
         >
           <FilePlus2 className="h-4 w-4" />
           New document
@@ -81,25 +63,14 @@ export function DocumentQuickActionsRail({
 
         <button
           type="button"
-          onClick={
-            () =>
-              onStateChange(
-                "active"
-              )
-          }
-          aria-pressed={
-            currentState ===
-            "active"
-          }
-          className={
-            cn(
-              "flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-sm font-medium transition-colors hover:bg-border/40",
-              currentState ===
-                "active"
-                ? "bg-primary/10 text-primary"
-                : "text-foreground"
-            )
-          }
+          onClick={() => onStateChange("active")}
+          aria-pressed={currentState === "active"}
+          className={cn(
+            "flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-sm font-medium transition-colors hover:bg-border/40",
+            currentState === "active"
+              ? "bg-primary/10 text-primary"
+              : "text-foreground",
+          )}
         >
           <Files className="h-4 w-4" />
           Show active documents
@@ -107,82 +78,47 @@ export function DocumentQuickActionsRail({
 
         <button
           type="button"
-          onClick={
-            () =>
-              onStateChange(
-                "archived"
-              )
-          }
-          aria-pressed={
-            currentState ===
-            "archived"
-          }
-          className={
-            cn(
-              "flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-sm font-medium transition-colors hover:bg-border/40",
-              currentState ===
-                "archived"
-                ? "bg-primary/10 text-primary"
-                : "text-foreground"
-            )
-          }
+          onClick={() => onStateChange("archived")}
+          aria-pressed={currentState === "archived"}
+          className={cn(
+            "flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-sm font-medium transition-colors hover:bg-border/40",
+            currentState === "archived"
+              ? "bg-primary/10 text-primary"
+              : "text-foreground",
+          )}
         >
           <Archive className="h-4 w-4" />
           Show archived documents
         </button>
 
-        {
-          hasActiveFilters && (
-            <button
-              type="button"
-              onClick={
-                onClear
-              }
-              className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-sm font-medium text-foreground transition-colors hover:bg-border/40"
-            >
-              <X className="h-4 w-4" />
-              Clear filters
-            </button>
-          )
-        }
+        {hasActiveFilters && (
+          <button
+            type="button"
+            onClick={onClear}
+            className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-sm font-medium text-foreground transition-colors hover:bg-border/40"
+          >
+            <X className="h-4 w-4" />
+            Clear filters
+          </button>
+        )}
 
         <button
           type="button"
-          onClick={
-            onRefresh
-          }
-          disabled={
-            isRefreshing
-          }
+          onClick={onRefresh}
+          disabled={isRefreshing}
           className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-sm font-medium text-foreground transition-colors hover:bg-border/40 disabled:cursor-not-allowed disabled:text-muted/60"
         >
           <RefreshCw
-            className={
-              cn(
-                "h-4 w-4",
-                isRefreshing &&
-                  "animate-spin"
-              )
-            }
+            className={cn("h-4 w-4", isRefreshing && "animate-spin")}
           />
 
-          {
-            isRefreshing
-              ? "Refreshing..."
-              : "Refresh"
-          }
+          {isRefreshing ? "Refreshing..." : "Refresh"}
         </button>
       </div>
 
-      {
-        readOnlyReason && (
-          <p className="mt-3 text-[11px] text-warning">
-            {
-              readOnlyReason
-            }
-          </p>
-        )
-      }
+      {readOnlyReason && (
+        <p className="mt-3 text-[11px] text-warning">{readOnlyReason}</p>
+      )}
     </section>
   );
 }

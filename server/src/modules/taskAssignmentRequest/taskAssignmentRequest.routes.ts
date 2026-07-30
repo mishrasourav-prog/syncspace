@@ -11,19 +11,19 @@ const router = Router();
 router.get(
   "/tasks/:taskId/assignment-requests",
   authenticateUser,
-  getTaskAssignmentRequests
+  getTaskAssignmentRequests,
 );
 
 router.post(
   "/tasks/:taskId/assignment-requests",
   authenticateUser,
-  createTaskAssignmentRequest
+  createTaskAssignmentRequest,
 );
 
 router.post(
   "/tasks/:taskId/assignment-requests/:requestId/accept",
   authenticateUser,
-  acceptTaskAssignmentRequest
+  acceptTaskAssignmentRequest,
 );
 
 export default router;

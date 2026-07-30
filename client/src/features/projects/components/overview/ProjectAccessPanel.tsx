@@ -3,8 +3,14 @@ import { Pencil, ShieldCheck, UserPlus, Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type { WorkspaceSummary } from "@/features/workspaces/types/workspace.types";
-import type { ProjectMember, ProjectRole } from "@/features/project-members/types/projectMember.types";
-import { canEditProject, canInviteProjectMember } from "../../project.permissions";
+import type {
+  ProjectMember,
+  ProjectRole,
+} from "@/features/project-members/types/projectMember.types";
+import {
+  canEditProject,
+  canInviteProjectMember,
+} from "../../project.permissions";
 import type { Project } from "../../types/project.types";
 
 const roleBadgeVariant: Record<ProjectRole, "primary" | "neutral"> = {
@@ -22,10 +28,19 @@ interface ProjectAccessPanelProps {
 }
 
 function scrollToMembers() {
-  document.getElementById("members")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  document
+    .getElementById("members")
+    ?.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
-export function ProjectAccessPanel({ project, workspace, role, members, onInvite, onEdit }: ProjectAccessPanelProps) {
+export function ProjectAccessPanel({
+  project,
+  workspace,
+  role,
+  members,
+  onInvite,
+  onEdit,
+}: ProjectAccessPanelProps) {
   const canInvite = canInviteProjectMember(project, workspace, role);
   const canEdit = canEditProject(project, workspace, role);
   const adminCount = members.filter((member) => member.role === "admin").length;
@@ -38,14 +53,21 @@ export function ProjectAccessPanel({ project, workspace, role, members, onInvite
     >
       <div className="mb-4 flex items-center gap-2">
         <ShieldCheck className="h-4 w-4 text-primary" />
-        <h2 id="project-access-panel-heading" className="text-h3 text-foreground">
+        <h2
+          id="project-access-panel-heading"
+          className="text-h3 text-foreground"
+        >
           Project Access
         </h2>
       </div>
 
       <div className="grid grid-cols-1 gap-x-6 gap-y-3 sm:grid-cols-2 lg:grid-cols-3">
         <InfoRow label="Your role">
-          {role ? <Badge variant={roleBadgeVariant[role]}>{role}</Badge> : <span className="text-sm text-muted">—</span>}
+          {role ? (
+            <Badge variant={roleBadgeVariant[role]}>{role}</Badge>
+          ) : (
+            <span className="text-sm text-muted">—</span>
+          )}
         </InfoRow>
 
         <InfoRow label="Project status">
@@ -55,7 +77,9 @@ export function ProjectAccessPanel({ project, workspace, role, members, onInvite
         </InfoRow>
 
         <InfoRow label="You can invite">
-          <Badge variant={canInvite ? "success" : "neutral"}>{canInvite ? "Yes" : "No"}</Badge>
+          <Badge variant={canInvite ? "success" : "neutral"}>
+            {canInvite ? "Yes" : "No"}
+          </Badge>
         </InfoRow>
 
         <InfoRow label="Permitted invite roles">

@@ -1,9 +1,4 @@
-import {
-  useRef,
-  useState,
-  type FormEvent,
-  type KeyboardEvent,
-} from "react";
+import { useRef, useState, type FormEvent, type KeyboardEvent } from "react";
 import { toast } from "sonner";
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -32,7 +27,7 @@ export function DiscussionReplyComposer({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const createReplyMutation = useCreateDiscussionReplyMutation(
     projectId,
-    discussionId
+    discussionId,
   );
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -54,7 +49,7 @@ export function DiscussionReplyComposer({
         },
         onError: (mutationError) =>
           toast.error(mutationError.message ?? "Unable to post this reply."),
-      }
+      },
     );
   }
 
@@ -104,9 +99,7 @@ export function DiscussionReplyComposer({
             type="submit"
             size="sm"
             className="bg-secondary text-white hover:bg-secondary/90"
-            disabled={
-              createReplyMutation.isPending || body.trim().length === 0
-            }
+            disabled={createReplyMutation.isPending || body.trim().length === 0}
           >
             {createReplyMutation.isPending ? "Sending..." : "Send"}
           </Button>

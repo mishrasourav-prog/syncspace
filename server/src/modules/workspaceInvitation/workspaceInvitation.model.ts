@@ -1,107 +1,101 @@
 import mongoose, { Schema, Document, Types } from "mongoose";
 
 export enum InvitationRole {
-    ADMIN = "admin",
-    MEMBER = "member",
-    GUEST = "guest",
+  ADMIN = "admin",
+  MEMBER = "member",
+  GUEST = "guest",
 }
 
 export enum InvitationStatus {
-    PENDING = "pending",
-    ACCEPTED = "accepted",
-    REJECTED = "rejected",
-    EXPIRED = "expired",
+  PENDING = "pending",
+  ACCEPTED = "accepted",
+  REJECTED = "rejected",
+  EXPIRED = "expired",
 }
 
 export interface IWorkspaceInvitationDocument extends Document {
-    _id: Types.ObjectId;
+  _id: Types.ObjectId;
 
-    workspace: Types.ObjectId;
+  workspace: Types.ObjectId;
 
-    email: string;
+  email: string;
 
-    invitedBy: Types.ObjectId;
+  invitedBy: Types.ObjectId;
 
-    role: InvitationRole;
+  role: InvitationRole;
 
-    status: InvitationStatus;
+  status: InvitationStatus;
 
-    expiresAt: Date;
+  expiresAt: Date;
 
-    acceptedAt?: Date;
+  acceptedAt?: Date;
 
-    createdAt: Date;
+  createdAt: Date;
 
-    updatedAt: Date;
+  updatedAt: Date;
 }
 
-const WorkspaceInvitationSchema =
-    new Schema<IWorkspaceInvitationDocument>(
-        {
-            workspace: {
-                type: Schema.Types.ObjectId,
-                ref: "Workspace",
-                required: true,
-                index: true,
-            },
+const WorkspaceInvitationSchema = new Schema<IWorkspaceInvitationDocument>(
+  {
+    workspace: {
+      type: Schema.Types.ObjectId,
+      ref: "Workspace",
+      required: true,
+      index: true,
+    },
 
-            email: {
-                type: String,
-                required: true,
-                lowercase: true,
-                trim: true,
-                index: true,
-            },
+    email: {
+      type: String,
+      required: true,
+      lowercase: true,
+      trim: true,
+      index: true,
+    },
 
-            invitedBy: {
-                type: Schema.Types.ObjectId,
-                ref: "User",
-                required: true,
-            },
+    invitedBy: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
 
-            role: {
-                type: String,
-                enum: Object.values(InvitationRole),
-                default: InvitationRole.MEMBER,
-            },
+    role: {
+      type: String,
+      enum: Object.values(InvitationRole),
+      default: InvitationRole.MEMBER,
+    },
 
-            status: {
-                type: String,
-                enum: Object.values(InvitationStatus),
-                default: InvitationStatus.PENDING,
-            },
+    status: {
+      type: String,
+      enum: Object.values(InvitationStatus),
+      default: InvitationStatus.PENDING,
+    },
 
-            expiresAt: {
-                type: Date,
-                required: true,
-                index: true,
-            },
+    expiresAt: {
+      type: Date,
+      required: true,
+      index: true,
+    },
 
-            acceptedAt: {
-                type: Date,
-            },
-        },
-        {
-            timestamps: true,
-        }
-    );
-
-
-WorkspaceInvitationSchema.index(
-    {
-        workspace: 1,
-        email: 1,
-        status: 1,
-    }
+    acceptedAt: {
+      type: Date,
+    },
+  },
+  {
+    timestamps: true,
+  },
 );
 
 WorkspaceInvitationSchema.index({
-    expiresAt: 1,
+  workspace: 1,
+  email: 1,
+  status: 1,
 });
 
+WorkspaceInvitationSchema.index({
+  expiresAt: 1,
+});
 
-export const WorkspaceInvitation =
-    mongoose.model<IWorkspaceInvitationDocument>(
-        "WorkspaceInvitation",
-        WorkspaceInvitationSchema
-    );
+export const WorkspaceInvitation = mongoose.model<IWorkspaceInvitationDocument>(
+  "WorkspaceInvitation",
+  WorkspaceInvitationSchema,
+);

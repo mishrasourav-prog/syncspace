@@ -1,6 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import type { ApiErrorShape } from "@/lib/axios";
-import { getProjectActivitiesRequest, getWorkspaceActivitiesRequest } from "../api/activity.api";
+import {
+  getProjectActivitiesRequest,
+  getWorkspaceActivitiesRequest,
+} from "../api/activity.api";
 import { activityQueryKeys } from "../activity.queryKeys";
 import type { Activity } from "../types/activity.types";
 

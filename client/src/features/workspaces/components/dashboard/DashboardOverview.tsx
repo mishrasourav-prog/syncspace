@@ -17,10 +17,17 @@ interface MetricCardProps {
   label: string;
 }
 
-function MetricCard({ icon: Icon, iconClassName, value, label }: MetricCardProps) {
+function MetricCard({
+  icon: Icon,
+  iconClassName,
+  value,
+  label,
+}: MetricCardProps) {
   return (
     <div className="flex items-center gap-3 rounded-xl border border-border bg-surface/60 p-4 shadow-soft">
-      <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${iconClassName}`}>
+      <span
+        className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${iconClassName}`}
+      >
         <Icon className="h-4 w-4" />
       </span>
       <div className="min-w-0">
@@ -43,7 +50,13 @@ function MetricCardSkeleton() {
   );
 }
 
-export function DashboardOverview({ total, active, archived, pendingInvitations, isLoading }: DashboardOverviewProps) {
+export function DashboardOverview({
+  total,
+  active,
+  archived,
+  pendingInvitations,
+  isLoading,
+}: DashboardOverviewProps) {
   if (isLoading) {
     return (
       <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
@@ -56,10 +69,30 @@ export function DashboardOverview({ total, active, archived, pendingInvitations,
 
   return (
     <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
-      <MetricCard icon={LayoutGrid} iconClassName="bg-primary/15 text-primary" value={total} label="Total workspaces" />
-      <MetricCard icon={Users} iconClassName="bg-secondary/15 text-secondary" value={active} label="Active workspaces" />
-      <MetricCard icon={Archive} iconClassName="bg-warning/15 text-warning" value={archived} label="Archived workspaces" />
-      <MetricCard icon={Mail} iconClassName="bg-success/15 text-success" value={pendingInvitations} label="Pending invitations" />
+      <MetricCard
+        icon={LayoutGrid}
+        iconClassName="bg-primary/15 text-primary"
+        value={total}
+        label="Total workspaces"
+      />
+      <MetricCard
+        icon={Users}
+        iconClassName="bg-secondary/15 text-secondary"
+        value={active}
+        label="Active workspaces"
+      />
+      <MetricCard
+        icon={Archive}
+        iconClassName="bg-warning/15 text-warning"
+        value={archived}
+        label="Archived workspaces"
+      />
+      <MetricCard
+        icon={Mail}
+        iconClassName="bg-success/15 text-success"
+        value={pendingInvitations}
+        label="Pending invitations"
+      />
     </div>
   );
 }

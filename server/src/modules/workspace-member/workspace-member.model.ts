@@ -28,48 +28,46 @@ export interface IWorkspaceMemberDocument extends Document {
   updatedAt: Date;
 }
 
-const workspaceMemberSchema =
-  new Schema<IWorkspaceMemberDocument>(
-    {
-      workspace: {
-        type: Schema.Types.ObjectId,
-        ref: "Workspace",
-        required: true,
-        index: true,
-      },
-
-      user: {
-        type: Schema.Types.ObjectId,
-        ref: "User",
-        required: true,
-        index: true,
-      },
-
-      role: {
-        type: String,
-        enum: Object.values(WorkspaceRole),
-        default: WorkspaceRole.MEMBER,
-      },
-
-      joinedAt: {
-        type: Date,
-        default: Date.now,
-      },
-
-      invitedBy: {
-        type: Schema.Types.ObjectId,
-        ref: "User",
-      },
-
-      lastActiveAt: {
-        type: Date,
-      },
+const workspaceMemberSchema = new Schema<IWorkspaceMemberDocument>(
+  {
+    workspace: {
+      type: Schema.Types.ObjectId,
+      ref: "Workspace",
+      required: true,
+      index: true,
     },
-    {
-      timestamps: true,
-    }
-  );
 
+    user: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+      index: true,
+    },
+
+    role: {
+      type: String,
+      enum: Object.values(WorkspaceRole),
+      default: WorkspaceRole.MEMBER,
+    },
+
+    joinedAt: {
+      type: Date,
+      default: Date.now,
+    },
+
+    invitedBy: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+    },
+
+    lastActiveAt: {
+      type: Date,
+    },
+  },
+  {
+    timestamps: true,
+  },
+);
 
 workspaceMemberSchema.index(
   {
@@ -78,22 +76,19 @@ workspaceMemberSchema.index(
   },
   {
     unique: true,
-  }
+  },
 );
-
 
 workspaceMemberSchema.index({
   workspace: 1,
   role: 1,
 });
 
-
 workspaceMemberSchema.index({
   user: 1,
 });
 
-export const WorkspaceMember =
-  mongoose.model<IWorkspaceMemberDocument>(
-    "WorkspaceMember",
-    workspaceMemberSchema
-  );
+export const WorkspaceMember = mongoose.model<IWorkspaceMemberDocument>(
+  "WorkspaceMember",
+  workspaceMemberSchema,
+);

@@ -1,122 +1,90 @@
-import {
-    Types,
-} from "mongoose";
+import { Types } from "mongoose";
 
 import type {
-    IDocumentUserPreview,
-    IProjectDocumentResponse,
+  IDocumentUserPreview,
+  IProjectDocumentResponse,
 } from "../../interfaces/document.interface";
 
 interface IPopulatedDocumentUser {
-    _id: Types.ObjectId;
+  _id: Types.ObjectId;
 
-    name: string;
+  name: string;
 
-    username: string;
+  username: string;
 
-    avatar?: string;
+  avatar?: string;
 }
 
 export interface IProjectDocumentForResponse {
-    _id: Types.ObjectId;
+  _id: Types.ObjectId;
 
-    workspace: Types.ObjectId;
+  workspace: Types.ObjectId;
 
-    project: Types.ObjectId;
+  project: Types.ObjectId;
 
-    title: string;
+  title: string;
 
-    content: unknown;
+  content: unknown;
 
-    createdBy:
-        IPopulatedDocumentUser |
-        null;
+  createdBy: IPopulatedDocumentUser | null;
 
-    updatedBy:
-        IPopulatedDocumentUser |
-        null;
+  updatedBy: IPopulatedDocumentUser | null;
 
-    revision: number;
+  revision: number;
 
-    isArchived: boolean;
+  isArchived: boolean;
 
-    archivedAt?:
-        Date |
-        null;
+  archivedAt?: Date | null;
 
-    createdAt: Date;
+  createdAt: Date;
 
-    updatedAt: Date;
+  updatedAt: Date;
 }
 
 const mapUserPreview = (
-    user:
-        IPopulatedDocumentUser |
-        null
+  user: IPopulatedDocumentUser | null,
 ): IDocumentUserPreview | null => {
-    if (!user) {
-        return null;
-    }
+  if (!user) {
+    return null;
+  }
 
-    return {
-        _id:
-            user._id.toString(),
+  return {
+    _id: user._id.toString(),
 
-        name:
-            user.name,
+    name: user.name,
 
-        username:
-            user.username,
+    username: user.username,
 
-        avatar:
-            user.avatar,
-    };
+    avatar: user.avatar,
+  };
 };
 
 export const mapProjectDocument = (
-    document:
-        IProjectDocumentForResponse
+  document: IProjectDocumentForResponse,
 ): IProjectDocumentResponse => {
-    return {
-        _id:
-            document._id.toString(),
+  return {
+    _id: document._id.toString(),
 
-        workspace:
-            document.workspace.toString(),
+    workspace: document.workspace.toString(),
 
-        project:
-            document.project.toString(),
+    project: document.project.toString(),
 
-        title:
-            document.title,
+    title: document.title,
 
-        content:
-            document.content,
+    content: document.content,
 
-        createdBy:
-            mapUserPreview(
-                document.createdBy
-            ),
+    createdBy: mapUserPreview(document.createdBy),
 
-        updatedBy:
-            mapUserPreview(
-                document.updatedBy
-            ),
+    updatedBy: mapUserPreview(document.updatedBy),
 
-        revision:
-            document.revision,
+    revision: document.revision,
 
-        isArchived:
-            document.isArchived,
+    isArchived: document.isArchived,
 
-        archivedAt:
-            document.archivedAt ??
-            null,
+    archivedAt: document.archivedAt ?? null,
 
-        createdAt:
-            document.createdAt,
+    createdAt: document.createdAt,
 
-        updatedAt:
-            document.updatedAt,
-    };
+    updatedAt: document.updatedAt,
+  };
 };

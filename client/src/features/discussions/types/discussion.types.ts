@@ -30,7 +30,7 @@ export interface DiscussionReply {
   project: string;
   discussion: string;
   author: DiscussionUserPreview | null;
-  /** Null once the reply has been (soft) deleted. */
+
   body: string | null;
   isDeleted: boolean;
   createdAt: string;
@@ -60,5 +60,4 @@ export interface UpdateDiscussionReplyPayload {
   body: string;
 }
 
-/** Client-side view filter applied over loaded discussion pages. Not a server sort/filter endpoint. */
 export type DiscussionListFilter = "all" | "pinned" | "mine" | "locked";

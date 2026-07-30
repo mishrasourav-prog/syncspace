@@ -1,29 +1,23 @@
-/**
- * Typography scale.
- * Headings: bold, tight tracking. Body: regular, relaxed leading.
- * Keep font-size/weight combinations to this set — no ad-hoc text sizing.
- */
+.text-display {
+  @apply text-4xl sm:text-5xl md:text-6xl font-semibold tracking-tight leading-[1.08];
+}
 
- .text-display {
-    @apply text-4xl sm:text-5xl md:text-6xl font-semibold tracking-tight leading-[1.08];
-  }
-  
-  .text-h1 {
-    @apply text-2xl sm:text-3xl font-semibold tracking-tight;
-  }
-  
-  .text-h2 {
-    @apply text-xl font-semibold tracking-tight;
-  }
-  
-  .text-h3 {
-    @apply text-base font-medium;
-  }
-  
-  .text-body {
-    @apply text-sm leading-relaxed text-foreground/80;
-  }
-  
-  .text-caption {
-    @apply text-xs text-muted;
-  }
+.text-h1 {
+  @apply text-2xl sm:text-3xl font-semibold tracking-tight;
+}
+
+.text-h2 {
+  @apply text-xl font-semibold tracking-tight;
+}
+
+.text-h3 {
+  @apply text-base font-medium;
+}
+
+.text-body {
+  @apply text-sm leading-relaxed text-foreground/80;
+}
+
+.text-caption {
+  @apply text-xs text-muted;
+}

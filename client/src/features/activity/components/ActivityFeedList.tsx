@@ -33,7 +33,7 @@ interface ActivityFeedListProps {
   onRetry: () => void;
   activities: Activity[];
   initialVisible: number;
-  /** Optional secondary line under the actor line, e.g. the project name for a workspace-wide feed. */
+
   getSecondaryLabel?: (activity: Activity) => string | null;
 }
 
@@ -51,7 +51,9 @@ export function ActivityFeedList({
 }: ActivityFeedListProps) {
   const [showAll, setShowAll] = useState(false);
 
-  const visibleActivities = showAll ? activities : activities.slice(0, initialVisible);
+  const visibleActivities = showAll
+    ? activities
+    : activities.slice(0, initialVisible);
   const hasMore = activities.length > initialVisible;
 
   return (
@@ -73,12 +75,18 @@ export function ActivityFeedList({
 
         {isError && (
           <div className="p-4">
-            <DashboardSectionError compact message={errorMessage ?? "Unable to load activity."} onRetry={onRetry} />
+            <DashboardSectionError
+              compact
+              message={errorMessage ?? "Unable to load activity."}
+              onRetry={onRetry}
+            />
           </div>
         )}
 
         {!isLoading && !isError && activities.length === 0 && (
-          <div className="px-4 py-10 text-center text-caption">{emptyMessage}</div>
+          <div className="px-4 py-10 text-center text-caption">
+            {emptyMessage}
+          </div>
         )}
 
         {visibleActivities.map((activity) => {
@@ -88,9 +96,16 @@ export function ActivityFeedList({
           const secondaryLabel = getSecondaryLabel?.(activity) ?? null;
 
           return (
-            <div key={activity._id} className="flex gap-3 border-b border-border/60 px-4 py-3 last:border-b-0">
+            <div
+              key={activity._id}
+              className="flex gap-3 border-b border-border/60 px-4 py-3 last:border-b-0"
+            >
               {activity.actor ? (
-                <Avatar src={activity.actor.avatar} name={activity.actor.name} size="sm" />
+                <Avatar
+                  src={activity.actor.avatar}
+                  name={activity.actor.name}
+                  size="sm"
+                />
               ) : (
                 <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-border/50 text-muted">
                   <Icon className="h-3.5 w-3.5" />
@@ -99,13 +114,23 @@ export function ActivityFeedList({
 
               <div className="min-w-0 flex-1">
                 <p className="text-sm text-foreground">
-                  <span className="font-medium">{activity.actor?.name ?? "System"}</span>{" "}
-                  <span className="text-muted">{getActivityActionCopy(activity.action)}</span>
-                  {entityTitle && <span className="font-medium"> {entityTitle}</span>}
+                  <span className="font-medium">
+                    {activity.actor?.name ?? "System"}
+                  </span>{" "}
+                  <span className="text-muted">
+                    {getActivityActionCopy(activity.action)}
+                  </span>
+                  {entityTitle && (
+                    <span className="font-medium"> {entityTitle}</span>
+                  )}
                 </p>
-                {statusChange && <p className="mt-0.5 text-xs text-muted">{statusChange}</p>}
+                {statusChange && (
+                  <p className="mt-0.5 text-xs text-muted">{statusChange}</p>
+                )}
                 <p className="mt-1 flex items-center gap-1.5 text-[11px] text-muted/70">
-                  {secondaryLabel && <span className="truncate">{secondaryLabel}</span>}
+                  {secondaryLabel && (
+                    <span className="truncate">{secondaryLabel}</span>
+                  )}
                   {secondaryLabel && <span aria-hidden>·</span>}
                   <span>{formatRelativeTime(activity.createdAt)}</span>
                 </p>

@@ -1,8 +1,19 @@
 import { Link } from "react-router-dom";
-import { Archive, ArchiveRestore, FileText, MoreHorizontal, Pencil } from "lucide-react";
+import {
+  Archive,
+  ArchiveRestore,
+  FileText,
+  MoreHorizontal,
+  Pencil,
+} from "lucide-react";
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { formatDateTime, formatRelativeTime } from "@/lib/date";
 import type { ProjectDocument } from "../types/document.types";
 
@@ -44,7 +55,9 @@ export function DocumentGridCard({
         <span
           className={
             "flex h-10 w-10 shrink-0 items-center justify-center rounded-lg " +
-            (document.isArchived ? "bg-border/40 text-muted" : "bg-primary/15 text-primary")
+            (document.isArchived
+              ? "bg-border/40 text-muted"
+              : "bg-primary/15 text-primary")
           }
         >
           <FileText className="h-5 w-5" />
@@ -85,17 +98,28 @@ export function DocumentGridCard({
       </div>
 
       <div className="pointer-events-none relative z-[1] min-w-0 flex-1">
-        <h3 className="truncate text-sm font-medium text-foreground">{document.title}</h3>
+        <h3 className="truncate text-sm font-medium text-foreground">
+          {document.title}
+        </h3>
 
-        <p className="mt-1 truncate text-caption">Created by {document.createdBy?.name ?? "Unavailable member"}</p>
+        <p className="mt-1 truncate text-caption">
+          Created by {document.createdBy?.name ?? "Unavailable member"}
+        </p>
 
-        <p className="mt-1 truncate text-[11px] text-muted" title={formatDateTime(document.updatedAt)}>
+        <p
+          className="mt-1 truncate text-[11px] text-muted"
+          title={formatDateTime(document.updatedAt)}
+        >
           Updated {formatRelativeTime(document.updatedAt)}
         </p>
       </div>
 
       <div className="pointer-events-none relative z-[1] flex min-w-0 items-center gap-2 border-t border-border/60 pt-3">
-        <Avatar src={document.updatedBy?.avatar} name={document.updatedBy?.name ?? "Unavailable member"} size="sm" />
+        <Avatar
+          src={document.updatedBy?.avatar}
+          name={document.updatedBy?.name ?? "Unavailable member"}
+          size="sm"
+        />
         <span className="min-w-0 flex-1 truncate text-caption">
           Updated by {document.updatedBy?.name ?? "Unavailable member"}
         </span>

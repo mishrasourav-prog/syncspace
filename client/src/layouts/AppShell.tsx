@@ -98,7 +98,7 @@ export function AppShell() {
         };
 
     return (
-        <div className="flex h-screen w-full overflow-hidden bg-background">
+        <div className="flex h-dvh w-full overflow-hidden bg-background">
             <AppSidebar
                 onCreateWorkspace={
                     openCreateWorkspace
@@ -117,7 +117,7 @@ export function AppShell() {
                 }
             />
 
-            <div className="flex min-w-0 flex-1 flex-col">
+            <div className="flex min-h-0 min-w-0 flex-1 flex-col">
                 <AppTopbar
                     onOpenMobileNav={
                         openMobileNavigation
@@ -127,7 +127,7 @@ export function AppShell() {
                     }
                 />
 
-                <main className="flex-1 overflow-y-auto">
+                <main className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
                     <div className="mx-auto w-full max-w-[1600px] px-4 py-6 sm:px-6 lg:px-8">
                         <Outlet
                             context={

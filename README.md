@@ -15,7 +15,7 @@
 
 [![Live Demo](https://img.shields.io/badge/Live%20Demo-Visit%20Site-8B5CF6?style=flat-square&logo=vercel&logoColor=white)](https://syncspace-umber.vercel.app/)
 [Live Demo](https://syncspace-umber.vercel.app/) · [View Repository](https://github.com/mishrasourav-prog/syncspace) · [Report a Bug](https://github.com/mishrasourav-prog/syncspace/issues) · [Request a Feature](https://github.com/mishrasourav-prog/syncspace/issues)
-[Report a Bug](https://github.com/mishrasourav-prog/syncspace/issues) · [Request a Feature](https://github.com/mishrasourav-prog/syncspace/issues)
+
 
 </div>
 
